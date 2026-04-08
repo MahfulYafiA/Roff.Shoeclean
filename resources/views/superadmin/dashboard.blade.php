@@ -58,9 +58,10 @@
         </div>
 
         {{-- MENU CARDS --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        {{-- 🚨 UBAH GRID: Menjadi 4 kolom (lg:grid-cols-4) agar muat 4 kotak secara sejajar --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             
-            {{-- CARD 1: KELOLA PROFIL (Dipindah jadi yang pertama) --}}
+            {{-- CARD 1: KELOLA PROFIL --}}
             <a href="{{ route('profil.index') }}" class="bg-white rounded-[2rem] p-8 md:p-10 border border-slate-100 hover-shadow-luxury group flex flex-col h-full">
                 <div class="w-12 h-12 md:w-14 md:h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-xl md:text-2xl mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-300">
                     <i class="fa-solid fa-user-gear"></i>
@@ -69,7 +70,7 @@
                 <p class="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">Perbarui data diri, nomor telepon, dan alamat Anda.</p>
             </a>
 
-            {{-- CARD 2: OMSET (Dipindah ke tengah) --}}
+            {{-- CARD 2: OMSET --}}
             <a href="{{ route('superadmin.laporan') }}" class="bg-white rounded-[2rem] p-8 md:p-10 border border-slate-100 hover-shadow-luxury group flex flex-col h-full">
                 <div class="w-12 h-12 md:w-14 md:h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl md:text-2xl mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-300">
                     <i class="fa-solid fa-chart-line"></i>
@@ -86,6 +87,15 @@
                 </div>
                 <h3 class="font-black text-lg md:text-xl text-slate-900 uppercase tracking-tight mb-2 md:mb-3 group-hover:text-emerald-600 transition-colors">MANAJEMEN USER</h3>
                 <p class="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">Kelola data akun, tambah admin baru, dan atur hak akses sistem.</p>
+            </a>
+
+            {{-- 🚨 CARD 4: KELOLA LAYANAN (TAMBAHAN BARU) 🚨 --}}
+            <a href="{{ route('superadmin.layanan.index') }}" class="bg-white rounded-[2rem] p-8 md:p-10 border border-slate-100 hover-shadow-luxury group flex flex-col h-full relative overflow-hidden">
+                <div class="w-12 h-12 md:w-14 md:h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl md:text-2xl mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fa-solid fa-tags"></i>
+                </div>
+                <h3 class="font-black text-lg md:text-xl text-slate-900 uppercase tracking-tight mb-2 md:mb-3 group-hover:text-purple-600 transition-colors">KELOLA LAYANAN</h3>
+                <p class="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">Kontrol penuh untuk menambah, mengubah, dan menghapus daftar layanan.</p>
             </a>
 
         </div>

@@ -8,37 +8,38 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    // ==========================================
-    // 1. FUNGSI UNTUK PELANGGAN (CUSTOMER)
-    // ==========================================
-    
+    /**
+     * Dashboard Pelanggan: Menampilkan ringkasan aktivitas
+     */
     public function dashboard()
     {
         $user = auth()->user();
 
-        // 🚨 GEMBOK 2: Cegat Admin & Superadmin jika nyasar ke dasbor pelanggan
+        // 🚨 GEMBOK ROLE: Redirect otomatis jika role tidak sesuai
         if ($user->id_role == 1) {
             return redirect()->route('superadmin.dashboard');
         } elseif ($user->id_role == 2) {
             return redirect()->route('admin.dashboard');
         }
 
-        // Mengambil data riwayat pesanan (dibatasi 5 terbaru untuk dasbor)
+        // Mengambil 5 riwayat pesanan terbaru dengan Eager Loading
         $riwayat = Reservasi::with(['detail.layanan', 'pembayaran'])
-                            ->where('id_user', $user->id_user)
-                            ->orderBy('id_reservasi', 'desc')
-                            ->take(5) 
-                            ->get();
+                    ->where('id_user', $user->id_user)
+                    ->latest('id_reservasi') // Lebih simpel daripada orderBy
+                    ->take(5) 
+                    ->get();
 
-        // ✅ UPDATE PATH VIEW: Sekarang mengarah ke folder 'resources/views/pelanggan/dashboard.blade.php'
         return view('pelanggan.dashboard', compact('riwayat'));
     }
 
+    /**
+     * Riwayat Pesanan: Menampilkan seluruh daftar transaksi pelanggan
+     */
     public function riwayat()
     {
         $user = auth()->user();
 
-        // 🚨 GEMBOK 2: Cegat Admin & Superadmin
+        // 🚨 GEMBOK ROLE
         if ($user->id_role == 1) {
             return redirect()->route('superadmin.dashboard');
         } elseif ($user->id_role == 2) {
@@ -48,17 +49,9 @@ class UserController extends Controller
         // Mengambil semua data riwayat pesanan
         $riwayat = Reservasi::with(['detail.layanan', 'pembayaran'])
                     ->where('id_user', $user->id_user)
-                    ->orderBy('id_reservasi', 'desc')
+                    ->latest('id_reservasi')
                     ->get();
 
-        // ✅ UPDATE PATH VIEW: Mengarah ke folder 'resources/views/pelanggan/reservasi/riwayat.blade.php'
         return view('pelanggan.reservasi.riwayat', compact('riwayat'));
     }
-
-    // ==========================================
-    // Catatan Arsitektur (Bisa dijelaskan ke dosen):
-    // Fungsi kelola user (index & destroy) untuk Superadmin telah dihapus dari controller ini.
-    // Hal ini menerapkan prinsip YAGNI (You Aren't Gonna Need It) dan Single Responsibility,
-    // karena Superadmin kini difokuskan khusus pada Laporan Omzet.
-    // ==========================================
 }

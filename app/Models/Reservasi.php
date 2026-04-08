@@ -9,13 +9,10 @@ class Reservasi extends Model
 {
     use HasFactory;
 
-    // Nama tabel di database
     protected $table = 'tr_reservasi';
-
-    // Primary Key
     protected $primaryKey = 'id_reservasi';
 
-    // Kolom yang boleh diisi
+    // Update Fillable sesuai Migrasi (Tambahkan status_pengambilan)
     protected $fillable = [
         'id_user',
         'tanggal_reservasi',
@@ -23,10 +20,11 @@ class Reservasi extends Model
         'metode_layanan',
         'alamat_jemput',
         'metode_pengembalian',
+        'status_pengambilan', // 🚨 Pastikan ini ada agar tidak error saat update status
         'status',
         'total_harga',
-        'wa_pengantaran',      // 🚨 TAMBAHAN BARU: WA Kurir
-        'alamat_pengantaran'   // 🚨 TAMBAHAN BARU: Alamat Kurir
+        'wa_pengantaran',      
+        'alamat_pengantaran'   
     ];
 
     /**
@@ -38,11 +36,12 @@ class Reservasi extends Model
     }
 
     /**
-     * Relasi ke Detail Reservasi (Pintu menuju data Layanan)
+     * Relasi ke Detail Reservasi (Banyak Item/Jasa)
+     * Diubah ke hasMany karena satu nota bisa banyak baris detail
      */
     public function detail()
     {
-        return $this->hasOne(DetailReservasi::class, 'id_reservasi', 'id_reservasi');
+        return $this->hasMany(DetailReservasi::class, 'id_reservasi', 'id_reservasi');
     }
 
     /**
@@ -54,11 +53,13 @@ class Reservasi extends Model
     }
 
     /**
-     * Relasi ke Layanan (INI YANG BIKIN ERROR DI HALAMAN LAPORAN!)
-     * Menghubungkan Reservasi langsung ke tabel Layanan melalui tabel detail_reservasi
+     * SOLUSI ERROR LAPORAN:
+     * Menambahkan withPivot('harga') agar kita bisa mengambil harga 
+     * yang tersimpan di tabel detail saat transaksi terjadi.
      */
     public function layanan()
     {
-        return $this->belongsToMany(Layanan::class, 'tr_detail_reservasi', 'id_reservasi', 'id_layanan');
+        return $this->belongsToMany(Layanan::class, 'tr_detail_reservasi', 'id_reservasi', 'id_layanan')
+                    ->withPivot('harga', 'id_detail'); // Membawa data harga dari tabel tengah
     }
 }

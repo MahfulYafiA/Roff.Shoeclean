@@ -7,17 +7,25 @@ use App\Models\Reservasi;
 
 class LaporanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Mengambil semua pesanan yang sudah 'Selesai' untuk dihitung omzetnya
-        $laporan = Reservasi::with(['user', 'layanan'])
-                            ->where('status', 'Selesai')
-                            ->orderBy('tanggal_reservasi', 'desc')
-                            ->get();
+        // 1. Ambil input filter dari user (jika ada)
+        $bulan = $request->get('bulan', date('m')); // Default: Bulan sekarang
+        $tahun = $request->get('tahun', date('Y')); // Default: Tahun sekarang
 
-        // Menghitung total omzet dari semua cucian yang selesai
+        // 2. Query Data dengan Eager Loading
+        $laporan = Reservasi::with(['user', 'layanan'])
+                    ->where('status', 'Selesai')
+                    // Filter berdasarkan bulan dan tahun pada kolom tanggal_reservasi
+                    ->whereMonth('tanggal_reservasi', $bulan)
+                    ->whereYear('tanggal_reservasi', $tahun)
+                    ->orderBy('tanggal_reservasi', 'desc')
+                    ->get();
+
+        // 3. Menghitung total omzet khusus dari data yang sudah di-filter
         $totalOmzet = $laporan->sum('total_harga');
 
-        return view('admin.laporan', compact('laporan', 'totalOmzet'));
+        // 4. Kirim data ke view
+        return view('admin.laporan', compact('laporan', 'totalOmzet', 'bulan', 'tahun'));
     }
 }

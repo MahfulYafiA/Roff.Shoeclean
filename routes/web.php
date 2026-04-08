@@ -10,30 +10,34 @@ use App\Http\Controllers\LayananController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\PasswordResetController; // ✅ PANGGIL CONTROLLER BARU
+use App\Http\Controllers\PasswordResetController;
 
 // ==========================================
 // 1. RUTE LANDING PAGE (Publik)
 // ==========================================
 Route::get('/', function () {
+    // Schema check mencegah error jika database belum dimigrasi
     $layanans = Schema::hasTable('ms_layanan') ? Layanan::all() : []; 
     return view('beranda.landing', compact('layanans'));
 })->name('landing');
 
+// Callback Midtrans (Jika nanti Mas pakai pembayaran otomatis)
 Route::post('/midtrans/callback', [ReservasiController::class, 'callback'])->name('midtrans.callback');
 
 // ==========================================
-// 2. RUTE AUTENTIKASI (Guest)
+// 2. RUTE AUTENTIKASI (Khusus Tamu/Belum Login)
 // ==========================================
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+    
+    // Login via Google
     Route::get('/login/google', [AuthController::class, 'redirectToGoogle'])->name('login.google');
     Route::get('/login/google/callback', [AuthController::class, 'handleGoogleCallback']);
     
-    // ✅ FITUR RESET PASSWORD VIA EMAIL
+    // Reset Password
     Route::get('/forgot-password', [PasswordResetController::class, 'requestForm'])->name('password.request');
     Route::post('/forgot-password', [PasswordResetController::class, 'sendEmail'])->name('password.email');
     Route::get('/reset-password/{token}', [PasswordResetController::class, 'resetForm'])->name('password.reset');
@@ -47,54 +51,59 @@ Route::middleware('auth')->group(function () {
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // --- AREA PROFIL (Dipakai Semua Role termasuk Superadmin) ---
-    Route::prefix('profil')->group(function () {
-        Route::get('/', [ProfileController::class, 'index'])->name('profil.index');
-        Route::patch('/update', [ProfileController::class, 'update'])->name('profil.update');
-        Route::patch('/password', [ProfileController::class, 'updatePassword'])->name('profil.updatePassword');
-        Route::patch('/foto', [ProfileController::class, 'updateFoto'])->name('profil.updateFoto');
-        Route::delete('/foto', [ProfileController::class, 'hapusFoto'])->name('profil.hapusFoto');
+    // --- MANAJEMEN PROFIL ---
+    Route::prefix('profil')->name('profil.')->group(function () {
+        Route::get('/', [ProfileController::class, 'index'])->name('index');
+        Route::patch('/update', [ProfileController::class, 'update'])->name('update');
+        Route::patch('/password', [ProfileController::class, 'updatePassword'])->name('updatePassword');
+        Route::patch('/foto', [ProfileController::class, 'updateFoto'])->name('updateFoto');
+        Route::delete('/foto', [ProfileController::class, 'hapusFoto'])->name('hapusFoto');
     });
 
-    // --- AREA RESERVASI (PELANGGAN) ---
-    Route::prefix('reservasi')->group(function () {
-        Route::get('/baru', [ReservasiController::class, 'create'])->name('reservasi.create');
-        Route::post('/baru', [ReservasiController::class, 'store'])->name('reservasi.store');
-        Route::get('/riwayat', [UserController::class, 'riwayat'])->name('reservasi.riwayat');
-        Route::get('/pembayaran/{id}', [ReservasiController::class, 'pembayaran'])->name('reservasi.pembayaran');
-        Route::post('/pilih-pengembalian/{id}', [ReservasiController::class, 'pilihPengembalian'])->name('reservasi.pilih-pengembalian');
-    });
-
+    // --- AREA PELANGGAN ---
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
-
-    // ==========================================
-    // --- AREA ADMIN & STAFF (FULL FITUR) ---
-    // ==========================================
-    Route::prefix('admin')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-        Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
-        Route::delete('/users/{id}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
-        Route::get('/antrean', [AdminController::class, 'antrean'])->name('admin.antrean');
-        Route::post('/reservasi/update/{id}', [AdminController::class, 'updateStatus'])->name('admin.reservasi.update');
-        Route::delete('/reservasi/delete/{id}', [AdminController::class, 'destroy'])->name('admin.reservasi.destroy');
-        
-        // --- FITUR KELOLA LAYANAN (FULL CRUD) ---
-        Route::get('/layanan', [LayananController::class, 'index'])->name('admin.layanan');
-        Route::post('/layanan', [LayananController::class, 'store'])->name('admin.layanan.store');
-        Route::put('/layanan/{id}', [LayananController::class, 'update'])->name('admin.layanan.update');
-        Route::delete('/layanan/{id}', [LayananController::class, 'destroy'])->name('admin.layanan.destroy');
-        
-        Route::get('/laporan', [LaporanController::class, 'index'])->name('admin.laporan');
+    Route::prefix('reservasi')->name('reservasi.')->group(function () {
+        Route::get('/baru', [ReservasiController::class, 'create'])->name('create');
+        Route::post('/baru', [ReservasiController::class, 'store'])->name('store');
+        Route::get('/riwayat', [UserController::class, 'riwayat'])->name('riwayat');
+        Route::get('/pembayaran/{id}', [ReservasiController::class, 'pembayaran'])->name('pembayaran');
+        Route::post('/pilih-pengembalian/{id}', [ReservasiController::class, 'pilihPengembalian'])->name('pilih-pengembalian');
     });
 
     // ==========================================
-    // --- AREA SUPERADMIN (OWNER - RAMPING) ---
+    // --- AREA ADMIN (STAFF OPERASIONAL) ---
     // ==========================================
-    Route::prefix('superadmin')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'superDashboard'])->name('superadmin.dashboard');
-        Route::get('/laporan', [AdminController::class, 'superLaporan'])->name('superadmin.laporan');
-        Route::get('/users', [AdminController::class, 'superUsers'])->name('superadmin.users');
-        Route::post('/users', [AdminController::class, 'storeAdmin'])->name('superadmin.users.store');
-        Route::delete('/users/{id}', [AdminController::class, 'destroySuperUser'])->name('superadmin.users.destroy');
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/users', [AdminController::class, 'users'])->name('users');
+        Route::delete('/users/{id}', [AdminController::class, 'destroyUser'])->name('users.destroy');
+        Route::get('/antrean', [AdminController::class, 'antrean'])->name('antrean');
+        Route::post('/reservasi/update/{id}', [AdminController::class, 'updateStatus'])->name('reservasi.update');
+        Route::delete('/reservasi/delete/{id}', [AdminController::class, 'destroy'])->name('reservasi.destroy');
+        
+        // CRUD Jasa Layanan
+        Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.index');
+        Route::post('/layanan', [LayananController::class, 'store'])->name('layanan.store');
+        Route::put('/layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');
+        Route::delete('/layanan/{id}', [LayananController::class, 'destroy'])->name('layanan.destroy');
+        
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
+    });
+
+    // ==========================================
+    // --- AREA SUPERADMIN (OWNER/PEMILIK) ---
+    // ==========================================
+    Route::prefix('superadmin')->name('superadmin.')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'superDashboard'])->name('dashboard');
+        Route::get('/laporan', [AdminController::class, 'superLaporan'])->name('laporan');
+        Route::get('/users', [AdminController::class, 'superUsers'])->name('users');
+        Route::post('/users', [AdminController::class, 'storeAdmin'])->name('users.store');
+        Route::delete('/users/{id}', [AdminController::class, 'destroySuperUser'])->name('users.destroy');
+
+        // Superadmin juga punya akses penuh kelola layanan
+        Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.index');
+        Route::post('/layanan', [LayananController::class, 'store'])->name('layanan.store');
+        Route::put('/layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');
+        Route::delete('/layanan/{id}', [LayananController::class, 'destroy'])->name('layanan.destroy');
     });
 });

@@ -65,8 +65,8 @@
             </div>
         </div>
 
-        {{-- GRID 4 KOTAK MENU ADMIN - Dikasih z-20 supaya nggak ketutup glow hero --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mt-8 relative z-20">
+        {{-- GRID 5 KOTAK MENU ADMIN --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 lg:gap-8 mt-8 relative z-20">
             
             {{-- KOTAK 1: KELOLA PROFIL --}}
             <a href="{{ route('profil.index') }}" class="group block bg-white rounded-[2.5rem] p-8 md:p-10 border border-slate-100 shadow-xl shadow-slate-200/20 hover:-translate-y-2 hover:bg-blue-600 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-500">
@@ -102,6 +102,15 @@
                 </div>
                 <h3 class="font-black text-xl lg:text-2xl text-slate-900 mb-3 group-hover:text-white transition-colors duration-500 uppercase leading-none tracking-tighter">Manajemen User</h3>
                 <p class="text-slate-500 font-medium text-sm leading-relaxed group-hover:text-blue-100 transition-colors duration-500">Kelola data akun, hak akses, dan status pengguna ROFF.</p>
+            </a>
+
+            {{-- 🚨 KOTAK 5: KELOLA LAYANAN 🚨 --}}
+            <a href="{{ route('admin.layanan.index') }}" class="group block bg-white rounded-[2.5rem] p-8 md:p-10 border border-slate-100 shadow-xl shadow-slate-200/20 hover:-translate-y-2 hover:bg-blue-600 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-500">
+                <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-white/20 group-hover:text-white transition-colors duration-500">
+                    <i class="fa-solid fa-tags text-xl"></i>
+                </div>
+                <h3 class="font-black text-xl lg:text-2xl text-slate-900 mb-3 group-hover:text-white transition-colors duration-500 uppercase leading-none tracking-tighter">Kelola Layanan</h3>
+                <p class="text-slate-500 font-medium text-sm leading-relaxed group-hover:text-blue-100 transition-colors duration-500">Tambah, ubah, dan hapus daftar menu layanan pencucian sepatu.</p>
             </a>
 
         </div>

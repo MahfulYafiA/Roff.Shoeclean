@@ -10,16 +10,17 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    // Menyesuaikan dengan nama tabel di database
+    // 1. Nama tabel sesuai ms_user di Workbench
     protected $table = 'ms_user';
-    protected $primaryKey = 'id_user';
     
-    // Matikan timestamps otomatis Laravel karena kita handle manual/lewat DB
-    // Pastikan di database kolom created_at memiliki default 'current_timestamp()'
-    public $timestamps = false; 
+    // 2. Primary Key bukan 'id', tapi 'id_user'
+    protected $primaryKey = 'id_user';
 
-    // Kolom yang boleh diisi (Mass Assignment)
-    // 🚨 no_telp HARUS ADA DI SINI agar tidak NULL saat registrasi
+    // 3. Timestamps harus TRUE karena di migrasi kita pakai $table->timestamps()
+    public $timestamps = true; 
+
+    // 4. Daftar kolom yang boleh diisi (Mass Assignment)
+    // Catatan: id_role saya hilangkan jika di migrasi terakhir Mas tidak memakainya
     protected $fillable = [
         'nama',
         'email',
@@ -28,34 +29,23 @@ class User extends Authenticatable
         'alamat',
         'foto_profil',
         'google_id',
-        'id_role', 
     ];
 
-    // Menyembunyikan data sensitif agar tidak muncul saat return JSON/Array
+    // 5. Sembunyikan data sensitif
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
     /**
-     * Casting kolom agar memiliki tipe data tertentu secara otomatis.
-     * Fitur ini sangat penting agar fungsi ->format('d/m/Y') tidak error.
+     * Casting tipe data otomatis
      */
     protected function casts(): array
     {
         return [
             'password' => 'hashed',
-            'email_verified_at' => 'datetime',
-            'created_at' => 'datetime', // Mengubah string DB menjadi Objek Tanggal (Carbon)
-            'updated_at' => 'datetime', // Mengubah string DB menjadi Objek Tanggal (Carbon)
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * Relasi ke Tabel Role (Opsional jika ingin panggil $user->role->nama_role)
-     */
-    public function role()
-    {
-        return $this->belongsTo(Role::class, 'id_role');
     }
 }

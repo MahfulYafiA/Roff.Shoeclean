@@ -9,24 +9,25 @@ class DetailReservasi extends Model
 {
     use HasFactory;
 
-    // 1. Sesuaikan nama tabel dengan ERD & Migration (tr_detail_reservasi)
+    // 1. Nama tabel sesuai desain Workbench
     protected $table = 'tr_detail_reservasi'; 
 
-    // 2. Samakan Primary Key-nya
+    // 2. Primary Key kustom
     protected $primaryKey = 'id_detail'; 
 
-    // 3. Kita matikan timestamps karena di migration detail tidak ada created_at
+    // 3. Matikan timestamps karena tidak ada di migrasi tabel ini
     public $timestamps = false;
 
-    // 4. Kolom yang boleh diisi (Hanya id_reservasi, id_layanan, dan harga)
+    // 4. Mencegah error Mass Assignment
     protected $fillable = [
         'id_reservasi',
         'id_layanan',
-        'harga' // Kita simpan harga di sini untuk record history
+        'harga' // Penting untuk mengunci harga history
     ];
 
     /**
-     * Relasi ke tabel Reservasi (Satu detail ini milik satu reservasi)
+     * Relasi ke tabel Reservasi
+     * Menghubungkan detail ini ke nota pesanan induknya
      */
     public function reservasi()
     {
@@ -34,7 +35,8 @@ class DetailReservasi extends Model
     }
 
     /**
-     * Relasi ke tabel Layanan (Wajib ada agar bisa panggil nama layanan)
+     * Relasi ke tabel Layanan
+     * Memungkinkan kita mengambil info jasa (misal: Deep Clean) dari baris detail ini
      */
     public function layanan()
     {

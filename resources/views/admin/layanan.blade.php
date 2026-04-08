@@ -21,7 +21,8 @@
         </a>
         <nav class="space-y-3 flex-grow overflow-y-auto">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-4 px-6 py-4 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-2xl font-bold transition-all text-sm">Dashboard</a>
-            <a href="{{ route('admin.layanan') }}" class="flex items-center gap-4 px-6 py-4 text-blue-600 bg-blue-50 rounded-2xl font-bold transition-all text-sm">Katalog Layanan</a>
+            {{-- 🚨 RUTE DIPERBARUI KE admin.layanan.index 🚨 --}}
+            <a href="{{ route('admin.layanan.index') }}" class="flex items-center gap-4 px-6 py-4 text-blue-600 bg-blue-50 rounded-2xl font-bold transition-all text-sm">Katalog Layanan</a>
             <a href="{{ route('admin.users') }}" class="flex items-center gap-4 px-6 py-4 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-2xl font-bold transition-all text-sm">Data Pelanggan</a>
         </nav>
         <form method="POST" action="{{ route('logout') }}" class="pt-8 border-t border-slate-100 m-0">
@@ -161,7 +162,9 @@
         function openEditModal(id, nama, harga, deskripsi) {
             modalTitle.innerHTML = 'Edit <span class="text-blue-600">Layanan</span>';
             form.action = `/admin/layanan/${id}`; // Arahkan ke update route
-            methodField.innerHTML = '@method("PUT")'; // Tambahkan method PUT untuk Laravel
+            
+            // 🚨 DIPERBARUI: Menggunakan format HTML murni untuk spoofing method PUT di Laravel
+            methodField.innerHTML = '<input type="hidden" name="_method" value="PUT">'; 
             
             // Isi Data
             document.getElementById('inputNama').value = nama;

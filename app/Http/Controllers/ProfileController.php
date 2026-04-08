@@ -20,62 +20,67 @@ class ProfileController extends Controller
     }
 
     /**
-     * 2. Update Informasi Pribadi (Form Tengah)
+     * 2. Update Informasi Pribadi
      */
     public function update(Request $request)
     {
         $user = Auth::user();
 
-        // Validasi disesuaikan dengan atribut "name" di HTML (no_hp & alamat)
+        // 🚨 UPDATE: Validasi karakter disesuaikan dengan Migration ms_user
         $request->validate([
-            'nama'  => 'required|string|max:100',
-            'no_hp' => 'nullable|string|max:20', 
-            'email' => 'required|string|email|max:100|unique:ms_user,email,' . $user->id_user . ',id_user',
-            'alamat'=> 'nullable|string',
+            'nama'   => 'required|string|max:40', // Sesuai Workbench (40)
+            'no_hp'  => 'nullable|string|max:15', // Sesuai Workbench (15)
+            'email'  => 'required|string|email|max:50|unique:ms_user,email,' . $user->id_user . ',id_user',
+            'alamat' => 'nullable|string|max:255',
+        ], [
+            'nama.max' => 'Nama terlalu panjang, maksimal 40 karakter.',
+            'no_hp.max' => 'Nomor WA maksimal 15 angka.',
+            'email.unique' => 'Email ini sudah digunakan oleh akun lain.',
         ]);
 
-        // Menyimpan data ke kolom database (no_telp & alamat)
         $user->update([
             'nama'    => $request->nama,
             'email'   => $request->email,
-            'no_telp' => $request->no_hp, // Mengambil dari input no_hp ke kolom no_telp
+            'no_telp' => $request->no_hp, // Map input no_hp ke kolom no_telp
             'alamat'  => $request->alamat,
         ]);
 
-        return back()->with('success', 'Informasi pribadi berhasil diperbarui!');
+        return back()->with('success', 'Informasi profil berhasil diperbarui!');
     }
 
     /**
-     * 3. Update Foto Profil (Form Kiri)
+     * 3. Update Foto Profil
      */
     public function updateFoto(Request $request)
     {
         $request->validate([
-            'foto_profil' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'foto_profil' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Max 2MB
+        ], [
+            'foto_profil.image' => 'File harus berupa gambar.',
+            'foto_profil.max'   => 'Ukuran foto maksimal 2MB.',
         ]);
 
         $user = Auth::user();
 
-        // Hapus foto lama jika ada
+        // Hapus foto lama di storage agar tidak menumpuk sampah
         if ($user->foto_profil && Storage::disk('public')->exists($user->foto_profil)) {
             Storage::disk('public')->delete($user->foto_profil);
         }
 
-        // Simpan foto baru
+        // Simpan foto baru ke folder storage/app/public/profil
         $path = $request->file('foto_profil')->store('profil', 'public');
 
         $user->foto_profil = $path;
         $user->save(); 
 
-        return back()->with('success', 'Foto profil berhasil diperbarui!');
+        return back()->with('success', 'Foto profil baru berhasil dipasang!');
     }
 
     /**
-     * 4. Update Password (Form Kanan)
+     * 4. Update Password
      */
     public function updatePassword(Request $request)
     {
-        // Sesuaikan validasi dengan name="new_password" di HTML
         $request->validate([
             'current_password' => 'required',
             'new_password'     => 'required|string|min:8|confirmed',
@@ -86,21 +91,20 @@ class ProfileController extends Controller
 
         $user = Auth::user();
         
-        // Cek password lama
+        // Validasi kecocokan password lama
         if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Password saat ini salah!']);
         }
 
-        // Update password baru
         $user->update([
             'password' => Hash::make($request->new_password)
         ]);
 
-        return back()->with('success', 'Password akun berhasil diganti!');
+        return back()->with('success', 'Kata sandi akun berhasil diubah.');
     }
 
     /**
-     * 5. Hapus Foto Profil
+     * 5. Hapus Foto Profil (Reset ke default)
      */
     public function hapusFoto()
     {
@@ -113,6 +117,6 @@ class ProfileController extends Controller
         $user->foto_profil = null;
         $user->save();
 
-        return back()->with('success', 'Foto profil berhasil dihapus!');
+        return back()->with('success', 'Foto profil telah dihapus.');
     }
 }

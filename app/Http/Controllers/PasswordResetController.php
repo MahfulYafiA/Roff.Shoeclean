@@ -19,7 +19,12 @@ class PasswordResetController extends Controller
     // 2. Mengirim Link Reset ke Email
     public function sendEmail(Request $request)
     {
-        $request->validate(['email' => 'required|email|exists:users,email']);
+        // 🚨 UPDATE: 'exists:ms_user,email' karena tabel kita ms_user
+        $request->validate([
+            'email' => 'required|email|exists:ms_user,email'
+        ], [
+            'email.exists' => 'Alamat email tidak terdaftar di sistem kami.'
+        ]);
 
         $status = Password::sendResetLink($request->only('email'));
 
@@ -28,7 +33,7 @@ class PasswordResetController extends Controller
                     : back()->withErrors(['email' => 'Gagal mengirim link reset sandi.']);
     }
 
-    // 3. Menampilkan Form Reset Sandi Baru (Dari Link Email)
+    // 3. Menampilkan Form Reset Sandi Baru
     public function resetForm(Request $request, $token)
     {
         return view('auth.reset-password', ['token' => $token, 'email' => $request->email]);
@@ -39,24 +44,26 @@ class PasswordResetController extends Controller
     {
         $request->validate([
             'token' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email|exists:ms_user,email',
             'password' => 'required|min:8|confirmed',
         ]);
 
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
+                // Menggunakan forceFill untuk update password terenkripsi
                 $user->forceFill([
                     'password' => Hash::make($password)
                 ])->setRememberToken(Str::random(60));
 
                 $user->save();
+
                 event(new PasswordReset($user));
             }
         );
 
         return $status === Password::PASSWORD_RESET
-                    ? redirect()->route('login')->with('status', 'Kata sandi berhasil diubah! Silakan login.')
+                    ? redirect()->route('login')->with('status', 'Kata sandi berhasil diubah! Silakan login kembali.')
                     : back()->withErrors(['email' => [__($status)]]);
     }
 }
