@@ -21,7 +21,7 @@ Route::get('/', function () {
     return view('beranda.landing', compact('layanans'));
 })->name('landing');
 
-// Callback Midtrans (Jika nanti Mas pakai pembayaran otomatis)
+// Callback Midtrans
 Route::post('/midtrans/callback', [ReservasiController::class, 'callback'])->name('midtrans.callback');
 
 // ==========================================
@@ -45,11 +45,14 @@ Route::middleware('guest')->group(function () {
 });
 
 // ==========================================
-// 3. RUTE TERPROTEKSI (Wajib Login)
+// 3. RUTE TERPROTEKSI (Wajib Login - Admin, Superadmin, Pelanggan)
 // ==========================================
 Route::middleware('auth')->group(function () {
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // 🚨 RUTE UNIVERSAL: UPDATE BANNER (Bisa diakses Admin & Superadmin)
+    Route::post('/update-hero-banner', [LayananController::class, 'updateHero'])->name('update.hero.universal');
 
     // --- MANAJEMEN PROFIL ---
     Route::prefix('profil')->name('profil.')->group(function () {
@@ -60,8 +63,18 @@ Route::middleware('auth')->group(function () {
         Route::delete('/foto', [ProfileController::class, 'hapusFoto'])->name('hapusFoto');
     });
 
+    // --- PENGATUR LALU LINTAS DASHBOARD ---
+    Route::get('/dashboard', function () {
+        $role = auth()->user()->role;
+        if ($role === 'superadmin') {
+            return redirect()->route('superadmin.dashboard');
+        } elseif ($role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } 
+        return app(UserController::class)->dashboard();
+    })->name('dashboard');
+
     // --- AREA PELANGGAN ---
-    Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
     Route::prefix('reservasi')->name('reservasi.')->group(function () {
         Route::get('/baru', [ReservasiController::class, 'create'])->name('create');
         Route::post('/baru', [ReservasiController::class, 'store'])->name('store');
@@ -71,7 +84,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // ==========================================
-    // --- AREA ADMIN (STAFF OPERASIONAL) ---
+    // 4. AREA ADMIN (STAFF OPERASIONAL)
     // ==========================================
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -81,7 +94,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/reservasi/update/{id}', [AdminController::class, 'updateStatus'])->name('reservasi.update');
         Route::delete('/reservasi/delete/{id}', [AdminController::class, 'destroy'])->name('reservasi.destroy');
         
-        // CRUD Jasa Layanan
+        // CRUD Jasa Layanan (Kini Admin juga bisa kelola)
         Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.index');
         Route::post('/layanan', [LayananController::class, 'store'])->name('layanan.store');
         Route::put('/layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');
@@ -91,7 +104,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // ==========================================
-    // --- AREA SUPERADMIN (OWNER/PEMILIK) ---
+    // 5. AREA SUPERADMIN (OWNER/PEMILIK)
     // ==========================================
     Route::prefix('superadmin')->name('superadmin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'superDashboard'])->name('dashboard');
@@ -100,7 +113,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/users', [AdminController::class, 'storeAdmin'])->name('users.store');
         Route::delete('/users/{id}', [AdminController::class, 'destroySuperUser'])->name('users.destroy');
 
-        // Superadmin juga punya akses penuh kelola layanan
+        // Superadmin tetap punya akses kelola layanan
         Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.index');
         Route::post('/layanan', [LayananController::class, 'store'])->name('layanan.store');
         Route::put('/layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');

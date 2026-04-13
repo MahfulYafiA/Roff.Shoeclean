@@ -3,39 +3,32 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use App\Models\Layanan;
 
 class LayananSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Matikan pengecekan foreign key
-        Schema::disableForeignKeyConstraints();
-
-        // 2. Kosongkan tabel
-        DB::table('ms_layanan')->truncate();
-
-        // 3. Isi data baru (hanya 3)
-        DB::table('ms_layanan')->insert([
+        $layanans = [
             [
                 'nama_layanan' => 'Fast Clean',
-                'harga' => 30000,
-                'deskripsi' => 'Pembersihan instan bagian luar sepatu. Estimasi 20-30 menit.',
+                'deskripsi' => 'Pembersihan instan untuk bagian luar sepatu (upper & midsole). Cocok untuk perawatan harian sepatu yang tidak terlalu kotor.',
+                'harga' => 20000,
             ],
             [
                 'nama_layanan' => 'Deep Clean',
-                'harga' => 50000,
-                'deskripsi' => 'Pembersihan menyeluruh untuk semua bagian sepatu secara detail.',
+                'deskripsi' => 'Pembersihan menyeluruh meliputi luar, dalam (insole), dan tali sepatu. Menghilangkan noda membandel dan bau tidak sedap.',
+                'harga' => 25000,
             ],
             [
                 'nama_layanan' => 'Unyellowing',
-                'harga' => 60000,
-                'deskripsi' => 'Perawatan khusus untuk menghilangkan noda kuning pada midsole.',
+                'deskripsi' => 'Treatment khusus untuk mengembalikan warna sol sepatu karet yang menguning (oksidasi) menjadi kembali putih bersih seperti baru.',
+                'harga' => 30000,
             ],
-        ]);
+        ];
 
-        // 4. Aktifkan kembali pengecekan foreign key
-        Schema::enableForeignKeyConstraints();
+        foreach ($layanans as $layanan) {
+            Layanan::create($layanan);
+        }
     }
 }

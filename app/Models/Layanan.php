@@ -17,11 +17,15 @@ class Layanan extends Model
      */
     public $timestamps = false;
 
-    // Agar fungsi create() dan update() di Controller lancar jaya
+    /**
+     * Agar fungsi create() dan update() di Controller lancar jaya.
+     * Kita tambahkan 'gambar' ke dalam array fillable.
+     */
     protected $fillable = [
         'nama_layanan',
         'harga',
-        'deskripsi'
+        'deskripsi',
+        'gambar' // 🚨 BARU: Mengizinkan pengisian path foto ke database
     ];
 
     /**

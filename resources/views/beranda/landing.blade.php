@@ -1,3 +1,13 @@
+@php
+    // Ambil data banner dari database
+    $heroSetting = Illuminate\Support\Facades\DB::table('ms_pengaturan')->where('key', 'hero_image')->first();
+    
+    // Tentukan path gambar: Gunakan upload-an jika ada, jika tidak pakai default
+    $heroPath = ($heroSetting && $heroSetting->value) 
+                ? asset('storage/' . $heroSetting->value) 
+                : asset('images/adidasspezial.png');
+@endphp
+
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
@@ -92,21 +102,18 @@
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
         .animate-float { animation: float 7s ease-in-out infinite; }
 
-        /* MENGHILANGKAN GARIS SCROLLBAR */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="antialiased selection:bg-blue-600 selection:text-white">
 
-    {{-- BACKGROUND KEREN GLOBAL --}}
     <div class="noise"></div>
     <div class="bg-mesh"></div>
     <div class="orb-1"></div>
     <div class="orb-2"></div>
     <div class="orb-3"></div>
 
-    {{-- NAVBAR RESPONSIVE PREMIUM --}}
     <nav class="fixed w-full z-50 glass-nav transition-all duration-300 border-b-2 border-slate-100/50" data-aos="fade-down" data-aos-duration="1000">
         <div class="w-full px-5 md:px-10 lg:px-12 py-4 md:py-6 flex justify-between items-center gap-2 relative">
             
@@ -176,7 +183,6 @@
             </div>
         </div>
 
-        {{-- MENU DROPDOWN HP (+ class nav-item) --}}
         <div id="menu-hp" class="hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-2xl border-b-2 border-slate-200/50 shadow-2xl flex flex-col font-bold text-xs uppercase tracking-[0.25em] text-slate-500 transition-all">
             <a href="#beranda" onclick="document.getElementById('menu-hp').classList.add('hidden')" class="nav-item p-6 border-b border-slate-100/50 text-slate-900 hover:bg-blue-50/50 hover:text-blue-600 transition-colors text-center">Beranda</a>
             <a href="#alur" onclick="document.getElementById('menu-hp').classList.add('hidden')" class="nav-item p-6 border-b border-slate-100/50 text-slate-400 hover:bg-blue-50/50 hover:text-blue-600 transition-colors text-center">Panduan</a>
@@ -188,8 +194,8 @@
             @endauth
             
             @auth
+                {{-- 🚨 BAGIAN "DASBOR SAYA" DIHAPUS 🚨 --}}
                 <div class="p-6 flex flex-col gap-4 bg-slate-50/80">
-                    <a href="{{ url('/dashboard') }}" class="w-full text-center border border-slate-200/80 bg-white/70 backdrop-blur-lg py-5 rounded-2xl font-black uppercase text-slate-900 hover:border-blue-600 transition-colors shadow-sm">Dasbor Saya</a>
                     <form method="POST" action="{{ route('logout') }}" class="w-full m-0 p-0">
                         @csrf
                         <button type="submit" class="w-full text-center bg-red-50 text-red-600 py-5 rounded-2xl font-black uppercase tracking-widest border border-red-100 hover:bg-red-600 hover:text-white transition-colors">Keluar</button>
@@ -204,7 +210,6 @@
         </div>
     </nav>
 
-    {{-- 🚨 UPDATE: HERO SECTION (Perbaikan Full 1 Layar Mobile Tanpa Potong) 🚨 --}}
     <header id="beranda" class="relative w-full min-h-[100svh] flex flex-col justify-center items-center px-6 lg:px-16 xl:px-24 pt-24 pb-8 md:pt-28 md:pb-12 overflow-hidden bg-transparent scroll-mt-0">
         <div class="w-full mx-auto relative z-10 flex flex-col lg:grid lg:grid-cols-12 gap-6 md:gap-10 lg:gap-12 items-center flex-grow h-full justify-between md:justify-center">
             
@@ -223,7 +228,6 @@
                     <span data-aos="fade-up" data-aos-duration="1000" data-aos-delay="500" class="text-premium-blue italic pr-0 md:pr-10 leading-tight">Antri.</span>
                 </h1>
                 
-                {{-- TOMBOL RESERVASI DESKTOP (Sembunyi di HP) --}}
                 <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="700" class="hidden lg:flex flex-col sm:flex-row gap-4 md:gap-6 mt-6 md:mt-10 justify-center md:justify-start">
                     <a href="{{ route('reservasi.create') }}" class="group w-full sm:w-auto bg-slate-900 text-white px-10 md:px-12 py-5 md:py-6 lg:py-7 rounded-full font-black uppercase text-[10px] md:text-xs tracking-[0.25em] flex items-center justify-center gap-4 hover:bg-blue-600 transition-all duration-500 glow-shadow hover:scale-105 shadow-xl shadow-slate-900/10">
                         Buat Reservasi 
@@ -236,7 +240,9 @@
 
             <div class="lg:col-span-5 relative flex flex-col items-center justify-center md:justify-end w-full flex-grow mt-2 md:mt-0gap-4 md:gap-0" data-aos="zoom-in-left" data-aos-duration="1500" data-aos-delay="400">
                 <div class="relative w-[70%] max-w-[280px] sm:max-w-[360px] md:max-w-md lg:max-w-[500px] xl:max-w-[600px] aspect-square md:aspect-[4/5] max-h-[40vh] md:max-h-none rounded-[2rem] md:rounded-[4rem] overflow-hidden glass-card luxury-shadow animate-float border-8 md:border-[10px] border-white mx-auto lg:mx-0 shadow-2xl">
-                    <img src="{{ asset('images/adidasspezial.png') }}" alt="Sepatu Premium" class="absolute inset-0 w-full h-full object-cover scale-105 hover:scale-110 transition-transform duration-[2s]">
+                    
+                    {{-- 🚨 UPDATE DINAMIS BANNER DISINI 🚨 --}}
+                    <img src="{{ $heroPath }}" alt="Sepatu Premium" class="absolute inset-0 w-full h-full object-cover scale-105 hover:scale-110 transition-transform duration-[2s]">
                     
                     <div class="absolute bottom-3 left-3 right-3 md:bottom-10 md:left-10 md:right-10 bg-white/85 backdrop-blur-2xl p-4 md:p-10 rounded-2xl md:rounded-[2.5rem] border border-white shadow-2xl transition-transform hover:-translate-y-2 duration-500">
                         <div class="flex items-center gap-2 md:gap-3.5 mb-1.5 md:mb-2.5">
@@ -247,7 +253,6 @@
                     </div>
                 </div>
 
-                {{-- TOMBOL RESERVASI MOBILE (Tampil di bawah gambar di HP) --}}
                 <div class="flex lg:hidden w-full max-w-[320px] sm:max-w-[360px] md:max-w-md mt-auto shrink-0 pt-4" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="600">
                     <a href="{{ route('reservasi.create') }}" class="group w-full bg-slate-900 text-white px-10 md:px-12 py-5 md:py-6 rounded-full font-black uppercase text-[10px] md:text-xs tracking-[0.25em] flex items-center justify-center gap-4 hover:bg-blue-600 transition-all duration-500 glow-shadow hover:scale-105 shadow-2xl shadow-slate-900/10 tracking-widest">
                         Buat Reservasi 
@@ -261,7 +266,6 @@
         </div>
     </header>
 
-    {{-- PANDUAN RESERVASI MODERN --}}
     <section id="alur" class="w-full min-h-[100svh] flex flex-col justify-center px-0 md:px-8 lg:px-16 xl:px-24 pt-24 pb-12 bg-transparent scroll-mt-0 relative overflow-hidden border-t-2 border-slate-100/50">
         <div class="w-full mx-auto relative z-10 flex flex-col justify-center h-full">
             <div class="mb-12 lg:mb-16 text-center md:text-left px-6 md:px-0" data-aos="fade-right" data-aos-duration="1000">
@@ -273,7 +277,6 @@
             
             <div class="flex md:grid md:grid-cols-12 gap-6 md:gap-8 lg:gap-12 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-8 px-6 md:pb-0 md:px-0">
                 
-                {{-- KARTU 1 --}}
                 <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="100" class="w-[85vw] sm:w-[340px] md:w-auto shrink-0 snap-center md:col-span-4 glass-card rounded-[3rem] p-8 md:p-10 lg:p-12 hover-lift relative overflow-hidden flex flex-col justify-center luxury-shadow border-2 border-white/70">
                     <div class="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-blue-100 to-blue-50 text-blue-600 rounded-2xl md:rounded-3xl flex items-center justify-center mb-6 md:mb-8 text-xl md:text-2xl font-black shadow-inner border border-blue-100">1</div>
                     <h5 class="font-black text-2xl md:text-3xl uppercase tracking-tight mb-3 md:mb-5 text-slate-900">Registrasi</h5>
@@ -282,7 +285,6 @@
                     </p>
                 </div>
                 
-                {{-- KARTU 2 --}}
                 <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="300" class="w-[85vw] sm:w-[340px] md:w-auto shrink-0 snap-center md:col-span-8 bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-md rounded-[3rem] p-8 md:p-10 lg:p-12 border border-slate-700/60 hover-lift relative overflow-hidden text-white group flex flex-col justify-center luxury-shadow glow-shadow">
                     <div class="absolute inset-0 bg-gradient-to-r from-cyan-600 to-purple-600 opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
                     <div class="w-12 h-12 md:w-14 md:h-14 bg-white/10 text-cyan-400 border border-cyan-500/30 rounded-2xl md:rounded-3xl flex items-center justify-center mb-6 md:mb-8 text-xl md:text-2xl font-black relative z-10 shadow-xl backdrop-blur">2</div>
@@ -292,7 +294,6 @@
                     </p>
                 </div>
                 
-                {{-- KARTU 3 --}}
                 <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200" class="w-[85vw] sm:w-[340px] md:w-auto shrink-0 snap-center md:col-span-6 glass-card rounded-[3rem] p-8 md:p-10 lg:p-12 hover-lift relative overflow-hidden flex flex-col justify-center luxury-shadow border-2 border-white/70">
                     <div class="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-blue-100 to-blue-50 text-blue-600 rounded-2xl md:rounded-3xl flex items-center justify-center mb-6 md:mb-8 text-xl md:text-2xl font-black shadow-inner border border-blue-100">3</div>
                     <h5 class="font-black text-2xl md:text-3xl uppercase tracking-tight mb-3 md:mb-4 text-slate-900">Penyerahan</h5>
@@ -301,7 +302,6 @@
                     </p>
                 </div>
                 
-                {{-- KARTU 4 --}}
                 <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="400" class="w-[85vw] sm:w-[340px] md:w-auto shrink-0 snap-center md:col-span-6 bg-gradient-to-tr from-blue-50 to-cyan-50 backdrop-blur-md border-2 border-white rounded-[3rem] p-8 md:p-10 lg:p-12 hover-lift relative overflow-hidden flex flex-col justify-center luxury-shadow shadow-xl shadow-cyan-500/5">
                     <div class="w-12 h-12 md:w-14 md:h-14 bg-white text-blue-600 shadow-xl rounded-2xl md:rounded-3xl flex items-center justify-center mb-6 md:mb-8 text-xl md:text-2xl font-black border border-slate-100">4</div>
                     <h5 class="font-black text-2xl md:text-3xl uppercase tracking-tight mb-3 md:mb-5 text-blue-800">Pantau Status</h5>
@@ -320,12 +320,10 @@
         </div>
     </section>
 
-    {{-- SECTION TENTANG KAMI RAHASIA --}}
     <section id="tentang" class="w-full min-h-[100svh] flex flex-col px-6 md:px-8 lg:px-16 xl:px-24 pt-28 pb-10 bg-transparent scroll-mt-0 relative overflow-hidden border-t-2 border-slate-100/50">
         <div class="w-full h-full flex flex-col mx-auto relative z-10 flex-grow justify-center lg:justify-start">
             <div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 xl:gap-24 items-center flex-grow w-full justify-between lg:justify-center">
                 
-                {{-- Bagian Teks (Atas di Mobile) --}}
                 <div class="text-center md:text-left flex flex-col items-center md:items-start w-full mt-6 md:mt-0" data-aos="fade-right" data-aos-duration="1200">
                     <span class="text-blue-600 font-black uppercase tracking-[0.35em] text-[10px] md:text-xs mb-2 md:mb-5 block">Tentang Kami</span>
                     <h2 class="font-black text-4xl leading-tight sm:text-6xl lg:text-7xl xl:text-8xluppercase uppercase tracking-tighter text-slate-900 md:leading-[1.0] mb-6 md:mb-10">
@@ -337,7 +335,6 @@
                         <p class="text-slate-600 font-medium text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed">Kami secara eksklusif menggunakan formulasi pembersih premium yang terbukti aman, mengembalikan kondisi terbaik material sepatu kesayangan Anda tanpa merusak tekstur aslinya.</p>
                     </div>
                     
-                    {{-- Card Owner Desktop (Sembunyi di HP) --}}
                     <div class="mt-6 md:mt-16 pt-6 md:pt-10 border-t-2 border-slate-100 hidden md:flex items-center justify-start w-full" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="300">
                         <div class="flex items-center gap-4 md:gap-6 p-4 md:p-5 glass-card rounded-2xl md:rounded-3xl w-full md:w-auto hover-lift border-white shadow-xl shadow-blue-500/5 border-2 border-white/80">
                             <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-tr from-cyan-400 via-blue-600 to-purple-600 rounded-xl md:rounded-3xl flex items-center justify-center text-white shadow-lg shadow-blue-500/40 shrink-0 border-2 border-white">
@@ -351,15 +348,12 @@
                     </div>
                 </div>
                 
-                {{-- Bagian Visual (Tengah & Bawah di Mobile) --}}
                 <div class="relative flex flex-col items-center justify-between lg:justify-end w-full flex-grow gap-6 md:gap-0" data-aos="fade-left" data-aos-duration="1500">
                     
-                    {{-- Gambar Kotak --}}
                     <div class="relative w-[60%] max-w-[240px] sm:max-w-[360px] md:w-full md:max-w-[440px] xl:max-w-[500px] aspect-square rounded-[2.5rem] md:rounded-[4rem] overflow-hidden luxury-shadow border-8 md:border-[10px] border-white glass-card flex items-center justify-center p-2 md:p-3 group mx-auto lg:mx-0 my-auto shadow-2xl">
                         <img src="{{ asset('images/fototentangkami.jpeg') }}" alt="Tentang Roff" class="w-full h-full object-cover rounded-[2rem] md:rounded-[3rem] group-hover:scale-105 transition-transform duration-700">
                     </div>
 
-                    {{-- CARD OWNER MOBILE --}}
                     <div class="p-5 sm:p-6 glass-card rounded-[2rem] flex items-center gap-4 sm:gap-6 border-2 border-white w-full md:hidden bg-white/75 backdrop-blur-2xl mt-auto shrink-0 shadow-2xl shadow-blue-500/5 glow-shadow-light" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
                         <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-lg border-2 border-white">
                             <i class="fa-solid fa-user-tie text-lg"></i>
@@ -380,7 +374,6 @@
         </div>
     </section>
 
-    {{-- LAYANAN MODERN GLASS --}}
     <section id="layanan" class="w-full min-h-[100svh] flex flex-col justify-center px-0 md:px-8 lg:px-16 xl:px-24 pt-24 pb-12 bg-transparent scroll-mt-0 relative border-t-2 border-slate-100/50 overflow-hidden">
         <div class="w-full mx-auto relative z-10 flex flex-col justify-center h-full">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-5 px-6 md:px-0">
@@ -400,18 +393,24 @@
             <div class="flex md:grid md:grid-cols-3 gap-6 md:gap-8 lg:gap-12 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-10 px-6 md:pb-0 md:px-0">
                 @foreach($layanans as $index => $layanan)
                     @php
-                        $image_file = 'default.png'; 
+                        // Logika Fallback Gambar (Jika di DB kosong)
+                        $fallback_image = 'default.png'; 
                         $nama_lower = strtolower($layanan->nama_layanan);
-                        if(str_contains($nama_lower, 'fast')) { $image_file = 'fastclean.png'; } 
-                        elseif(str_contains($nama_lower, 'deep')) { $image_file = 'deepclean.png'; } 
-                        elseif(str_contains($nama_lower, 'unyellowing')) { $image_file = 'unyellowing.png'; }
+                        if(str_contains($nama_lower, 'fast')) { $fallback_image = 'fastclean.png'; } 
+                        elseif(str_contains($nama_lower, 'deep')) { $fallback_image = 'deepclean.png'; } 
+                        elseif(str_contains($nama_lower, 'unyellowing')) { $fallback_image = 'unyellowing.png'; }
+                        
                         $harga_k = ($layanan->harga / 1000) . 'k';
                     @endphp
 
                     <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="{{ $index * 200 }}" class="w-[85vw] sm:w-[340px] md:w-auto shrink-0 snap-center glass-card p-8 md:p-10 rounded-[3rem] hover-lift flex flex-col luxury-shadow relative overflow-hidden group border-2 border-white shadow-xl shadow-blue-500/5">
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-cyan-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                        
+                        {{-- 🚨 UPDATE GAMBAR DINAMIS 🚨 --}}
                         <div class="w-full h-48 lg:h-56 xl:h-64 rounded-[2rem] overflow-hidden mb-8 mt-1 relative bg-white border border-slate-100/50 shadow-inner">
-                            <img src="{{ asset('images/' . $image_file) }}" alt="{{ $layanan->nama_layanan }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            <img src="{{ $layanan->gambar ? asset('storage/' . $layanan->gambar) : asset('images/' . $fallback_image) }}" 
+                                 alt="{{ $layanan->nama_layanan }}" 
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                         </div>
                         
                         <div class="px-1 flex flex-col flex-grow">
@@ -446,7 +445,6 @@
         </div>
     </section>
 
-    {{-- SECTION LOKASI PREMIUM --}}
     <section id="lokasi" class="relative w-full min-h-[100svh] flex items-center px-6 md:px-8 lg:px-16 xl:px-24 pt-24 pb-12 bg-transparent overflow-hidden scroll-mt-0 border-t-2 border-slate-100/50 outline-none">
         <div class="w-full mx-auto relative z-10">
             <div class="mb-12 lg:mb-16 text-center md:text-left" data-aos="fade-right" data-aos-duration="1000">
@@ -489,7 +487,7 @@
                     </div>
 
                     <div class="pt-10 relative z-10">
-                        <a href="https://wa.me/6282231259408" target="_blank" class="w-full py-5 md:py-6 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-cyan-500 hover:to-purple-500 text-white rounded-2xl font-black uppercase text-[11px] md:text-xs tracking-[0.25em] flex items-center justify-center gap-4 transition-all duration-300 shadow-xl shadow-blue-500/20 group hover:scale-[1.02] tracking-widest leading-none">
+                        <a href="https://wa.me/6282231259408" target="_blank" class="w-full py-5 md:py-6 bg-gradient-to-r from-blue-600 to-blue-50 hover:from-cyan-500 hover:to-purple-500 text-white rounded-2xl font-black uppercase text-[11px] md:text-xs tracking-[0.25em] flex items-center justify-center gap-4 transition-all duration-300 shadow-xl shadow-blue-500/20 group hover:scale-[1.02] tracking-widest leading-none">
                             <i class="fa-brands fa-whatsapp text-2xl"></i>
                             Hubungi CS
                             <i class="fa-solid fa-arrow-right text-sm group-hover:translate-x-2 transition-transform"></i>
@@ -516,17 +514,13 @@
         </div>
     </section>
 
-    {{-- FOOTER MODERN PREMIUM --}}
     <footer class="bg-[#0b1121] text-white w-full relative z-20 border-t-2 border-slate-800/50 overflow-hidden min-h-[calc(100svh-72px)] md:min-h-0 flex flex-col mt-auto">
-        {{-- Ornament Background Footer --}}
         <div class="absolute top-0 right-0 w-[40rem] h-[40rem] bg-gradient-to-br from-blue-600/10 to-purple-600/5 rounded-full blur-[140px] -translate-y-1/2 translate-x-1/2 opacity-60"></div>
         <div class="absolute bottom-0 left-0 w-[30rem] h-[30rem] bg-gradient-to-br from-cyan-600/10 to-blue-600/5 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 opacity-50"></div>
 
-        {{-- Section Atas: Grid Konten --}}
         <div class="w-full px-5 md:px-12 lg:px-20 mx-auto relative z-10 pt-10 md:pt-20 pb-10 md:pb-16 flex-grow flex flex-col justify-evenly">
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 md:gap-12 lg:gap-16 w-full my-auto">
                 
-                {{-- Column 1: Brand (Full width on mobile) --}}
                 <div class="col-span-2 lg:col-span-1 space-y-4 md:space-y-8 w-full">
                     <a href="#" class="inline-block">
                         <h2 class="text-3xl lg:text-4xl font-black tracking-tighter uppercase leading-none">
@@ -538,7 +532,6 @@
                     </p>
                 </div>
 
-                {{-- Column 2: Quick Menu --}}
                 <div class="col-span-1 space-y-4 md:space-y-8">
                     <h4 class="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] text-white/50">Menu Cepat</h4>
                     <ul class="space-y-3 md:space-y-5">
@@ -550,7 +543,6 @@
                     </ul>
                 </div>
 
-                {{-- Column 3: Social --}}
                 <div class="col-span-1 space-y-4 md:space-y-8">
                     <h4 class="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] text-white/50">Ikuti Kami</h4>
                     <div class="flex gap-3 md:gap-5">
@@ -564,10 +556,8 @@
                             <i class="fa-solid fa-envelope"></i>
                         </a>
                     </div>
-                    <p class="text-slate-500 text-[9px] md:text-[11px] font-bold uppercase tracking-[0.25em] leading-relaxed mt-2.5 hidden sm:block">Update harian di sosial media.</p>
                 </div>
 
-                {{-- Column 4: Contact (Full width on mobile) --}}
                 <div class="col-span-2 lg:col-span-1 space-y-4 md:space-y-8 pt-4 md:pt-0 w-full border-t lg:border-t-0 border-slate-800/50">
                     <h4 class="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em] text-white/50 pt-6 lg:pt-0">Hubungi Kami</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 md:gap-6 w-full">
@@ -588,9 +578,7 @@
             </div>
         </div>
 
-        {{-- GARIS PEMBATAS MENTOK POJOK --}}
         <div class="w-full bg-white/[0.02] border-t-2 border-white/10 mt-auto shrink-0 backdrop-blur-sm">
-            {{-- Section Bawah: Copyright --}}
             <div class="w-full px-5 md:px-12 lg:px-20 mx-auto relative z-10 py-6 md:py-8">
                 <div class="flex flex-row justify-between items-center gap-3">
                     <p class="text-slate-400 text-[9px] md:text-[11px] font-black uppercase tracking-[0.25em] md:tracking-[0.35em] leading-none">
@@ -608,7 +596,6 @@
         </div>
     </footer>
     
-    {{-- SCRIPT UNTUK INISIALISASI AOS & SCROLL SPY --}}
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {

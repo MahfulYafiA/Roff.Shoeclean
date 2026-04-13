@@ -15,10 +15,10 @@ class UserController extends Controller
     {
         $user = auth()->user();
 
-        // 🚨 GEMBOK ROLE: Redirect otomatis jika role tidak sesuai
-        if ($user->id_role == 1) {
+        // 🚨 GEMBOK ROLE: Pengecekan disesuaikan dengan kolom 'role' (teks)
+        if ($user->role === 'superadmin') {
             return redirect()->route('superadmin.dashboard');
-        } elseif ($user->id_role == 2) {
+        } elseif ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
@@ -39,10 +39,10 @@ class UserController extends Controller
     {
         $user = auth()->user();
 
-        // 🚨 GEMBOK ROLE
-        if ($user->id_role == 1) {
+        // 🚨 GEMBOK ROLE: Pengecekan disesuaikan dengan kolom 'role' (teks)
+        if ($user->role === 'superadmin') {
             return redirect()->route('superadmin.dashboard');
-        } elseif ($user->id_role == 2) {
+        } elseif ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 

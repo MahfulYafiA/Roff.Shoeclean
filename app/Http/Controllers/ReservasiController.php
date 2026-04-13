@@ -41,7 +41,7 @@ class ReservasiController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validasi Ketat (Sesuai Limit DB 15 Karakter untuk HP)
+        // 1. Validasi Ketat
         $request->validate([
             'id_layanan'        => 'required|exists:ms_layanan,id_layanan',
             'jumlah_sepatu'     => 'required|integer|min:1',
@@ -49,10 +49,11 @@ class ReservasiController extends Controller
             'metode_pembayaran' => 'required',
             'bukti_pembayaran'  => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'alamat_jemput'     => 'nullable|string|max:255', 
-            'no_telp'           => 'nullable|string|max:15', // Sesuai Workbench
+            'no_telp'           => 'nullable|string|max:15', 
         ], [
             'no_telp.max' => 'Nomor WhatsApp maksimal 15 angka.',
-            'bukti_pembayaran.max' => 'Ukuran foto bukti transfer maksimal 2MB.'
+            'bukti_pembayaran.max' => 'Ukuran foto bukti transfer maksimal 2MB.',
+            'bukti_pembayaran.image' => 'File harus berupa gambar (JPG/PNG).'
         ]);
 
         DB::beginTransaction();
@@ -62,26 +63,32 @@ class ReservasiController extends Controller
             $layanan = Layanan::findOrFail($request->id_layanan);
             $total_harga = $layanan->harga * $request->jumlah_sepatu;
 
-            // Update info user secara otomatis jika ada perubahan di form reservasi
-            $user->update([
-                'no_telp' => $request->no_telp ?? $user->no_telp,
-                'alamat'  => $request->alamat_jemput ?? $user->alamat,
-            ]);
+            // Update alamat user jika dia menginputkan alamat penjemputan baru
+            if ($request->alamat_jemput) {
+                User::where('id_user', $user->id_user)->update([
+                    'alamat' => $request->alamat_jemput
+                ]);
+            }
 
             // 1. SIMPAN KE tr_reservasi
             $reservasi = Reservasi::create([
-                'id_user'           => $user->id_user,
-                'tanggal_reservasi' => now(),
-                'jumlah_sepatu'     => $request->jumlah_sepatu,
-                'metode_layanan'    => $request->metode_layanan, 
-                'status'            => 'Menunggu Konfirmasi', 
-                'total_harga'       => $total_harga,
-                'alamat_jemput'     => $request->alamat_jemput,
+                'id_user'             => $user->id_user,
+                'tanggal_reservasi'   => now(),
+                'jumlah_sepatu'       => $request->jumlah_sepatu,
+                'metode_layanan'      => $request->metode_layanan, 
+                'status'              => 'Menunggu Konfirmasi', 
+                'total_harga'         => $total_harga,
+                'alamat_jemput'       => $request->alamat_jemput,
+                // ✅ Nilai default untuk kolom yang mewajibkan input
+                'metode_pengembalian' => 'Belum Ditentukan', 
+                'status_pengambilan'  => 'Belum Diambil', // <-- Penambahan Terbaru
             ]);
 
             // 2. SIMPAN KE tr_detail_reservasi (History Harga)
+            $id_res_baru = $reservasi->id_reservasi ?? $reservasi->id; 
+
             DetailReservasi::create([
-                'id_reservasi' => $reservasi->id_reservasi,
+                'id_reservasi' => $id_res_baru,
                 'id_layanan'   => $request->id_layanan,
                 'harga'        => $layanan->harga,
             ]);
@@ -93,7 +100,7 @@ class ReservasiController extends Controller
             }
 
             Pembayaran::create([
-                'id_reservasi'      => $reservasi->id_reservasi,
+                'id_reservasi'      => $id_res_baru,
                 'metode_pembayaran' => $request->metode_pembayaran,
                 'tanggal_bayar'     => $nama_file ? now() : null,
                 'status_pembayaran' => $nama_file ? 'Menunggu Validasi' : 'Belum Bayar',
@@ -108,7 +115,8 @@ class ReservasiController extends Controller
             if (isset($nama_file)) {
                 Storage::disk('public')->delete($nama_file);
             }
-            return back()->with('error', 'Gagal membuat reservasi: ' . $e->getMessage())->withInput();
+            
+            return back()->withErrors(['Sistem Database Menolak: ' . $e->getMessage()])->withInput();
         }
     }
 
@@ -151,7 +159,7 @@ class ReservasiController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal memproses pilihan: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['Gagal: ' . $e->getMessage()]);
         }
     }
 }

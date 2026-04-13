@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('nama', 40); // Sesuai Workbench (40)
             $table->string('email', 50)->unique(); // Sesuai Workbench (50)
             $table->string('password', 60); // Sesuai Workbench (60)
+            
+            // ✅ INI YANG KURANG: Kolom penentu hak akses (Role)
+            $table->enum('role', ['superadmin', 'admin', 'pelanggan'])->default('pelanggan');
+            
             $table->string('google_id', 30)->nullable(); // Sesuai Workbench (30)
             $table->string('no_telp', 15)->nullable(); // Sesuai Workbench (15)
             $table->string('alamat', 255)->nullable(); // Rekomendasi Strict (255)
