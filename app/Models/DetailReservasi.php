@@ -18,11 +18,13 @@ class DetailReservasi extends Model
     // 3. Matikan timestamps karena tidak ada di migrasi tabel ini
     public $timestamps = false;
 
-    // 4. Mencegah error Mass Assignment
+    // 4. Mencegah error Mass Assignment (✅ UPDATE: Tambah jumlah & sub_total)
     protected $fillable = [
         'id_reservasi',
         'id_layanan',
-        'harga' // Penting untuk mengunci harga history
+        'harga',      // Penting untuk mengunci harga history
+        'jumlah',     // 🚨 Kolom baru (Pindahan dari tr_reservasi)
+        'sub_total'   // 🚨 Kolom baru (Hasil harga * jumlah)
     ];
 
     /**

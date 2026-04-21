@@ -12,19 +12,22 @@ class Reservasi extends Model
     protected $table = 'tr_reservasi';
     protected $primaryKey = 'id_reservasi';
 
-    // Update Fillable sesuai Migrasi (Tambahkan status_pengambilan)
+    /**
+     * ✅ UPDATE: Mendukung 4 Kombinasi Logistik
+     * Menambahkan metode_masuk & metode_keluar sesuai migrasi terbaru.
+     */
     protected $fillable = [
         'id_user',
         'tanggal_reservasi',
-        'jumlah_sepatu',
         'metode_layanan',
         'alamat_jemput',
-        'metode_pengembalian',
-        'status_pengambilan', // 🚨 Pastikan ini ada agar tidak error saat update status
         'status',
+        'status_bayar',
         'total_harga',
         'wa_pengantaran',      
-        'alamat_pengantaran'   
+        'alamat_pengantaran',
+        'metode_masuk',  // 🚨 BARU: Antar Sendiri / Jemput Kurir
+        'metode_keluar'  // 🚨 BARU: Ambil Sendiri / Antar Kurir
     ];
 
     /**
@@ -37,7 +40,6 @@ class Reservasi extends Model
 
     /**
      * Relasi ke Detail Reservasi (Banyak Item/Jasa)
-     * Diubah ke hasMany karena satu nota bisa banyak baris detail
      */
     public function detail()
     {
@@ -53,13 +55,11 @@ class Reservasi extends Model
     }
 
     /**
-     * SOLUSI ERROR LAPORAN:
-     * Menambahkan withPivot('harga') agar kita bisa mengambil harga 
-     * yang tersimpan di tabel detail saat transaksi terjadi.
+     * Relasi ke Layanan (Pivot)
      */
     public function layanan()
     {
         return $this->belongsToMany(Layanan::class, 'tr_detail_reservasi', 'id_reservasi', 'id_layanan')
-                    ->withPivot('harga', 'id_detail'); // Membawa data harga dari tabel tengah
+                    ->withPivot('id_detail', 'harga', 'jumlah', 'sub_total');
     }
 }

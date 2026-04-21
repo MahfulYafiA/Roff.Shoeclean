@@ -19,11 +19,15 @@ return new class extends Migration
             $table->unsignedInteger('id_reservasi'); 
             
             $table->string('metode_pembayaran', 50);
-            $table->dateTime('tanggal_bayar');
+            
+            // ✅ UPDATE: Tambahkan ->nullable() agar bisa kosong di awal pesanan
+            $table->dateTime('tanggal_bayar')->nullable();
+            
             $table->string('status_pembayaran', 50);
             
+            // ✅ UPDATE: Tambahkan ->nullable() agar bisa kosong di awal pesanan
             // Menggunakan VARCHAR 150 sesuai kesepakatan Strict UMKM
-            $table->string('bukti_pembayaran', 150); 
+            $table->string('bukti_pembayaran', 150)->nullable(); 
 
             // Timestamps opsional, tapi bagus untuk audit
             $table->timestamps(); 

@@ -19,13 +19,14 @@ class Layanan extends Model
 
     /**
      * Agar fungsi create() dan update() di Controller lancar jaya.
-     * Kita tambahkan 'gambar' ke dalam array fillable.
+     * Kita tambahkan 'gambar' dan 'is_active' ke dalam array fillable.
      */
     protected $fillable = [
         'nama_layanan',
         'harga',
         'deskripsi',
-        'gambar' // 🚨 BARU: Mengizinkan pengisian path foto ke database
+        'gambar',   // Mengizinkan pengisian path foto ke database
+        'is_active' // 🚨 BARU: Mengizinkan fitur ubah status aktif/nonaktif layanan
     ];
 
     /**

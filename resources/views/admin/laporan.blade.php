@@ -44,25 +44,25 @@
             
             {{-- LOGO & TOMBOL KEMBALI KIRI --}}
             <div class="flex items-center gap-3 md:gap-4">
-                {{-- 🚨 TOMBOL PANAH KEMBALI KE DASBOR 🚨 --}}
-                <a href="{{ auth()->user()->role == 'superadmin' ? route('superadmin.dashboard') : route('admin.dashboard') }}" class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-800/50 border border-slate-700 text-slate-400 hover:{{ auth()->user()->role == 'superadmin' ? 'text-emerald-400' : 'text-blue-400' }} hover:bg-slate-800 transition-all flex items-center justify-center shadow-sm group active:scale-95" title="Kembali ke Dasbor">
+                {{-- TOMBOL PANAH KEMBALI KE DASBOR --}}
+                <a href="{{ auth()->user()->id_role == 1 ? route('superadmin.dashboard') : route('admin.dashboard') }}" class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-800/50 border border-slate-700 text-slate-400 hover:{{ auth()->user()->id_role == 1 ? 'text-emerald-400' : 'text-blue-400' }} hover:bg-slate-800 transition-all flex items-center justify-center shadow-sm group active:scale-95" title="Kembali ke Dasbor">
                     <i class="fa-solid fa-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
                 </a>
                 
                 <h1 class="block font-black text-xl md:text-2xl uppercase tracking-tighter italic text-white leading-tight">
-                    ROFF.<span class="{{ auth()->user()->role == 'superadmin' ? 'text-emerald-500' : 'text-blue-500' }}">{{ auth()->user()->role == 'superadmin' ? 'SUPER' : 'ADMIN' }}</span>
+                    ROFF.<span class="{{ auth()->user()->id_role == 1 ? 'text-emerald-500' : 'text-blue-500' }}">{{ auth()->user()->id_role == 1 ? 'SUPER' : 'ADMIN' }}</span>
                 </h1>
             </div>
             
             {{-- PROFIL KANAN ATAS --}}
             <div class="flex items-center gap-5">
                 <div class="flex items-center bg-slate-800/40 border border-slate-700 p-1 pr-4 rounded-full shadow-inner">
-                    <div class="w-8 h-8 rounded-full overflow-hidden {{ auth()->user()->role == 'superadmin' ? 'bg-emerald-500' : 'bg-blue-600' }} flex items-center justify-center text-[10px] font-black text-white border border-slate-700 shadow-xl">
-                        {{ auth()->user()->role == 'superadmin' ? 'SU' : strtoupper(substr(auth()->user()->nama, 0, 2)) }}
+                    <div class="w-8 h-8 rounded-full overflow-hidden {{ auth()->user()->id_role == 1 ? 'bg-emerald-500' : 'bg-blue-600' }} flex items-center justify-center text-[10px] font-black text-white border border-slate-700 shadow-xl">
+                        {{ auth()->user()->id_role == 1 ? 'SU' : strtoupper(substr(auth()->user()->nama, 0, 2)) }}
                     </div>
                     <div class="ml-3 hidden md:block">
-                        <p class="text-[10px] font-black text-white uppercase tracking-widest leading-none">{{ auth()->user()->role == 'superadmin' ? 'Superadmin' : explode(' ', auth()->user()->nama)[0] }}</p>
-                        <p class="text-[7px] font-bold {{ auth()->user()->role == 'superadmin' ? 'text-emerald-500/60' : 'text-blue-500/60' }} uppercase mt-0.5 tracking-tighter">Verified Access</p>
+                        <p class="text-[10px] font-black text-white uppercase tracking-widest leading-none">{{ auth()->user()->id_role == 1 ? 'Superadmin' : explode(' ', auth()->user()->nama)[0] }}</p>
+                        <p class="text-[7px] font-bold {{ auth()->user()->id_role == 1 ? 'text-emerald-500/60' : 'text-blue-500/60' }} uppercase mt-0.5 tracking-tighter">Verified Access</p>
                     </div>
                 </div>
             </div>
@@ -72,31 +72,58 @@
         <div class="p-6 md:p-12 flex-1 overflow-y-auto custom-scroll relative">
             
             {{-- Background Glow --}}
-            <div class="absolute top-0 right-0 w-[500px] h-[500px] {{ auth()->user()->role == 'superadmin' ? 'bg-emerald-500/10' : 'bg-blue-600/10' }} blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/4 no-print"></div>
+            <div class="absolute top-0 right-0 w-[500px] h-[500px] {{ auth()->user()->id_role == 1 ? 'bg-emerald-500/10' : 'bg-blue-600/10' }} blur-[120px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/4 no-print"></div>
 
             {{-- HEADER HALAMAN & TOTAL OMSET --}}
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 md:mb-12 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6 md:mb-8 relative z-10">
                 <div>
-                    <div class="inline-flex items-center gap-2 {{ auth()->user()->role == 'superadmin' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-blue-500/10 border-blue-500/20' }} border px-4 py-1.5 rounded-full mb-4 no-print">
-                        <span class="w-1.5 h-1.5 rounded-full {{ auth()->user()->role == 'superadmin' ? 'bg-emerald-500' : 'bg-blue-500' }} animate-pulse shadow-[0_0_10px_currentColor]"></span>
-                        <p class="text-[8px] md:text-[9px] font-black {{ auth()->user()->role == 'superadmin' ? 'text-emerald-400' : 'text-blue-400' }} uppercase tracking-[0.4em]">Real-time Data</p>
+                    <div class="inline-flex items-center gap-2 {{ auth()->user()->id_role == 1 ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-blue-500/10 border-blue-500/20' }} border px-4 py-1.5 rounded-full mb-4 no-print">
+                        <span class="w-1.5 h-1.5 rounded-full {{ auth()->user()->id_role == 1 ? 'bg-emerald-500' : 'bg-blue-500' }} animate-pulse shadow-[0_0_10px_currentColor]"></span>
+                        <p class="text-[8px] md:text-[9px] font-black {{ auth()->user()->id_role == 1 ? 'text-emerald-400' : 'text-blue-400' }} uppercase tracking-[0.4em]">Real-time Data</p>
                     </div>
                     <h1 class="text-3xl md:text-5xl font-black text-white print-text-dark tracking-tighter leading-none mb-2">
-                        Laporan <span class="italic text-transparent bg-clip-text {{ auth()->user()->role == 'superadmin' ? 'bg-gradient-to-r from-emerald-400 to-teal-200' : 'bg-gradient-to-r from-blue-400 to-indigo-200' }} print-text-dark">Omset.</span>
+                        Laporan <span class="italic text-transparent bg-clip-text {{ auth()->user()->id_role == 1 ? 'bg-gradient-to-r from-emerald-400 to-teal-200' : 'bg-gradient-to-r from-blue-400 to-indigo-200' }} print-text-dark">Omset.</span>
                     </h1>
                     <p class="text-slate-400 print-text-dark font-medium text-sm">Monitoring pendapatan resmi sistem ROFF.SHOECLEAN</p>
                 </div>
 
                 {{-- KARTU TOTAL OMSET --}}
                 <div class="glass-panel w-full md:w-auto px-8 py-6 rounded-[2rem] text-right shadow-2xl relative overflow-hidden shrink-0 border border-white/10 print-border-light print-bg-light">
-                    <div class="absolute top-0 right-0 w-16 h-16 {{ auth()->user()->role == 'superadmin' ? 'bg-emerald-500/20' : 'bg-blue-500/20' }} rounded-full -translate-y-1/2 translate-x-1/2 blur-md no-print"></div>
-                    <p class="text-[9px] md:text-[10px] font-black {{ auth()->user()->role == 'superadmin' ? 'text-emerald-400' : 'text-blue-400' }} uppercase tracking-[0.3em] mb-1 relative z-10">Total Omset Keseluruhan</p>
+                    <div class="absolute top-0 right-0 w-16 h-16 {{ auth()->user()->id_role == 1 ? 'bg-emerald-500/20' : 'bg-blue-500/20' }} rounded-full -translate-y-1/2 translate-x-1/2 blur-md no-print"></div>
+                    <p class="text-[9px] md:text-[10px] font-black {{ auth()->user()->id_role == 1 ? 'text-emerald-400' : 'text-blue-400' }} uppercase tracking-[0.3em] mb-1 relative z-10">Total Omset Keseluruhan</p>
                     <h3 class="text-2xl md:text-4xl font-black text-white print-text-dark tracking-tighter relative z-10 italic">
                         Rp {{ number_format($totalOmzet ?? 0, 0, ',', '.') }}
                     </h3>
                 </div>
             </div>
             
+            {{-- ✅ REVISI DOSEN: FILTER TANGGAL --}}
+            <div class="glass-panel rounded-3xl p-5 md:p-6 mb-8 relative z-10 no-print border border-white/5 shadow-lg">
+                <form action="{{ url()->current() }}" method="GET" class="flex flex-col md:flex-row items-end gap-4">
+                    <div class="w-full md:w-auto flex-1">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"><i class="fa-regular fa-calendar mr-1"></i> Dari Tanggal</label>
+                        {{-- Atribut [color-scheme:dark] membuat kalender otomatis mode gelap --}}
+                        <input type="date" name="tgl_mulai" value="{{ request('tgl_mulai', $tgl_mulai ?? '') }}" class="w-full bg-slate-800/50 border border-slate-700 text-white rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all [color-scheme:dark]">
+                    </div>
+                    <div class="w-full md:w-auto flex-1">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1"><i class="fa-regular fa-calendar-check mr-1"></i> Sampai Tanggal</label>
+                        <input type="date" name="tgl_selesai" value="{{ request('tgl_selesai', $tgl_selesai ?? '') }}" class="w-full bg-slate-800/50 border border-slate-700 text-white rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all [color-scheme:dark]">
+                    </div>
+                    <div class="w-full md:w-auto flex gap-3 h-full">
+                        <button type="submit" class="w-full md:w-auto {{ auth()->user()->id_role == 1 ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/20' }} text-white px-8 py-3.5 rounded-xl font-black text-[10px] md:text-xs uppercase tracking-widest transition-all shadow-lg flex items-center justify-center">
+                            <i class="fa-solid fa-filter mr-2"></i> Terapkan
+                        </button>
+                        
+                        {{-- Tombol Reset hanya muncul jika filter sedang aktif --}}
+                        @if(request('tgl_mulai') || request('tgl_selesai'))
+                        <a href="{{ url()->current() }}" class="w-full md:w-auto bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white px-6 py-3.5 rounded-xl font-black text-[10px] md:text-xs uppercase tracking-widest transition-all flex items-center justify-center" title="Hapus Filter">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
             {{-- TABEL DATA --}}
             <div class="glass-panel rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden mb-8 md:mb-10 relative z-10 print-border-light">
                 <div class="overflow-x-auto">
@@ -117,16 +144,19 @@
                                     <span class="block text-[9px] font-normal text-slate-500 mt-1">{{ $l->updated_at->format('H:i') }} WIB</span>
                                 </td>
                                 <td class="px-8 py-6">
-                                    <p class="font-black text-white print-text-dark uppercase italic leading-tight">{{ $l->user->nama ?? 'N/A' }}</p>
+                                    <p class="font-black text-white print-text-dark uppercase italic leading-tight">{{ $l->user->nama ?? 'Walk-in Customer' }}</p>
                                     <p class="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-widest">ID #{{ $l->id_reservasi }}</p>
                                 </td>
                                 <td class="px-8 py-6">
                                     <span class="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-slate-700">
                                         {{ $l->detail->first()->layanan->nama_layanan ?? $l->layanan->pluck('nama_layanan')->first() ?? 'Layanan' }}
                                     </span>
-                                    <span class="block text-[9px] font-bold text-slate-500 mt-2 uppercase tracking-widest">{{ $l->jumlah_sepatu }} PASANG</span>
+                                    <span class="block text-[9px] font-bold text-slate-500 mt-2 uppercase tracking-widest">
+                                        {{-- ✅ UPDATE STRUKTUR: Mengambil jumlah dari tabel tr_detail_reservasi --}}
+                                        {{ $l->detail->first()->jumlah ?? 1 }} PASANG
+                                    </span>
                                 </td>
-                                <td class="px-8 py-6 text-right font-black {{ auth()->user()->role == 'superadmin' ? 'text-emerald-400' : 'text-blue-400' }} italic text-base tracking-tighter">
+                                <td class="px-8 py-6 text-right font-black {{ auth()->user()->id_role == 1 ? 'text-emerald-400' : 'text-blue-400' }} italic text-base tracking-tighter">
                                     Rp {{ number_format($l->total_harga, 0, ',', '.') }}
                                 </td>
                             </tr>
@@ -135,7 +165,7 @@
                                 <td colspan="4" class="p-24 text-center">
                                     <div class="flex flex-col items-center opacity-30">
                                         <i class="fa-solid fa-receipt text-6xl mb-4 text-slate-400"></i>
-                                        <p class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">Data belum tersedia</p>
+                                        <p class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">Data belum tersedia / Filter tidak ditemukan</p>
                                     </div>
                                 </td>
                             </tr>
@@ -148,7 +178,7 @@
             {{-- FOOTER & TOMBOL CETAK --}}
             <div class="flex flex-col md:flex-row justify-between items-center gap-6 no-print relative z-10">
                 <div class="flex items-center gap-4 opacity-50">
-                    <span class="w-2 h-2 rounded-full {{ auth()->user()->role == 'superadmin' ? 'bg-emerald-500' : 'bg-blue-500' }} animate-pulse shadow-[0_0_10px_currentColor]"></span>
+                    <span class="w-2 h-2 rounded-full {{ auth()->user()->id_role == 1 ? 'bg-emerald-500' : 'bg-blue-500' }} animate-pulse shadow-[0_0_10px_currentColor]"></span>
                     <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] italic">
                         Laporan resmi yang diverifikasi sistem.
                     </p>

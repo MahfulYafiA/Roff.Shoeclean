@@ -1,11 +1,15 @@
 @php
-    // Ambil data banner dari database
+    // Ambil data banner hero dari database
     $heroSetting = Illuminate\Support\Facades\DB::table('ms_pengaturan')->where('key', 'hero_image')->first();
-    
-    // Tentukan path gambar: Gunakan upload-an jika ada, jika tidak pakai default
     $heroPath = ($heroSetting && $heroSetting->value) 
                 ? asset('storage/' . $heroSetting->value) 
                 : asset('images/adidasspezial.png');
+
+    // ✅ AMBIL DATA FOTO TENTANG KAMI DARI DATABASE
+    $tentangSetting = Illuminate\Support\Facades\DB::table('ms_pengaturan')->where('key', 'tentang_image')->first();
+    $tentangPath = ($tentangSetting && $tentangSetting->value) 
+                ? asset('storage/' . $tentangSetting->value) 
+                : asset('images/fototentangkami.jpeg'); // Gambar default jika admin belum upload
 @endphp
 
 <!DOCTYPE html>
@@ -194,7 +198,6 @@
             @endauth
             
             @auth
-                {{-- 🚨 BAGIAN "DASBOR SAYA" DIHAPUS 🚨 --}}
                 <div class="p-6 flex flex-col gap-4 bg-slate-50/80">
                     <form method="POST" action="{{ route('logout') }}" class="w-full m-0 p-0">
                         @csrf
@@ -240,8 +243,6 @@
 
             <div class="lg:col-span-5 relative flex flex-col items-center justify-center md:justify-end w-full flex-grow mt-2 md:mt-0gap-4 md:gap-0" data-aos="zoom-in-left" data-aos-duration="1500" data-aos-delay="400">
                 <div class="relative w-[70%] max-w-[280px] sm:max-w-[360px] md:max-w-md lg:max-w-[500px] xl:max-w-[600px] aspect-square md:aspect-[4/5] max-h-[40vh] md:max-h-none rounded-[2rem] md:rounded-[4rem] overflow-hidden glass-card luxury-shadow animate-float border-8 md:border-[10px] border-white mx-auto lg:mx-0 shadow-2xl">
-                    
-                    {{-- 🚨 UPDATE DINAMIS BANNER DISINI 🚨 --}}
                     <img src="{{ $heroPath }}" alt="Sepatu Premium" class="absolute inset-0 w-full h-full object-cover scale-105 hover:scale-110 transition-transform duration-[2s]">
                     
                     <div class="absolute bottom-3 left-3 right-3 md:bottom-10 md:left-10 md:right-10 bg-white/85 backdrop-blur-2xl p-4 md:p-10 rounded-2xl md:rounded-[2.5rem] border border-white shadow-2xl transition-transform hover:-translate-y-2 duration-500">
@@ -351,7 +352,8 @@
                 <div class="relative flex flex-col items-center justify-between lg:justify-end w-full flex-grow gap-6 md:gap-0" data-aos="fade-left" data-aos-duration="1500">
                     
                     <div class="relative w-[60%] max-w-[240px] sm:max-w-[360px] md:w-full md:max-w-[440px] xl:max-w-[500px] aspect-square rounded-[2.5rem] md:rounded-[4rem] overflow-hidden luxury-shadow border-8 md:border-[10px] border-white glass-card flex items-center justify-center p-2 md:p-3 group mx-auto lg:mx-0 my-auto shadow-2xl">
-                        <img src="{{ asset('images/fototentangkami.jpeg') }}" alt="Tentang Roff" class="w-full h-full object-cover rounded-[2rem] md:rounded-[3rem] group-hover:scale-105 transition-transform duration-700">
+                        {{-- ✅ MENGGUNAKAN VARIABEL GAMBAR DARI DATABASE --}}
+                        <img src="{{ $tentangPath }}" alt="Tentang Roff" class="w-full h-full object-cover rounded-[2rem] md:rounded-[3rem] group-hover:scale-105 transition-transform duration-700">
                     </div>
 
                     <div class="p-5 sm:p-6 glass-card rounded-[2rem] flex items-center gap-4 sm:gap-6 border-2 border-white w-full md:hidden bg-white/75 backdrop-blur-2xl mt-auto shrink-0 shadow-2xl shadow-blue-500/5 glow-shadow-light" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
@@ -406,7 +408,6 @@
                     <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="{{ $index * 200 }}" class="w-[85vw] sm:w-[340px] md:w-auto shrink-0 snap-center glass-card p-8 md:p-10 rounded-[3rem] hover-lift flex flex-col luxury-shadow relative overflow-hidden group border-2 border-white shadow-xl shadow-blue-500/5">
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-cyan-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
                         
-                        {{-- 🚨 UPDATE GAMBAR DINAMIS 🚨 --}}
                         <div class="w-full h-48 lg:h-56 xl:h-64 rounded-[2rem] overflow-hidden mb-8 mt-1 relative bg-white border border-slate-100/50 shadow-inner">
                             <img src="{{ $layanan->gambar ? asset('storage/' . $layanan->gambar) : asset('images/' . $fallback_image) }}" 
                                  alt="{{ $layanan->nama_layanan }}" 

@@ -10,25 +10,29 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    // 1. Nama tabel sesuai ms_user di Workbench
+    // 1. Nama tabel sesuai ms_user di database
     protected $table = 'ms_user';
     
-    // 2. Primary Key bukan 'id', tapi 'id_user'
+    // 2. Primary Key menggunakan 'id_user'
     protected $primaryKey = 'id_user';
 
-    // 3. Timestamps harus TRUE karena di migrasi kita pakai $table->timestamps()
+    // 3. Timestamps aktif
     public $timestamps = true; 
 
-    // 4. Daftar kolom yang boleh diisi (Mass Assignment)
-    // Catatan: id_role saya hilangkan jika di migrasi terakhir Mas tidak memakainya
+    /**
+     * 4. Daftar kolom yang boleh diisi (Mass Assignment)
+     * ✅ UPDATE: Menambahkan 'is_active' untuk fitur kontrol admin
+     */
     protected $fillable = [
         'nama',
         'email',
         'password',
+        'id_role',    
         'no_telp',
         'alamat',
         'foto_profil',
         'google_id',
+        'is_active', // 🚨 TAMBAHKAN INI
     ];
 
     // 5. Sembunyikan data sensitif
@@ -43,9 +47,9 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'password' => 'hashed',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'is_active'  => 'boolean', // 🚨 TAMBAHKAN INI agar terbaca true/false
         ];
     }
 }

@@ -10,9 +10,13 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
+    ->withMiddleware(function (Middleware $middleware) {
+        // ✅ MENGECUALIKAN ROUTE MIDTRANS DARI KEAMANAN CSRF
+        // Ini agar robot Midtrans bisa mengirim laporan sukses ke web Mas tanpa ditolak Laravel
+        $middleware->validateCsrfTokens(except: [
+            '/midtrans/callback',
+        ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

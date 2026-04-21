@@ -7,25 +7,36 @@ use App\Models\Reservasi;
 
 class LaporanController extends Controller
 {
+    /**
+     * Menampilkan Laporan dengan Filter Periode
+     */
     public function index(Request $request)
     {
-        // 1. Ambil input filter dari user (jika ada)
-        $bulan = $request->get('bulan', date('m')); // Default: Bulan sekarang
-        $tahun = $request->get('tahun', date('Y')); // Default: Tahun sekarang
+        // 1. Ambil input filter tanggal dari user
+        $tgl_mulai = $request->get('tgl_mulai');
+        $tgl_selesai = $request->get('tgl_selesai');
 
-        // 2. Query Data dengan Eager Loading
-        $laporan = Reservasi::with(['user', 'layanan'])
-                    ->where('status', 'Selesai')
-                    // Filter berdasarkan bulan dan tahun pada kolom tanggal_reservasi
-                    ->whereMonth('tanggal_reservasi', $bulan)
-                    ->whereYear('tanggal_reservasi', $tahun)
-                    ->orderBy('tanggal_reservasi', 'desc')
-                    ->get();
+        // 2. Query Data dengan Eager Loading (Termasuk relasi pembayaran untuk revisi detail)
+        $query = Reservasi::with(['user', 'layanan', 'pembayaran'])
+                    ->where('status', 'Selesai') // Laporan biasanya hanya untuk yang sudah selesai
+                    ->orderBy('tanggal_reservasi', 'desc');
 
-        // 3. Menghitung total omzet khusus dari data yang sudah di-filter
+        // 3. Logika Filter Periode
+        if ($tgl_mulai && $tgl_selesai) {
+            // Jika user memilih rentang tanggal
+            $query->whereBetween('tanggal_reservasi', [$tgl_mulai, $tgl_selesai]);
+        } else {
+            // Default: Tampilkan data bulan berjalan jika filter kosong
+            $query->whereMonth('tanggal_reservasi', date('m'))
+                  ->whereYear('tanggal_reservasi', date('Y'));
+        }
+
+        $laporan = $query->get();
+
+        // 4. Menghitung total omzet khusus dari data yang sudah di-filter
         $totalOmzet = $laporan->sum('total_harga');
 
-        // 4. Kirim data ke view
-        return view('admin.laporan', compact('laporan', 'totalOmzet', 'bulan', 'tahun'));
+        // 5. Kirim data ke view
+        return view('admin.laporan', compact('laporan', 'totalOmzet', 'tgl_mulai', 'tgl_selesai'));
     }
 }

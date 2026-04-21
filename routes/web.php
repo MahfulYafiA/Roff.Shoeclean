@@ -11,21 +11,21 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\AdminTransaksiController; 
 
 // ==========================================
 // 1. RUTE LANDING PAGE (Publik)
 // ==========================================
 Route::get('/', function () {
-    // Schema check mencegah error jika database belum dimigrasi
-    $layanans = Schema::hasTable('ms_layanan') ? Layanan::all() : []; 
+    $layanans = Schema::hasTable('ms_layanan') ? Layanan::where('is_active', true)->get() : []; 
     return view('beranda.landing', compact('layanans'));
 })->name('landing');
 
-// Callback Midtrans
+// Webhook Midtrans
 Route::post('/midtrans/callback', [ReservasiController::class, 'callback'])->name('midtrans.callback');
 
 // ==========================================
-// 2. RUTE AUTENTIKASI (Khusus Tamu/Belum Login)
+// 2. RUTE AUTENTIKASI (Guest)
 // ==========================================
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -33,11 +33,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
     
-    // Login via Google
     Route::get('/login/google', [AuthController::class, 'redirectToGoogle'])->name('login.google');
     Route::get('/login/google/callback', [AuthController::class, 'handleGoogleCallback']);
     
-    // Reset Password
     Route::get('/forgot-password', [PasswordResetController::class, 'requestForm'])->name('password.request');
     Route::post('/forgot-password', [PasswordResetController::class, 'sendEmail'])->name('password.email');
     Route::get('/reset-password/{token}', [PasswordResetController::class, 'resetForm'])->name('password.reset');
@@ -45,16 +43,16 @@ Route::middleware('guest')->group(function () {
 });
 
 // ==========================================
-// 3. RUTE TERPROTEKSI (Wajib Login - Admin, Superadmin, Pelanggan)
+// 3. RUTE TERPROTEKSI (Auth)
 // ==========================================
 Route::middleware('auth')->group(function () {
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // 🚨 RUTE UNIVERSAL: UPDATE BANNER (Bisa diakses Admin & Superadmin)
     Route::post('/update-hero-banner', [LayananController::class, 'updateHero'])->name('update.hero.universal');
+    Route::post('/update-tentang-kami', [LayananController::class, 'updateTentang'])->name('update.tentang.universal');
 
-    // --- MANAJEMEN PROFIL ---
+    // Profil
     Route::prefix('profil')->name('profil.')->group(function () {
         Route::get('/', [ProfileController::class, 'index'])->name('index');
         Route::patch('/update', [ProfileController::class, 'update'])->name('update');
@@ -63,18 +61,15 @@ Route::middleware('auth')->group(function () {
         Route::delete('/foto', [ProfileController::class, 'hapusFoto'])->name('hapusFoto');
     });
 
-    // --- PENGATUR LALU LINTAS DASHBOARD ---
+    // Dashboard Switcher
     Route::get('/dashboard', function () {
-        $role = auth()->user()->role;
-        if ($role === 'superadmin') {
-            return redirect()->route('superadmin.dashboard');
-        } elseif ($role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        } 
+        $role = auth()->user()->id_role; 
+        if ($role == 1) return redirect()->route('superadmin.dashboard');
+        if ($role == 2) return redirect()->route('admin.dashboard');
         return app(UserController::class)->dashboard();
     })->name('dashboard');
 
-    // --- AREA PELANGGAN ---
+    // Pelanggan
     Route::prefix('reservasi')->name('reservasi.')->group(function () {
         Route::get('/baru', [ReservasiController::class, 'create'])->name('create');
         Route::post('/baru', [ReservasiController::class, 'store'])->name('store');
@@ -84,7 +79,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // ==========================================
-    // 4. AREA ADMIN (STAFF OPERASIONAL)
+    // 4. AREA ADMIN
     // ==========================================
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -94,29 +89,37 @@ Route::middleware('auth')->group(function () {
         Route::post('/reservasi/update/{id}', [AdminController::class, 'updateStatus'])->name('reservasi.update');
         Route::delete('/reservasi/delete/{id}', [AdminController::class, 'destroy'])->name('reservasi.destroy');
         
-        // CRUD Jasa Layanan (Kini Admin juga bisa kelola)
+        Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.index');
+        Route::post('/layanan', [LayananController::class, 'store'])->name('layanan.store');
+        Route::put('/layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');
+        Route::delete('/layanan/{id}', [LayananController::class, 'destroy'])->name('layanan.destroy');
+        Route::post('/layanan/{id}/toggle', [LayananController::class, 'toggleStatus'])->name('layanan.toggle');
+        
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
+        Route::get('/kasir-offline', [AdminTransaksiController::class, 'createOffline'])->name('transaksi.offline');
+        Route::post('/kasir-offline', [AdminTransaksiController::class, 'storeOffline'])->name('transaksi.store-offline');
+    });
+
+    // ==========================================
+    // 5. AREA SUPERADMIN
+    // ==========================================
+    Route::prefix('superadmin')->name('superadmin.')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'superDashboard'])->name('dashboard');
+        Route::get('/laporan', [AdminController::class, 'superLaporan'])->name('laporan');
+        
+        // Manajemen User
+        Route::get('/users', [AdminController::class, 'superUsers'])->name('users');
+        Route::post('/users', [AdminController::class, 'storeAdmin'])->name('users.store');
+        Route::delete('/users/{id}', [AdminController::class, 'destroySuperUser'])->name('users.destroy');
+        Route::patch('/users/{id}/toggle', [AdminController::class, 'toggleUserStatus'])->name('users.toggle');
+
+        // Layanan (DIBERSIHKAN DARI NAMA DOUBLE)
         Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.index');
         Route::post('/layanan', [LayananController::class, 'store'])->name('layanan.store');
         Route::put('/layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');
         Route::delete('/layanan/{id}', [LayananController::class, 'destroy'])->name('layanan.destroy');
         
-        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
-    });
-
-    // ==========================================
-    // 5. AREA SUPERADMIN (OWNER/PEMILIK)
-    // ==========================================
-    Route::prefix('superadmin')->name('superadmin.')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'superDashboard'])->name('dashboard');
-        Route::get('/laporan', [AdminController::class, 'superLaporan'])->name('laporan');
-        Route::get('/users', [AdminController::class, 'superUsers'])->name('users');
-        Route::post('/users', [AdminController::class, 'storeAdmin'])->name('users.store');
-        Route::delete('/users/{id}', [AdminController::class, 'destroySuperUser'])->name('users.destroy');
-
-        // Superadmin tetap punya akses kelola layanan
-        Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.index');
-        Route::post('/layanan', [LayananController::class, 'store'])->name('layanan.store');
-        Route::put('/layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');
-        Route::delete('/layanan/{id}', [LayananController::class, 'destroy'])->name('layanan.destroy');
+        // 🚨 FIX: Cukup tulis 'layanan.toggle', nanti otomatis jadi 'superadmin.layanan.toggle'
+        Route::post('/layanan/{id}/toggle', [LayananController::class, 'toggleStatus'])->name('layanan.toggle'); 
     });
 });

@@ -94,9 +94,12 @@
             </div>
 
             {{-- GRID MENU (TEMA ADMIN) --}}
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 shrink-0">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-6 shrink-0">
                 @php
                     $menus = [
+                        // ✅ TAMBAHAN: Menu Kasir Offline diletakkan di urutan pertama
+                        ['url' => route('admin.transaksi.offline'), 'icon' => 'fa-cash-register', 'title' => 'Kasir', 'desc' => 'Input Offline', 'color' => 'text-orange-400', 'bg' => 'bg-orange-500/10'],
+                        
                         ['url' => route('profil.index'), 'icon' => 'fa-id-card-clip', 'title' => 'Profil', 'desc' => 'Admin Settings', 'color' => 'text-blue-400', 'bg' => 'bg-blue-500/10'],
                         ['url' => route('admin.antrean'), 'icon' => 'fa-clipboard-list', 'title' => 'Antrean', 'desc' => 'Update Status Cuci', 'color' => 'text-emerald-400', 'bg' => 'bg-emerald-500/10'],
                         ['url' => route('admin.laporan'), 'icon' => 'fa-chart-pie', 'title' => 'Laporan', 'desc' => 'Rekap Omset Harian', 'color' => 'text-cyan-400', 'bg' => 'bg-cyan-500/10'],
@@ -106,12 +109,12 @@
                 @endphp
 
                 @foreach($menus as $menu)
-                <a href="{{ $menu['url'] }}" class="glass-card group p-5 lg:p-8 rounded-[1.5rem] lg:rounded-[2rem] flex flex-col justify-center items-start h-full">
-                    <div class="w-10 h-10 lg:w-14 lg:h-14 {{ $menu['bg'] }} {{ $menu['color'] }} rounded-[1rem] flex items-center justify-center mb-3 lg:mb-6 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] transition-all duration-500 shadow-lg shadow-black/20">
-                        <i class="fa-solid {{ $menu['icon'] }} text-lg lg:text-xl"></i>
+                <a href="{{ $menu['url'] }}" class="glass-card group p-5 lg:p-6 xl:p-8 rounded-[1.5rem] lg:rounded-[2rem] flex flex-col justify-center items-start h-full">
+                    <div class="w-10 h-10 lg:w-12 lg:h-12 {{ $menu['bg'] }} {{ $menu['color'] }} rounded-[1rem] flex items-center justify-center mb-3 lg:mb-5 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] transition-all duration-500 shadow-lg shadow-black/20">
+                        <i class="fa-solid {{ $menu['icon'] }} text-lg"></i>
                     </div>
-                    <h3 class="font-black text-sm lg:text-xl text-white mb-1 uppercase tracking-tighter leading-none group-hover:text-blue-400 transition-colors">{{ $menu['title'] }}</h3>
-                    <p class="text-slate-500 text-[8px] lg:text-[10px] font-bold uppercase tracking-widest italic opacity-70">{{ $menu['desc'] }}</p>
+                    <h3 class="font-black text-sm lg:text-lg text-white mb-1 uppercase tracking-tighter leading-none group-hover:text-blue-400 transition-colors">{{ $menu['title'] }}</h3>
+                    <p class="text-slate-500 text-[8px] lg:text-[9px] font-bold uppercase tracking-widest italic opacity-70">{{ $menu['desc'] }}</p>
                 </a>
                 @endforeach
             </div>

@@ -12,20 +12,20 @@ return new class extends Migration
     public function up(): void 
     {
         Schema::create('ms_user', function (Blueprint $table) {
-            $table->increments('id_user'); // PK INT(11) di Workbench
-            $table->string('nama', 40); // Sesuai Workbench (40)
-            $table->string('email', 50)->unique(); // Sesuai Workbench (50)
-            $table->string('password', 60); // Sesuai Workbench (60)
+            $table->increments('id_user'); // PK INT di Workbench
+            $table->string('nama', 40); 
+            $table->string('email', 50)->unique(); 
+            $table->string('password', 60); 
             
-            // ✅ INI YANG KURANG: Kolom penentu hak akses (Role)
-            $table->enum('role', ['superadmin', 'admin', 'pelanggan'])->default('pelanggan');
+            // ✅ UPDATE: Sesuaikan dengan ERD Workbench (id_role INT)
+            $table->integer('id_role')->default(3); // 1:Superadmin, 2:Admin, 3:Pelanggan
             
-            $table->string('google_id', 30)->nullable(); // Sesuai Workbench (30)
-            $table->string('no_telp', 15)->nullable(); // Sesuai Workbench (15)
-            $table->string('alamat', 255)->nullable(); // Rekomendasi Strict (255)
-            $table->string('foto_profil', 150)->nullable(); // Sesuai Workbench (150)
-            $table->rememberToken(); // Otomatis VARCHAR(100) sesuai Workbench
-            $table->timestamps(); // created_at & updated_at
+            $table->string('google_id', 30)->nullable(); 
+            $table->string('no_telp', 15)->nullable(); 
+            $table->string('alamat', 200)->nullable(); // Sesuaikan dengan VARCHAR(200) tadi
+            $table->string('foto_profil', 150)->nullable(); 
+            $table->rememberToken(); 
+            $table->timestamps(); 
         });
     }
 

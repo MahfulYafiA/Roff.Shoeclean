@@ -216,7 +216,7 @@
             title: judul,
             text: pesan,
             icon: 'success',
-            confirmButtonText: 'PAHAM, TERIMA KASIH',
+            confirmButtonText: 'OKE', // ✅ UBAH DISINI: Sudah jadi OKE
             buttonsStyling: true,
             showClass: {
                 popup: 'animate__animated animate__fadeInDown'

@@ -17,25 +17,24 @@ class Pembayaran extends Model
 
     /**
      * Kita aktifkan timestamps karena di file migrasi tr_pembayaran 
-     * sebelumnya Mas sudah menambahkan $table->timestamps();
+     * ada $table->timestamps();
      */
     public $timestamps = true; 
 
-    // Mendaftarkan kolom-kolom yang diizinkan untuk diisi
+    // ✅ UPDATE: Mendaftarkan kolom-kolom baru sesuai ERD Dosen
     protected $fillable = [
         'id_reservasi',
-        'metode_pembayaran',
-        'tanggal_bayar',
-        'status_pembayaran',
-        'bukti_pembayaran'
+        'metode_bayar', // Nama baru
+        'tanggal',      // Nama baru
+        'jumlah'        // Kolom baru
     ];
 
     /**
-     * Agar tanggal_bayar bisa kita format dengan ->format('d M Y') di view,
+     * ✅ UPDATE: Agar 'tanggal' bisa kita format dengan ->format('d M Y') di view,
      * kita tambahkan casting ke datetime.
      */
     protected $casts = [
-        'tanggal_bayar' => 'datetime',
+        'tanggal' => 'datetime',
     ];
 
     /**

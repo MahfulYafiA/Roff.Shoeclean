@@ -93,8 +93,13 @@
                 @php
                     $menus = [
                         ['url' => route('profil.index'), 'icon' => 'fa-id-card-clip', 'title' => 'Profil', 'desc' => 'Owner Settings', 'color' => 'text-emerald-400', 'bg' => 'bg-emerald-500/10'],
+                        
+                        // ✅ PERBAIKAN 1: Rute Omset diubah ke superadmin.laporan
                         ['url' => route('superadmin.laporan'), 'icon' => 'fa-chart-pie', 'title' => 'Omset', 'desc' => 'Revenue Analytics', 'color' => 'text-blue-400', 'bg' => 'bg-blue-500/10'],
+                        
                         ['url' => route('superadmin.users'), 'icon' => 'fa-users-gear', 'title' => 'User', 'desc' => 'Admin Controls', 'color' => 'text-purple-400', 'bg' => 'bg-purple-500/10'],
+                        
+                        // ✅ PERBAIKAN 2: Rute Layanan juga dipastikan mengarah ke superadmin
                         ['url' => route('superadmin.layanan.index'), 'icon' => 'fa-boxes-stacked', 'title' => 'Layanan', 'desc' => 'Price & List', 'color' => 'text-cyan-400', 'bg' => 'bg-cyan-500/10'],
                     ];
                 @endphp

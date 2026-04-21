@@ -67,6 +67,48 @@ class LayananController extends Controller
     }
 
     /**
+     * Update Foto Bagian "Tentang Kami" (Universal)
+     */
+    public function updateTentang(Request $request)
+    {
+        $request->validate([
+            'tentang_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ], [
+            'tentang_image.required' => 'Pilih foto terlebih dahulu.',
+            'tentang_image.image'    => 'File harus berupa gambar.',
+            'tentang_image.max'      => 'Ukuran foto maksimal 2MB.'
+        ]);
+
+        try {
+            if ($request->hasFile('tentang_image')) {
+                // 1. Cari data lama
+                $oldSetting = DB::table('ms_pengaturan')->where('key', 'tentang_image')->first();
+                
+                // 2. Hapus file lama jika ada
+                if ($oldSetting && $oldSetting->value) {
+                    Storage::disk('public')->delete($oldSetting->value);
+                }
+
+                // 3. Simpan foto baru ke folder 'banners'
+                $path = $request->file('tentang_image')->store('banners', 'public');
+
+                // 4. Simpan ke database
+                DB::table('ms_pengaturan')->updateOrInsert(
+                    ['key' => 'tentang_image'],
+                    [
+                        'value' => $path,
+                        'updated_at' => now()
+                    ]
+                );
+
+                return redirect()->back()->with('success', 'Gambar "Tentang Kami" berhasil diperbarui!');
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal update gambar: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Menyimpan layanan baru ke database (Admin & Superadmin)
      */
     public function store(Request $request)
@@ -94,6 +136,7 @@ class LayananController extends Controller
                 'harga'        => $request->harga,
                 'deskripsi'    => $request->deskripsi,
                 'gambar'       => $pathGambar,
+                'is_active'    => true, // Default aktif saat dibuat
             ]);
 
             return redirect()->back()->with('success', 'Layanan jasa baru berhasil ditambahkan!');
@@ -157,6 +200,25 @@ class LayananController extends Controller
             return redirect()->back()->with('success', 'Layanan berhasil dihapus dari daftar.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus layanan.');
+        }
+    }
+
+    /**
+     * 🚨 FUNGSI BARU: Toggle Aktif/Nonaktif Layanan
+     */
+    public function toggleStatus($id)
+    {
+        try {
+            $layanan = Layanan::findOrFail($id);
+            
+            // Membalikkan status boolean (jika true jadi false, jika false jadi true)
+            $layanan->is_active = !$layanan->is_active;
+            $layanan->save();
+
+            $statusText = $layanan->is_active ? 'diaktifkan' : 'dinonaktifkan';
+            return redirect()->back()->with('success', "Layanan {$layanan->nama_layanan} berhasil {$statusText}.");
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengubah status layanan: ' . $e->getMessage());
         }
     }
 }

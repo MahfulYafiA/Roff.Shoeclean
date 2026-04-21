@@ -20,7 +20,6 @@
             overflow-x: hidden; 
         }
         
-        /* --- BACKGROUND PREMIUM GLOBAL --- */
         .noise { 
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
             pointer-events: none; z-index: 9999; opacity: 0.035; 
@@ -38,7 +37,7 @@
             animation: floatOrb 15s infinite alternate ease-in-out;
         }
         .orb-1 { width: 600px; height: 600px; background: rgba(37, 99, 235, 0.15); top: -100px; left: -100px; }
-        .orb-2 { width: 700px; height: 700px; background: rgba(56, 189, 248, 0.12); bottom: -200px; right: -100px; animation-delay: -5s; }
+        .orb-2 { width: 700px; height: 700px; background: rgba(6, 182, 212, 0.12); bottom: -200px; right: -100px; animation-delay: -5s; }
         .orb-3 { width: 500px; height: 500px; background: rgba(139, 92, 246, 0.1); top: 40%; left: 30%; animation-delay: -10s; }
         
         @keyframes floatOrb {
@@ -46,23 +45,19 @@
             100% { transform: translate(100px, 80px) scale(1.2) rotate(10deg); }
         }
 
-        /* --- GLASSMORPHISM --- */
         .glass-nav { 
             background: rgba(255, 255, 255, 0.65); 
             backdrop-filter: blur(28px); 
-            -webkit-backdrop-filter: blur(28px); 
             border-bottom: 1px solid rgba(255, 255, 255, 0.5); 
         }
         
         .glass-card {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5));
             backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
             border: 1px solid rgba(255, 255, 255, 0.9);
             box-shadow: 0 16px 48px -12px rgba(31, 38, 135, 0.08);
         }
 
-        /* Custom Input Radio Behavior */
         input[type="radio"]:checked + div { 
             border-color: #2563eb; 
             background-color: rgba(37, 99, 235, 0.05); 
@@ -80,47 +75,41 @@
 </head>
 <body class="antialiased selection:bg-blue-600 selection:text-white flex flex-col h-screen overflow-hidden relative">
 
-    {{-- BACKGROUND ELEMENTS --}}
     <div class="noise"></div>
     <div class="bg-mesh"></div>
     <div class="orb-1"></div>
     <div class="orb-2"></div>
     <div class="orb-3"></div>
 
-    {{-- TOP NAVIGATION --}}
     <header class="glass-nav px-6 md:px-12 py-4 flex justify-between items-center shrink-0 z-40 relative">
         <div class="flex items-center gap-3 md:gap-4">
-            <a href="{{ url('/dashboard') }}" class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center shadow-sm group active:scale-95" title="Kembali ke Dasbor">
+            <a href="{{ url('/dashboard') }}" class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center shadow-sm group active:scale-95">
                 <i class="fa-solid fa-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
             </a>
-            
             <h1 class="block font-black text-xl md:text-2xl uppercase tracking-tighter italic text-slate-900 leading-tight">
                 ROFF.<span class="text-blue-600">MEMBER</span>
             </h1>
         </div>
-        
         <div class="text-right shrink-0">
             <p class="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 leading-none mb-1">Pemesanan</p>
             <p class="font-black text-xs md:text-sm text-slate-900 uppercase tracking-widest">Sesi Baru</p>
         </div>
     </header>
 
-    {{-- MAIN SCROLLABLE CONTENT --}}
     <main class="flex-1 overflow-y-auto custom-scroll w-full relative z-10 p-4 md:p-6 lg:p-10">
         <div class="max-w-5xl mx-auto">
             
             <div class="mb-8 md:mb-10 text-center px-2">
                 <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-4 py-1.5 rounded-full mb-4">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse shadow-[0_0_10px_rgba(37,99,235,0.5)]"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
                     <p class="text-[8px] md:text-[9px] font-black text-blue-600 uppercase tracking-[0.4em]">Order & Booking</p>
                 </div>
                 <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter mb-2 uppercase italic leading-none">
                     Form <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Reservasi.</span>
                 </h1>
-                <p class="text-slate-500 font-medium text-xs md:text-sm mt-2">Pilih jenis layanan dan atur detail pesanan sepatu Anda.</p>
+                <p class="text-slate-500 font-medium text-xs md:text-sm mt-2">Pilih layanan dan atur kombinasi pengiriman sesuai keinginan Anda.</p>
             </div>
 
-            {{-- 🚨 NOTIFIKASI ERROR VALIDASI 🚨 --}}
             @if ($errors->any())
                 <div class="mb-8 md:mb-10 bg-red-50 border border-red-200 text-red-600 p-6 rounded-[2rem] shadow-sm animate-pulse">
                     <div class="flex items-center gap-3 mb-2">
@@ -135,8 +124,7 @@
                 </div>
             @endif
 
-            {{-- Form Start --}}
-            <form id="formReservasi" action="{{ route('reservasi.store') }}" method="POST" enctype="multipart/form-data" class="glass-card rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 lg:p-14 space-y-10 md:space-y-12">
+            <form id="formReservasi" action="{{ route('reservasi.store') }}" method="POST" class="glass-card rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 lg:p-14 space-y-10 md:space-y-12">
                 @csrf
 
                 {{-- STEP 1: PILIH LAYANAN --}}
@@ -154,7 +142,7 @@
                                     <div class="flex justify-between items-start mb-3 gap-2">
                                         <h4 class="font-black text-lg md:text-xl text-slate-800 italic tracking-tight leading-tight transition-colors">{{ $l->nama_layanan }}</h4>
                                         <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center mt-1 group-hover:border-blue-400 bg-white shrink-0">
-                                            <div class="radio-dot w-2.5 h-2.5 bg-blue-600 rounded-full opacity-0 transform scale-0 transition-all duration-300 shadow-[0_0_8px_rgba(37,99,235,0.5)]"></div>
+                                            <div class="radio-dot w-2.5 h-2.5 bg-blue-600 rounded-full opacity-0 transform scale-0 transition-all duration-300"></div>
                                         </div>
                                     </div>
                                     <p class="text-[10px] md:text-[11px] text-slate-500 font-medium mb-5 leading-relaxed line-clamp-3">{{ $l->deskripsi }}</p>
@@ -166,32 +154,32 @@
                     </div>
                 </div>
 
-                {{-- STEP 2: METODE PENYERAHAN SEPATU --}}
+                {{-- STEP 2A: PENYERAHAN SEPATU --}}
                 <div>
                     <h3 class="font-black text-base md:text-lg uppercase tracking-widest mb-6 flex items-center gap-3 text-slate-900">
-                        <span class="bg-blue-600 text-white w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] md:text-xs shadow-lg shadow-blue-500/30">2</span> 
-                        Metode Penyerahan
+                        <span class="bg-blue-600 text-white w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] md:text-xs shadow-lg shadow-blue-500/30">2A</span> 
+                        Serahkan Sepatu Ke Toko
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
                         <label class="relative cursor-pointer group">
-                            <input type="radio" name="metode_layanan" value="Drop-off" class="sr-only delivery-radio" {{ old('metode_layanan', 'Drop-off') == 'Drop-off' ? 'checked' : '' }} required>
+                            <input type="radio" name="metode_masuk" value="Antar Sendiri" class="sr-only delivery-in-radio" {{ old('metode_masuk', 'Antar Sendiri') == 'Antar Sendiri' ? 'checked' : '' }} required>
                             <div class="border-2 border-slate-200 bg-white/60 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 hover:border-blue-400 hover:bg-white transition-all h-full">
                                 <div class="flex justify-between items-start mb-2">
-                                    <h4 class="font-black text-lg md:text-xl text-slate-800 italic tracking-tight transition-colors">Antar ke Toko</h4>
+                                    <h4 class="font-black text-lg md:text-xl text-slate-800 italic tracking-tight transition-colors">Antar Sendiri</h4>
                                     <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center group-hover:border-blue-400 bg-white shrink-0">
-                                        <div class="radio-dot w-2.5 h-2.5 bg-blue-600 rounded-full opacity-0 transform scale-0 transition-all duration-300 shadow-[0_0_8px_rgba(37,99,235,0.5)]"></div>
+                                        <div class="radio-dot w-2.5 h-2.5 bg-blue-600 rounded-full opacity-0 transform scale-0 transition-all duration-300"></div>
                                     </div>
                                 </div>
-                                <p class="text-[10px] md:text-[11px] text-slate-500 font-medium">Bawa langsung sepatu kotor Anda ke bengkel kami.</p>
+                                <p class="text-[10px] md:text-[11px] text-slate-500 font-medium">Bawa langsung sepatu kotor Anda ke workshop kami.</p>
                             </div>
                         </label>
                         <label class="relative cursor-pointer group">
-                            <input type="radio" name="metode_layanan" value="Pick-up" class="sr-only delivery-radio" {{ old('metode_layanan') == 'Pick-up' ? 'checked' : '' }}>
+                            <input type="radio" name="metode_masuk" value="Jemput Kurir" class="sr-only delivery-in-radio" {{ old('metode_masuk') == 'Jemput Kurir' ? 'checked' : '' }}>
                             <div class="border-2 border-slate-200 bg-white/60 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 hover:border-blue-400 hover:bg-white transition-all h-full">
                                 <div class="flex justify-between items-start mb-2">
                                     <h4 class="font-black text-lg md:text-xl text-slate-800 italic tracking-tight transition-colors">Dijemput Kurir</h4>
                                     <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center group-hover:border-blue-400 bg-white shrink-0">
-                                        <div class="radio-dot w-2.5 h-2.5 bg-blue-600 rounded-full opacity-0 transform scale-0 transition-all duration-300 shadow-[0_0_8px_rgba(37,99,235,0.5)]"></div>
+                                        <div class="radio-dot w-2.5 h-2.5 bg-blue-600 rounded-full opacity-0 transform scale-0 transition-all duration-300"></div>
                                     </div>
                                 </div>
                                 <p class="text-[10px] md:text-[11px] text-slate-500 font-medium">Tim kurir kami akan mengambil sepatu ke lokasi Anda.</p>
@@ -200,23 +188,58 @@
                     </div>
                 </div>
 
-                {{-- STEP 3: DETAIL & ALAMAT --}}
+                {{-- STEP 2B: PENGAMBILAN SEPATU --}}
+                <div>
+                    <h3 class="font-black text-base md:text-lg uppercase tracking-widest mb-6 flex items-center gap-3 text-slate-900">
+                        <span class="bg-blue-600 text-white w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] md:text-xs shadow-lg shadow-blue-500/30">2B</span> 
+                        Pengambilan Setelah Selesai
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="metode_keluar" value="Ambil Sendiri" class="sr-only delivery-out-radio" {{ old('metode_keluar', 'Ambil Sendiri') == 'Ambil Sendiri' ? 'checked' : '' }} required>
+                            <div class="border-2 border-slate-200 bg-white/60 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 hover:border-blue-400 hover:bg-white transition-all h-full">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-black text-lg md:text-xl text-slate-800 italic tracking-tight transition-colors">Ambil Sendiri</h4>
+                                    <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center group-hover:border-blue-400 bg-white shrink-0">
+                                        <div class="radio-dot w-2.5 h-2.5 bg-blue-600 rounded-full opacity-0 transform scale-0 transition-all duration-300"></div>
+                                    </div>
+                                </div>
+                                <p class="text-[10px] md:text-[11px] text-slate-500 font-medium">Ambil sepatu Anda di toko kami jika sudah bersih.</p>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer group">
+                            <input type="radio" name="metode_keluar" value="Antar Kurir" class="sr-only delivery-out-radio" {{ old('metode_keluar') == 'Antar Kurir' ? 'checked' : '' }}>
+                            <div class="border-2 border-slate-200 bg-white/60 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 hover:border-blue-400 hover:bg-white transition-all h-full">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-black text-lg md:text-xl text-slate-800 italic tracking-tight transition-colors">Diantar Kurir</h4>
+                                    <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center group-hover:border-blue-400 bg-white shrink-0">
+                                        <div class="radio-dot w-2.5 h-2.5 bg-blue-600 rounded-full opacity-0 transform scale-0 transition-all duration-300"></div>
+                                    </div>
+                                </div>
+                                <p class="text-[10px] md:text-[11px] text-slate-500 font-medium">Kurir kami akan mengantar kembali sepatu ke rumah Anda.</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                {{-- STEP 3: DETAIL --}}
                 <div>
                     <h3 class="font-black text-base md:text-lg uppercase tracking-widest mb-6 flex items-center gap-3 text-slate-900">
                         <span class="bg-blue-600 text-white w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] md:text-xs shadow-lg shadow-blue-500/30">3</span> 
-                        Detail Pesanan
+                        Detail Lokasi & Pesanan
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
                         <div>
                             <label class="block text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 ml-2">Jumlah Sepatu (Pasang)</label>
                             <input type="number" id="jumlah_sepatu" name="jumlah_sepatu" min="1" value="{{ old('jumlah_sepatu', 1) }}" required 
-                                   class="w-full bg-white border border-slate-200 text-slate-900 text-lg rounded-[1.5rem] p-4 md:p-5 font-black focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400 shadow-sm">
+                                   class="w-full bg-white border border-slate-200 text-slate-900 text-lg rounded-[1.5rem] p-4 md:p-5 font-black focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm">
                         </div>
                         
-                        <div id="areaAlamat" class="hidden transition-all duration-300">
-                            <label class="block text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] mb-3 ml-2">Alamat Penjemputan</label>
-                            <textarea name="alamat_jemput" id="alamat_jemput" rows="2" placeholder="Masukkan alamat lengkap penjemputan..." 
-                                      class="w-full bg-blue-50 border border-blue-200 text-slate-900 text-sm rounded-[1.5rem] p-4 md:p-5 font-medium focus:ring-4 focus:ring-blue-500/20 focus:border-blue-600 outline-none resize-none transition-all shadow-sm placeholder:text-slate-400">{{ old('alamat_jemput') }}</textarea>
+                        <div id="areaAlamat" class="hidden transition-all duration-500">
+                            <label class="block text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] mb-3 ml-2">Alamat Lengkap</label>
+                            <textarea name="alamat_jemput" id="alamat_jemput" rows="2" placeholder="Masukkan alamat lengkap untuk keperluan kurir..." 
+                                      class="w-full bg-blue-50 border border-blue-200 text-slate-900 text-sm rounded-[1.5rem] p-4 md:p-5 font-medium focus:ring-4 focus:ring-blue-500/20 focus:border-blue-600 outline-none resize-none transition-all shadow-sm">{{ old('alamat_jemput') }}</textarea>
+                            <p class="text-[9px] text-slate-400 mt-2 ml-2 italic">*Diisi jika Anda memilih layanan antar/jemput kurir.</p>
                         </div>
                     </div>
                 </div>
@@ -227,91 +250,37 @@
                         <span class="bg-blue-600 text-white w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] md:text-xs shadow-lg shadow-blue-500/30">4</span> 
                         Metode Pembayaran
                     </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+                    
+                    <div class="grid grid-cols-1">
                         <label class="relative cursor-pointer group">
-                            <input type="radio" name="metode_pembayaran" value="Bayar di Toko" class="sr-only payment-radio" {{ old('metode_pembayaran') == 'Bayar di Toko' ? 'checked' : '' }} required>
+                            <input type="radio" name="metode_pembayaran" value="Payment Gateway" class="sr-only payment-radio" checked required>
                             <div class="border-2 border-slate-200 bg-white/60 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 hover:border-blue-400 hover:bg-white transition-all h-full">
                                 <div class="flex justify-between items-start mb-2">
-                                    <h4 class="font-black text-lg md:text-xl text-slate-800 italic tracking-tight transition-colors">Bayar di Toko</h4>
+                                    <h4 class="font-black text-lg md:text-xl text-slate-800 italic tracking-tight transition-colors">QRIS / Bank (Otomatis)</h4>
                                     <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center group-hover:border-blue-400 bg-white shrink-0">
-                                        <div class="radio-dot w-2.5 h-2.5 bg-blue-600 rounded-full opacity-0 transform scale-0 transition-all duration-300 shadow-[0_0_8px_rgba(37,99,235,0.5)]"></div>
+                                        <div class="radio-dot w-2.5 h-2.5 bg-blue-600 rounded-full opacity-0 transform scale-0 transition-all duration-300"></div>
                                     </div>
                                 </div>
-                                <p class="text-[10px] md:text-[11px] text-slate-500 font-medium">Tunai/QRIS saat serah-terima sepatu di bengkel.</p>
-                            </div>
-                        </label>
-                        <label class="relative cursor-pointer group">
-                            <input type="radio" name="metode_pembayaran" value="Transfer Bank" class="sr-only payment-radio" {{ old('metode_pembayaran') == 'Transfer Bank' ? 'checked' : '' }}>
-                            <div class="border-2 border-slate-200 bg-white/60 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 hover:border-blue-400 hover:bg-white transition-all h-full">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h4 class="font-black text-lg md:text-xl text-slate-800 italic tracking-tight transition-colors">Transfer / E-Wallet</h4>
-                                    <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center group-hover:border-blue-400 bg-white shrink-0">
-                                        <div class="radio-dot w-2.5 h-2.5 bg-blue-600 rounded-full opacity-0 transform scale-0 transition-all duration-300 shadow-[0_0_8px_rgba(37,99,235,0.5)]"></div>
-                                    </div>
-                                </div>
-                                <p class="text-[10px] md:text-[11px] text-slate-500 font-medium">Transfer via BRI atau DANA. Wajib unggah bukti.</p>
+                                <p class="text-[10px] md:text-[11px] text-slate-500 font-medium">Pembayaran instan via QRIS, E-Wallet, atau Virtual Account (Midtrans).</p>
                             </div>
                         </label>
                     </div>
 
-                    {{-- AREA UPLOAD TRANSFER --}}
-                    <div id="areaTransfer" class="hidden mt-6 bg-blue-50/80 p-6 md:p-8 rounded-[2rem] border border-blue-100 transition-all">
-                        <p class="text-[10px] font-black text-blue-800 uppercase tracking-widest mb-4 ml-2">Tujuan Transfer & Pembayaran</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <div class="bg-white p-5 rounded-[1.5rem] border border-blue-200 shadow-sm relative overflow-hidden">
-                                <div class="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -z-10"></div>
-                                <p class="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mb-1 flex items-center gap-2">
-                                    <i class="fa-solid fa-building-columns"></i> Bank BRI
-                                </p>
-                                <p class="text-lg md:text-xl font-black text-slate-800 tracking-wider mt-2 font-mono">1234 5678 9012</p>
-                                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">a.n Roff Shoeclean</p>
-                            </div>
-                            <div class="bg-white p-5 rounded-[1.5rem] border border-cyan-200 shadow-sm relative overflow-hidden">
-                                <div class="absolute top-0 right-0 w-16 h-16 bg-cyan-50 rounded-bl-full -z-10"></div>
-                                <p class="text-[10px] font-black text-cyan-600 uppercase tracking-[0.2em] mb-1 flex items-center gap-2">
-                                    <i class="fa-solid fa-wallet"></i> E-Wallet DANA
-                                </p>
-                                <p class="text-lg md:text-xl font-black text-slate-800 tracking-wider mt-2 font-mono">0812 3456 7890</p>
-                                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">a.n Roff Shoeclean</p>
-                            </div>
-                        </div>
-                        <hr class="border-blue-200/60 mb-6 border-dashed">
-                        <label class="block text-[10px] font-black text-blue-800 uppercase tracking-widest mb-3 ml-2">Upload Bukti Transfer</label>
-                        <input type="file" name="bukti_pembayaran" id="bukti_pembayaran" accept="image/jpeg, image/png, image/jpg" 
-                               class="block w-full text-xs text-slate-600 bg-white border border-blue-200 rounded-[1.2rem] file:bg-blue-600 file:text-white file:border-0 file:px-6 file:py-4 file:font-black file:uppercase file:text-[10px] file:tracking-widest cursor-pointer hover:file:bg-blue-700 transition-all shadow-sm outline-none">
+                    <div class="mt-6 bg-cyan-50/80 p-6 md:p-8 rounded-[2rem] border border-cyan-100 text-center">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Midtrans.png" class="h-6 md:h-8 mx-auto mb-4" alt="Midtrans">
+                        <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs md:text-sm mb-2">Checkout Otomatis Berbasis Snap</h4>
+                        <p class="text-[10px] md:text-[11px] text-slate-500 font-medium max-w-lg mx-auto">Status pembayaran akan otomatis diverifikasi sistem setelah Anda menyelesaikan transaksi di jendela Midtrans.</p>
                     </div>
-
-                    {{-- AREA INFO BAYAR DI TOKO --}}
-                    <div id="areaBayarToko" class="hidden mt-6 bg-slate-50 p-6 md:p-8 rounded-[2rem] border border-slate-200 transition-all">
-                        <div class="flex flex-col md:flex-row items-start gap-5">
-                            <div class="w-12 h-12 rounded-full bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm text-blue-600">
-                                <i class="fa-solid fa-store text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-black text-slate-900 text-sm md:text-base uppercase tracking-widest mb-2">Panduan Pembayaran Kasir</h4>
-                                <p class="text-[11px] md:text-xs text-slate-500 leading-relaxed font-medium">
-                                    Selesaikan reservasi ini, lalu selesaikan pembayaran secara Tunai (Cash) atau Scan QRIS saat serah terima sepatu di kasir kami.
-                                </p>
-                                <div class="mt-5 p-4 bg-white rounded-2xl border border-slate-200 shadow-sm inline-block">
-                                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                                        <i class="fa-solid fa-location-dot text-blue-600"></i> Lokasi Bengkel Roff Shoeclean:
-                                    </p>
-                                    <p class="text-xs font-black text-slate-800 tracking-wide mt-1">Ds. Purworejo Rt.05 Rw.01, Kec. Geger, Kab. Madiun</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
 
                 {{-- TOTAL & SUBMIT --}}
                 <div class="bg-blue-50/50 border border-blue-100 p-8 md:p-10 rounded-[2rem] flex flex-col md:flex-row justify-between items-center gap-6 mt-6 shadow-sm">
                     <div class="text-center md:text-left">
                         <p class="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1">Total Tagihan</p>
-                        <h2 class="text-4xl md:text-5xl font-black text-blue-600 italic tracking-tighter drop-shadow-sm" id="totalTagihan">Rp 0</h2>
+                        <h2 class="text-4xl md:text-5xl font-black text-blue-600 italic tracking-tighter" id="totalTagihan">Rp 0</h2>
                     </div>
-                    <button type="submit" id="btnSubmit" class="w-full md:w-auto px-12 lg:px-16 py-5 lg:py-6 bg-blue-600 text-white font-black uppercase text-[10px] md:text-xs tracking-[0.3em] rounded-[1.5rem] shadow-lg shadow-blue-500/30 active:scale-95 transition-all hover:bg-slate-900 hover:shadow-slate-900/30">
-                        Konfirmasi Reservasi
+                    <button type="submit" id="btnSubmit" class="w-full md:w-auto px-12 lg:px-16 py-5 lg:py-6 bg-blue-600 text-white font-black uppercase text-[10px] md:text-xs tracking-[0.3em] rounded-[1.5rem] shadow-lg shadow-blue-500/30 active:scale-95 transition-all hover:bg-slate-900 hover:shadow-slate-900/30 flex items-center justify-center gap-3">
+                        Lanjut Checkout <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
             </form>
@@ -324,22 +293,17 @@
             const btnSubmit = document.getElementById('btnSubmit');
             const jumlahInput = document.getElementById('jumlah_sepatu');
             const totalText = document.getElementById('totalTagihan');
-            
-            const areaTransfer = document.getElementById('areaTransfer');
-            const areaBayarToko = document.getElementById('areaBayarToko');
-            const fileInput = document.getElementById('bukti_pembayaran');
-            
             const areaAlamat = document.getElementById('areaAlamat');
             const inputAlamat = document.getElementById('alamat_jemput');
 
-            const layananRadios = document.querySelectorAll('input[name="id_layanan"]');
-            const paymentRadios = document.querySelectorAll('input[name="metode_pembayaran"]');
-            const deliveryRadios = document.querySelectorAll('input[name="metode_layanan"]');
+            const layananRadios = document.querySelectorAll('.layanan-radio');
+            const inRadios = document.querySelectorAll('.delivery-in-radio');
+            const outRadios = document.querySelectorAll('.delivery-out-radio');
 
             function hitungTotal() {
                 let harga = 0;
                 let jumlah = parseInt(jumlahInput.value) || 1;
-                const selectedLayanan = document.querySelector('input[name="id_layanan"]:checked');
+                const selectedLayanan = document.querySelector('.layanan-radio:checked');
                 
                 if (selectedLayanan) {
                     harga = parseInt(selectedLayanan.getAttribute('data-harga'));
@@ -350,8 +314,14 @@
             }
 
             function toggleAlamatArea() {
-                const selectedDelivery = document.querySelector('input[name="metode_layanan"]:checked');
-                if (selectedDelivery && selectedDelivery.value === 'Pick-up') {
+                const selectedIn = document.querySelector('.delivery-in-radio:checked');
+                const selectedOut = document.querySelector('.delivery-out-radio:checked');
+                
+                // Area alamat muncul jika pilih Jemput Kurir (masuk) ATAU Antar Kurir (keluar)
+                const isNeedKurir = (selectedIn && selectedIn.value === 'Jemput Kurir') || 
+                                    (selectedOut && selectedOut.value === 'Antar Kurir');
+
+                if (isNeedKurir) {
                     areaAlamat.classList.remove('hidden');
                     inputAlamat.required = true;
                 } else {
@@ -360,43 +330,22 @@
                 }
             }
 
-            function toggleUploadArea() {
-                const selectedPayment = document.querySelector('input[name="metode_pembayaran"]:checked');
-                if (selectedPayment && selectedPayment.value === 'Transfer Bank') {
-                    areaTransfer.classList.remove('hidden');
-                    areaBayarToko.classList.add('hidden');
-                    fileInput.required = true;
-                } else if (selectedPayment && selectedPayment.value === 'Bayar di Toko') {
-                    areaBayarToko.classList.remove('hidden');
-                    areaTransfer.classList.add('hidden');
-                    fileInput.required = false;
-                } else {
-                    areaTransfer.classList.add('hidden');
-                    areaBayarToko.classList.add('hidden');
-                    fileInput.required = false;
-                }
-            }
-
-            // Ganti tombol saat loading agar tidak di-klik 2x
             form.addEventListener('submit', function() {
                 setTimeout(() => {
                     btnSubmit.disabled = true;
-                    btnSubmit.innerText = 'MEMPROSES...';
+                    btnSubmit.innerHTML = 'MEMPROSES... <i class="fa-solid fa-circle-notch fa-spin ml-2"></i>';
                     btnSubmit.classList.replace('bg-blue-600', 'bg-slate-400');
-                    btnSubmit.classList.replace('hover:bg-slate-900', 'hover:bg-slate-400');
                     btnSubmit.classList.remove('shadow-blue-500/30');
                 }, 50);
             });
 
             layananRadios.forEach(radio => radio.addEventListener('change', hitungTotal));
             jumlahInput.addEventListener('input', hitungTotal);
-            paymentRadios.forEach(radio => radio.addEventListener('change', toggleUploadArea));
-            deliveryRadios.forEach(radio => radio.addEventListener('change', toggleAlamatArea));
+            inRadios.forEach(radio => radio.addEventListener('change', toggleAlamatArea));
+            outRadios.forEach(radio => radio.addEventListener('change', toggleAlamatArea));
             
-            // Panggil sekali saat dimuat agar area sesuai dengan nilai old()
             hitungTotal();
             toggleAlamatArea();
-            toggleUploadArea();
         });
     </script>
 </body>
