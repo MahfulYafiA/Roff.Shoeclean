@@ -75,7 +75,7 @@
             </h1>
         </div>
         <div class="hidden sm:block text-right">
-            <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Secure Payment</p>
+            <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Secure Payment Gateway</p>
         </div>
     </header>
 
@@ -85,10 +85,10 @@
             <div class="mb-10 lg:mb-16 text-center">
                 <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-4 py-1.5 rounded-full mb-4 lg:mb-6">
                     <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
-                    <p class="text-[8px] md:text-[9px] lg:text-[10px] font-black text-blue-600 uppercase tracking-[0.4em]">Konfirmasi Pembayaran</p>
+                    <p class="text-[8px] md:text-[9px] lg:text-[10px] font-black text-blue-600 uppercase tracking-[0.4em]">Payment Confirmation</p>
                 </div>
                 <h2 class="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Selesaikan <span class="text-blue-600">Pesanan.</span></h2>
-                <p class="text-slate-500 font-medium text-xs md:text-sm lg:text-base mt-4 lg:mt-6">Lanjutkan proses pembayaran menggunakan QRIS atau Virtual Account pilihan Anda.</p>
+                <p class="text-slate-500 font-medium text-xs md:text-sm lg:text-base mt-4 lg:mt-6">Data reservasi Anda telah kami amankan. Silakan lanjut ke gerbang pembayaran.</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
@@ -97,7 +97,7 @@
                 <div class="lg:col-span-6 space-y-6 flex flex-col h-full">
                     <div class="glass-card rounded-[2.5rem] lg:rounded-[3rem] p-8 lg:p-12 border-blue-100 relative overflow-hidden flex-1 flex flex-col justify-center">
                         <div class="absolute top-0 right-0 w-32 h-32 lg:w-48 lg:h-48 bg-blue-50 rounded-bl-full -z-10"></div>
-                        <p class="text-[10px] lg:text-xs font-black text-slate-400 uppercase tracking-widest mb-2 lg:mb-4">Total yang harus dibayar</p>
+                        <p class="text-[10px] lg:text-xs font-black text-slate-400 uppercase tracking-widest mb-2 lg:mb-4">Total Tagihan Anda</p>
                         <h3 class="text-4xl md:text-5xl lg:text-6xl font-black text-blue-600 italic tracking-tighter">Rp {{ number_format($reservasi->total_harga, 0, ',', '.') }}</h3>
                         
                         <div class="mt-8 lg:mt-12 pt-8 lg:pt-10 border-t border-slate-200/60 space-y-4 lg:space-y-6">
@@ -106,9 +106,17 @@
                                 <span class="text-slate-900 bg-slate-100 px-3 py-1 rounded-md">#ORD-{{ $reservasi->id_reservasi }}</span>
                             </div>
                             <div class="flex justify-between items-center text-[11px] lg:text-[13px] font-bold uppercase tracking-widest">
-                                <span class="text-slate-400">Jumlah Sepatu</span>
-                                {{-- ✅ UPDATE: Memanggil data jumlah sepatu dari tabel tr_detail_reservasi --}}
-                                <span class="text-slate-900">{{ $reservasi->detail->first()->jumlah ?? 1 }} Pasang</span>
+                                <span class="text-slate-400">Total Muatan</span>
+                                {{-- ✅ UPDATE: Menghitung total sepatu dari semua rincian detail --}}
+                                <span class="text-slate-900 font-black italic">{{ $reservasi->detail->sum('jumlah') }} Pasang Sepatu</span>
+                            </div>
+                            <div class="flex justify-between items-start text-[11px] lg:text-[13px] font-bold uppercase tracking-widest">
+                                <span class="text-slate-400 shrink-0">Daftar Jasa</span>
+                                <div class="text-right flex flex-col gap-1">
+                                    @foreach($reservasi->detail as $det)
+                                        <span class="text-slate-700 text-[10px] lg:text-[12px]">{{ $det->layanan->nama_layanan }} ({{ $det->jumlah }}x)</span>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -118,24 +126,21 @@
                 <div class="lg:col-span-6 flex flex-col h-full">
                     <div class="glass-card rounded-[2.5rem] lg:rounded-[3rem] p-8 lg:p-14 h-full flex flex-col justify-center items-center text-center border-slate-200">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Midtrans.png" class="h-10 lg:h-14 mb-8 drop-shadow-sm" alt="Midtrans">
-                        <h2 class="text-2xl lg:text-3xl font-black text-slate-900 mb-3 uppercase italic tracking-tight">QRIS & Virtual Account</h2>
+                        <h2 class="text-2xl lg:text-3xl font-black text-slate-900 mb-3 uppercase italic tracking-tight">Checkout Instan</h2>
                         <p class="text-[11px] lg:text-sm text-slate-500 mb-10 font-medium leading-relaxed max-w-sm">
-                            Sistem akan otomatis mendeteksi pembayaran Anda seketika setelah transaksi berhasil di jendela Midtrans.
+                            Klik tombol di bawah untuk membuka jendela pembayaran aman Midtrans. Kami mendukung QRIS, GoPay, dan Transfer Bank.
                         </p>
                         
                         <button id="pay-button" class="w-full max-w-md bg-blue-600 text-white py-5 lg:py-6 rounded-[1.5rem] lg:rounded-[2rem] font-black uppercase text-xs lg:text-sm tracking-[0.2em] shadow-2xl shadow-blue-500/30 hover:bg-slate-900 hover:shadow-slate-900/20 hover:-translate-y-1 transition-all duration-300 active:scale-95 flex items-center justify-center gap-3">
-                            Bayar Sekarang <i class="fa-solid fa-qrcode text-xl"></i>
+                            Lanjut ke Pembayaran <i class="fa-solid fa-chevron-right text-sm"></i>
                         </button>
                     </div>
                 </div>
 
             </div>
 
-            {{-- Footer Link --}}
             <div class="text-center mt-12 lg:mt-16 mb-6">
-                <a href="{{ route('reservasi.riwayat') }}" class="text-[10px] lg:text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-red-600 transition-colors bg-white px-6 py-3 rounded-full shadow-sm border border-slate-100">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Riwayat
-                </a>
+                <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-[0.5em] text-slate-300">© 2026 ROFF.SHOECLEAN SECURE SYSTEM</p>
             </div>
         </div>
     </main>
@@ -144,33 +149,27 @@
     <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
     <script type="text/javascript">
         document.getElementById('pay-button').onclick = function () {
-            // Loading State
             const btn = document.getElementById('pay-button');
             const originalText = btn.innerHTML;
-            btn.innerHTML = 'MEMPROSES... <i class="fa-solid fa-circle-notch fa-spin ml-2"></i>';
-            btn.classList.replace('bg-blue-600', 'bg-slate-400');
-            btn.classList.remove('shadow-blue-500/30', 'hover:-translate-y-1', 'hover:bg-slate-900');
+            
+            btn.innerHTML = 'MENGHUBUNGKAN... <i class="fa-solid fa-circle-notch fa-spin ml-2"></i>';
+            btn.disabled = true;
 
             snap.pay('{{ $snapToken }}', {
                 onSuccess: function (result) { 
                     window.location.href = "{{ route('reservasi.riwayat') }}"; 
                 },
                 onPending: function (result) { 
-                    alert("Pembayaran tertunda, silakan selesaikan instruksi pembayaran."); 
-                    btn.innerHTML = originalText;
-                    btn.classList.replace('bg-slate-400', 'bg-blue-600');
-                    btn.classList.add('shadow-blue-500/30', 'hover:-translate-y-1', 'hover:bg-slate-900');
+                    window.location.href = "{{ route('reservasi.riwayat') }}";
                 },
                 onError: function (result) { 
-                    alert("Pembayaran gagal atau dibatalkan."); 
+                    alert("Terjadi kesalahan pada pembayaran."); 
                     btn.innerHTML = originalText;
-                    btn.classList.replace('bg-slate-400', 'bg-blue-600');
-                    btn.classList.add('shadow-blue-500/30', 'hover:-translate-y-1', 'hover:bg-slate-900');
+                    btn.disabled = false;
                 },
                 onClose: function () {
                     btn.innerHTML = originalText;
-                    btn.classList.replace('bg-slate-400', 'bg-blue-600');
-                    btn.classList.add('shadow-blue-500/30', 'hover:-translate-y-1', 'hover:bg-slate-900');
+                    btn.disabled = false;
                 }
             });
         };
