@@ -83,7 +83,7 @@
                         Selamat Datang, <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200 italic">Owner!</span>
                     </h1>
                     <p class="text-slate-400 font-medium text-sm md:text-base max-w-3xl leading-relaxed mb-0">
-                        Akses penuh operasional ROFF.SHOECLEAN. Monitor performa bisnis, audit transaksi harian, dan kendalikan seluruh strategi dari satu dasbor master.
+                        Akses penuh operasional ROFF.SHOECLEAN, Monitor performa bisnis, audit transaksi harian, dan kendalikan seluruh strategi dari satu dasbor master
                     </p>
                 </div>
             </div>

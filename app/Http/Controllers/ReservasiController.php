@@ -22,7 +22,8 @@ class ReservasiController extends Controller
      */
     public function create()
     {
-        $layanans = Layanan::where('is_active', true)->get(); 
+        // 🔥 UPDATE DISINI: Ubah 'Tersedia' menjadi 'Aktif' sesuai ENUM database kita
+        $layanans = Layanan::where('status', 'Aktif')->get();
         $user = auth()->user();
         
         return view('pelanggan.reservasi.create', compact('layanans', 'user'));
@@ -55,13 +56,13 @@ class ReservasiController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validasi Input (Metode pembayaran otomatis di-set di form)
+        // 1. Validasi Input (Sudah diubah ke alamat_lengkap)
         $request->validate([
             'layanan'           => 'required|array',
             'metode_masuk'      => 'required|in:Antar Sendiri,Jemput Kurir',
             'metode_keluar'     => 'required|in:Ambil Sendiri,Antar Kurir',
             'metode_pembayaran' => 'required',
-            'alamat_jemput'     => 'nullable|string|max:255',
+            'alamat_lengkap'    => 'nullable|string|max:255', // UPDATE DISINI
         ]);
 
         DB::beginTransaction();
@@ -93,9 +94,9 @@ class ReservasiController extends Controller
                 return back()->withErrors(['Mohon tentukan jumlah pasang sepatu minimal 1 pada layanan yang dipilih.'])->withInput();
             }
 
-            // Update alamat jika user mengisi alamat baru di form
-            if ($request->alamat_jemput) {
-                User::where('id_user', $user->id_user)->update(['alamat' => $request->alamat_jemput]);
+            // Update alamat di profile user jika user mengisi alamat baru
+            if ($request->alamat_lengkap) {
+                User::where('id_user', $user->id_user)->update(['alamat' => $request->alamat_lengkap]);
             }
 
             // 3. SIMPAN KE tr_reservasi (Header)
@@ -108,10 +109,10 @@ class ReservasiController extends Controller
                 'status'            => 'Menunggu Konfirmasi',
                 'status_bayar'      => 'Belum Lunas', 
                 'total_harga'       => $total_harga,
-                'alamat_jemput'     => $request->alamat_jemput,
+                'alamat_lengkap'    => $request->alamat_lengkap,
             ]);
 
-            // 4. SIMPAN KE tr_detail_reservasi (Isi daftar cucian)
+            // 4. SIMPAN KE tr_detail_reservasi
             foreach ($items_terpilih as $item) {
                 DetailReservasi::create([
                     'id_reservasi' => $reservasi->id_reservasi,
@@ -122,20 +123,18 @@ class ReservasiController extends Controller
                 ]);
             }
 
-            // 5. SIMPAN KE tr_pembayaran (Rekod awal pembayaran)
+            // 5. SIMPAN KE tr_pembayaran
             Pembayaran::create([
                 'id_reservasi' => $reservasi->id_reservasi,
                 'metode_bayar' => 'Payment Gateway',
             ]);
 
-            // SEMUA BERHASIL? KITA COMMIT!
             DB::commit();
 
             // 6. LANJUT KE PROSES MIDTRANS
             $reservasiLengkap = Reservasi::with(['user', 'detail.layanan'])->find($reservasi->id_reservasi);
             $snapToken = $this->generateMidtransToken($reservasiLengkap);
 
-            // ✅ Tampilkan view pembayaran yang memicu Snap Popup DAN bawa pesan sukses
             return view('pelanggan.reservasi.pembayaran', [
                 'reservasi'   => $reservasiLengkap,
                 'snapToken'   => $snapToken,
@@ -187,7 +186,7 @@ class ReservasiController extends Controller
     }
 
     /**
-     * Webhook Midtrans Callback (Otomatis Update Status)
+     * Webhook Midtrans Callback
      */
     public function callback(Request $request)
     {

@@ -37,11 +37,11 @@
 </head>
 
 @php
-    // ✅ LOGIKA DINAMIS
-    $roleId = auth()->user()->id_role;
-    $isSuper = $roleId == 1;
-    $isAdmin = $roleId == 2;
-    $isStaff = $isSuper || $isAdmin;
+    // LOGIKA DINAMIS MENGGUNAKAN ENUM 'role'
+    $userRole = auth()->user()->role;
+    $isSuper = $userRole === 'superadmin';
+    $isAdmin = $userRole === 'admin';
+    $isStaff = $isSuper || $isAdmin; // Staff adalah Superadmin atau Admin
     
     // Warna Aksen
     $accent = $isSuper ? 'emerald' : 'blue';
@@ -94,8 +94,8 @@
         </nav>
     @endif
 
-    {{-- NOTIFIKASI --}}
-    <div class="w-full px-6 md:px-10 mt-8">
+    {{-- NOTIFIKASI SUCCESS KESELURUHAN --}}
+    <div class="w-full px-6 md:px-10 mt-8 max-w-7xl mx-auto">
         @if(session('success'))
             <div class="{{ $isStaff ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-600' }} border px-6 py-4 rounded-2xl mb-2 text-xs md:text-sm font-bold flex items-center gap-3 shadow-sm animate-pulse">
                 <i class="fa-solid fa-circle-check text-lg"></i> {{ session('success') }}
@@ -110,7 +110,7 @@
             <h1 class="text-4xl md:text-5xl font-black uppercase tracking-tighter {{ $isStaff ? 'text-white' : 'text-slate-900' }} leading-none">
                 Kelola <span class="text-{{ $accent }}-500 italic">Profil</span>
             </h1>
-            <p class="{{ $isStaff ? 'text-slate-400' : 'text-slate-500' }} font-medium text-xs md:text-sm mt-3">Data diri Anda aman di sistem ROFF.SHOECLEAN.</p>
+            <p class="{{ $isStaff ? 'text-slate-400' : 'text-slate-500' }} font-medium text-xs md:text-sm mt-3">Data diri Anda aman di sistem ROFF.SHOECLEAN</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 xl:gap-8 items-stretch max-w-7xl mx-auto w-full">
@@ -163,28 +163,36 @@
                     <div class="w-12 h-12 rounded-2xl bg-{{ $accent }}-500 text-white flex items-center justify-center shadow-lg"><i class="fa-solid fa-user-pen"></i></div>
                     <div>
                         <h2 class="text-lg font-black uppercase tracking-tight {{ $isStaff ? 'text-white' : 'text-slate-900' }}">Data Diri</h2>
-                        <p class="text-[10px] font-medium text-slate-500">Update identitas utama Anda.</p>
+                        <p class="text-[10px] font-medium text-slate-500">Update identitas utama Anda</p>
                     </div>
                 </div>
 
                 <form action="{{ route('profil.update') }}" method="POST" class="flex flex-col flex-grow">
                     @csrf @method('PATCH')
+                    
+                    {{-- Alert Error Khusus Profil --}}
+                    @if($errors->has('nama') || $errors->has('email') || $errors->has('no_hp'))
+                        <div class="bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl mb-6 text-xs font-bold shadow-sm">
+                            Terdapat kesalahan pada input profil Anda. Silakan periksa kembali.
+                        </div>
+                    @endif
+
                     <div class="space-y-5 flex-grow">
                         <div>
                             <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Nama Lengkap</label>
-                            <input type="text" name="nama" value="{{ auth()->user()->nama }}" required class="w-full {{ $isStaff ? 'bg-slate-800/50 border-slate-700 text-white focus:border-'.$accent.'-500' : 'bg-slate-50 border-slate-200 focus:border-blue-500' }} border px-5 py-4 rounded-xl text-xs font-bold outline-none transition-all">
+                            <input type="text" name="nama" value="{{ old('nama', auth()->user()->nama) }}" required class="w-full {{ $isStaff ? 'bg-slate-800/50 border-slate-700 text-white focus:border-'.$accent.'-500' : 'bg-slate-50 border-slate-200 focus:border-blue-500' }} border px-5 py-4 rounded-xl text-xs font-bold outline-none transition-all">
                         </div>
                         <div>
                             <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Email</label>
-                            <input type="email" name="email" value="{{ auth()->user()->email }}" required class="w-full {{ $isStaff ? 'bg-slate-800/50 border-slate-700 text-white focus:border-'.$accent.'-500' : 'bg-slate-50 border-slate-200 focus:border-blue-500' }} border px-5 py-4 rounded-xl text-xs font-bold outline-none">
+                            <input type="email" name="email" value="{{ old('email', auth()->user()->email) }}" required class="w-full {{ $isStaff ? 'bg-slate-800/50 border-slate-700 text-white focus:border-'.$accent.'-500' : 'bg-slate-50 border-slate-200 focus:border-blue-500' }} border px-5 py-4 rounded-xl text-xs font-bold outline-none">
                         </div>
                         <div>
                             <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">No. WhatsApp</label>
-                            <input type="text" name="no_hp" value="{{ auth()->user()->no_telp }}" class="w-full {{ $isStaff ? 'bg-slate-800/50 border-slate-700 text-white focus:border-'.$accent.'-500' : 'bg-slate-50 border-slate-200 focus:border-blue-500' }} border px-5 py-4 rounded-xl text-xs font-bold outline-none">
+                            <input type="text" name="no_hp" value="{{ old('no_hp', auth()->user()->no_telp) }}" class="w-full {{ $isStaff ? 'bg-slate-800/50 border-slate-700 text-white focus:border-'.$accent.'-500' : 'bg-slate-50 border-slate-200 focus:border-blue-500' }} border px-5 py-4 rounded-xl text-xs font-bold outline-none">
                         </div>
                         <div>
                             <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Alamat</label>
-                            <textarea name="alamat" rows="2" class="w-full {{ $isStaff ? 'bg-slate-800/50 border-slate-700 text-white focus:border-'.$accent.'-500' : 'bg-slate-50 border-slate-200 focus:border-blue-500' }} border px-5 py-4 rounded-xl text-xs font-bold outline-none resize-none">{{ auth()->user()->alamat }}</textarea>
+                            <textarea name="alamat" rows="2" class="w-full {{ $isStaff ? 'bg-slate-800/50 border-slate-700 text-white focus:border-'.$accent.'-500' : 'bg-slate-50 border-slate-200 focus:border-blue-500' }} border px-5 py-4 rounded-xl text-xs font-bold outline-none resize-none">{{ old('alamat', auth()->user()->alamat) }}</textarea>
                         </div>
                     </div>
                     <button type="submit" class="w-full mt-8 bg-{{ $accent }}-600 hover:bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all shadow-lg active:scale-95">Simpan Perubahan</button>
@@ -197,12 +205,27 @@
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 text-white border border-slate-700 flex items-center justify-center shadow-lg"><i class="fa-solid fa-shield-halved"></i></div>
                     <div>
                         <h2 class="text-lg font-black uppercase tracking-tight {{ $isStaff ? 'text-white' : 'text-slate-900' }}">Keamanan</h2>
-                        <p class="text-[10px] font-medium text-slate-500">Perbarui kata sandi secara berkala.</p>
+                        <p class="text-[10px] font-medium text-slate-500">Perbarui kata sandi secara berkala</p>
                     </div>
                 </div>
 
                 <form action="{{ route('profil.updatePassword') }}" method="POST" class="flex flex-col flex-grow">
                     @csrf @method('PATCH')
+                    
+                    {{-- 🚨 TAMBAHAN ALERT ERROR KHUSUS PASSWORD 🚨 --}}
+                    @if($errors->has('current_password') || $errors->has('new_password'))
+                        <div class="bg-red-500/10 border border-red-500/30 text-red-500 px-4 py-3 rounded-xl mb-6 text-xs font-bold shadow-sm">
+                            <ul class="list-disc list-inside">
+                                @if($errors->has('current_password'))
+                                    <li>{{ $errors->first('current_password') }}</li>
+                                @endif
+                                @if($errors->has('new_password'))
+                                    <li>{{ $errors->first('new_password') }}</li>
+                                @endif
+                            </ul>
+                        </div>
+                    @endif
+
                     <div class="space-y-5 flex-grow">
                         <div>
                             <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">Password Saat Ini</label>

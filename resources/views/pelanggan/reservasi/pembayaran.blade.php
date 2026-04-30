@@ -87,8 +87,8 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
                     <p class="text-[8px] md:text-[9px] lg:text-[10px] font-black text-blue-600 uppercase tracking-[0.4em]">Payment Confirmation</p>
                 </div>
-                <h2 class="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Selesaikan <span class="text-blue-600">Pesanan.</span></h2>
-                <p class="text-slate-500 font-medium text-xs md:text-sm lg:text-base mt-4 lg:mt-6">Data reservasi Anda telah kami amankan. Silakan lanjut ke gerbang pembayaran.</p>
+                <h2 class="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Selesaikan <span class="text-blue-600">Pesanan</span></h2>
+                <p class="text-slate-500 font-medium text-xs md:text-sm lg:text-base mt-4 lg:mt-6">Data reservasi Anda telah kami amankan, Silakan lanjut ke gerbang pembayaran</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
@@ -107,7 +107,6 @@
                             </div>
                             <div class="flex justify-between items-center text-[11px] lg:text-[13px] font-bold uppercase tracking-widest">
                                 <span class="text-slate-400">Total Muatan</span>
-                                {{-- ✅ UPDATE: Menghitung total sepatu dari semua rincian detail --}}
                                 <span class="text-slate-900 font-black italic">{{ $reservasi->detail->sum('jumlah') }} Pasang Sepatu</span>
                             </div>
                             <div class="flex justify-between items-start text-[11px] lg:text-[13px] font-bold uppercase tracking-widest">
@@ -122,13 +121,16 @@
                     </div>
                 </div>
 
-                {{-- KANAN: TOMBOL MIDTRANS --}}
+                {{-- KANAN: TOMBOL PEMBAYARAN SECURE --}}
                 <div class="lg:col-span-6 flex flex-col h-full">
                     <div class="glass-card rounded-[2.5rem] lg:rounded-[3rem] p-8 lg:p-14 h-full flex flex-col justify-center items-center text-center border-slate-200">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Midtrans.png" class="h-10 lg:h-14 mb-8 drop-shadow-sm" alt="Midtrans">
-                        <h2 class="text-2xl lg:text-3xl font-black text-slate-900 mb-3 uppercase italic tracking-tight">Checkout Instan</h2>
+                        {{-- Mengganti Logo Midtrans dengan Ikon Shield/Keamanan --}}
+                        <div class="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-2xl lg:text-4xl mb-6 lg:mb-8 shadow-inner border border-blue-100">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <h2 class="text-2xl lg:text-3xl font-black text-slate-900 mb-3 uppercase italic tracking-tight">Checkout Cepat</h2>
                         <p class="text-[11px] lg:text-sm text-slate-500 mb-10 font-medium leading-relaxed max-w-sm">
-                            Klik tombol di bawah untuk membuka jendela pembayaran aman Midtrans. Kami mendukung QRIS, GoPay, dan Transfer Bank.
+                            Klik tombol di bawah untuk membuka gerbang pembayaran yang aman, Kami mendukung QRIS, GoPay, dan Transfer Bank
                         </p>
                         
                         <button id="pay-button" class="w-full max-w-md bg-blue-600 text-white py-5 lg:py-6 rounded-[1.5rem] lg:rounded-[2rem] font-black uppercase text-xs lg:text-sm tracking-[0.2em] shadow-2xl shadow-blue-500/30 hover:bg-slate-900 hover:shadow-slate-900/20 hover:-translate-y-1 transition-all duration-300 active:scale-95 flex items-center justify-center gap-3">

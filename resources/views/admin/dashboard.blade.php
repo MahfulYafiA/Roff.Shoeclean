@@ -88,7 +88,7 @@
                         Selamat Datang, <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-200 italic">{{ auth()->user()->nama ?? 'Admin' }}!</span>
                     </h1>
                     <p class="text-slate-400 font-medium text-sm md:text-base max-w-3xl leading-relaxed mb-0">
-                        Pantau operasional bisnis ROFF.SHOECLEAN secara real-time. Kelola antrean, update harga layanan, hingga pantau performa omset harian.
+                        Pantau operasional bisnis ROFF.SHOECLEAN secara real-time, Kelola antrean, update harga layanan, hingga pantau performa omset harian
                     </p>
                 </div>
             </div>

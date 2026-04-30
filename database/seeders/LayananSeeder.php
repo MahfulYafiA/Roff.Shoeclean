@@ -12,12 +12,12 @@ class LayananSeeder extends Seeder
         $layanans = [
             [
                 'nama_layanan' => 'Fast Clean',
-                'deskripsi' => 'Pembersihan instan untuk bagian luar sepatu (upper & midsole). Cocok untuk perawatan harian sepatu yang tidak terlalu kotor.',
+                'deskripsi' => 'Pembersihan kilat pada bagian luar (upper) dan midsole sepatu dalam waktu singkat dan cepat.',
                 'harga' => 20000,
             ],
             [
                 'nama_layanan' => 'Deep Clean',
-                'deskripsi' => 'Pembersihan menyeluruh meliputi luar, dalam (insole), dan tali sepatu. Menghilangkan noda membandel dan bau tidak sedap.',
+                'deskripsi' => 'Pembersihan menyeluruh ke setiap sudut sepatu, meliputi bagian luar, dalam (insole), tali, hingga telapak (outsole).',
                 'harga' => 25000,
             ],
             [

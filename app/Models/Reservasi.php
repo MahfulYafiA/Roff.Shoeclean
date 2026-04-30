@@ -13,21 +13,19 @@ class Reservasi extends Model
     protected $primaryKey = 'id_reservasi';
 
     /**
-     * ✅ UPDATE: Mendukung 4 Kombinasi Logistik
-     * Menambahkan metode_masuk & metode_keluar sesuai migrasi terbaru.
+     * ✅ UPDATE: Menyesuaikan nama kolom alamat_lengkap
+     * Menghapus alamat_jemput dan menggantinya dengan alamat_lengkap.
      */
     protected $fillable = [
         'id_user',
         'tanggal_reservasi',
         'metode_layanan',
-        'alamat_jemput',
+        'alamat_lengkap',  // ✨ SUDAH DIUPDATE DISINI
         'status',
         'status_bayar',
         'total_harga',
-        'wa_pengantaran',      
-        'alamat_pengantaran',
-        'metode_masuk',  // 🚨 BARU: Antar Sendiri / Jemput Kurir
-        'metode_keluar'  // 🚨 BARU: Ambil Sendiri / Antar Kurir
+        'metode_masuk',    // Antar Sendiri / Jemput Kurir
+        'metode_keluar'    // Ambil Sendiri / Antar Kurir
     ];
 
     /**

@@ -20,9 +20,9 @@ class AuthController extends Controller
     {
         // 1. Validasi disesuaikan dengan limit karakter di Migrasi ms_user
         $request->validate([
-            'nama' => 'required|string|max:40', // Sesuai Workbench (40)
-            'no_telp' => 'required|string|max:15', // Sesuai Workbench (15)
-            'email' => 'required|string|email|max:50|unique:ms_user', // Sesuai Workbench (50)
+            'nama' => 'required|string|max:40', 
+            'no_telp' => 'required|string|max:15', 
+            'email' => 'required|string|email|max:50|unique:ms_user', 
             'password' => 'required|string|min:8|confirmed', 
         ], 
         [
@@ -39,7 +39,8 @@ class AuthController extends Controller
             'email' => $request->email,
             'no_telp' => $request->no_telp,
             'password' => Hash::make($request->password), 
-            'id_role' => 3, // Default: Pelanggan
+            // ✨ UPDATE: id_role dihapus, diganti role ENUM
+            'role' => 'pelanggan', 
         ]);
 
         Auth::login($user);
@@ -60,7 +61,13 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             
-            // Logika redirect dipisah ke fungsi agar rapi (Re-useable)
+            // ✨ UPDATE: Tambahan Cek Status Akun
+            // Cegah login jika akun sudah dinonaktifkan oleh Superadmin
+            if (auth()->user()->status === 'Nonaktif') {
+                Auth::logout();
+                return back()->withErrors(['email' => 'Akun Anda telah dinonaktifkan. Hubungi admin.'])->onlyInput('email');
+            }
+
             return $this->redirectUser(auth()->user());
         }
 
@@ -70,13 +77,14 @@ class AuthController extends Controller
     }
 
     /**
-     * Fungsi Helper untuk Redirect berdasarkan Role
+     * Fungsi Helper untuk Redirect berdasarkan Role (Sudah Update ENUM)
      */
     private function redirectUser($user)
     {
-        if ($user->id_role == 1) {
+        // ✨ UPDATE: Pengecekan menggunakan String ENUM, bukan angka
+        if ($user->role === 'superadmin') {
             return redirect()->route('superadmin.dashboard'); 
-        } elseif ($user->id_role == 2) {
+        } elseif ($user->role === 'admin') {
             return redirect()->route('admin.dashboard'); 
         } else {
             return redirect()->route('dashboard'); 
@@ -110,15 +118,22 @@ class AuthController extends Controller
             if ($user) {
                 // Update Google ID jika belum ada
                 $user->update(['google_id' => $googleUser->getId()]);
+                
+                // ✨ UPDATE: Cegah akun Nonaktif login via Google
+                if ($user->status === 'Nonaktif') {
+                    return redirect()->route('login')->with('error', 'Akun Anda telah dinonaktifkan.');
+                }
+                
                 Auth::login($user);
             } else {
                 // Buat user baru jika belum terdaftar
                 $user = User::create([
-                    'nama' => substr($googleUser->getName(), 0, 40), // Potong jika nama Google > 40 char
+                    'nama' => substr($googleUser->getName(), 0, 40), 
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
-                    'id_role' => 3, 
-                    'password' => Hash::make(now()), // Password acak aman
+                    // ✨ UPDATE: id_role dihapus, diganti role ENUM
+                    'role' => 'pelanggan', 
+                    'password' => Hash::make(now()), 
                 ]);
                 Auth::login($user);
             }

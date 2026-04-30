@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen User - ROFF.ADMIN</title>
+    <title>Manajemen User - ROFF.MANAGEMENT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -27,7 +27,8 @@
 <body class="text-slate-200 antialiased flex h-screen overflow-hidden relative">
 
     @php
-        $isSuper = auth()->user()->id_role == 1;
+        // ✨ PERBAIKAN: Menggunakan ENUM role
+        $isSuper = auth()->user()->role === 'superadmin';
         $accent = $isSuper ? 'emerald' : 'blue';
     @endphp
 
@@ -81,9 +82,9 @@
                         <p class="text-[8px] md:text-[9px] font-black text-{{ $accent }}-400 uppercase tracking-[0.4em]">Database Master</p>
                     </div>
                     <h1 class="text-3xl md:text-5xl font-black text-white tracking-tighter leading-none mb-2">
-                        Manajemen <span class="italic text-transparent bg-clip-text bg-gradient-to-r from-{{ $accent }}-400 to-teal-200">User.</span>
+                        Manajemen <span class="italic text-transparent bg-clip-text bg-gradient-to-r from-{{ $accent }}-400 to-teal-200">User</span>
                     </h1>
-                    <p class="text-slate-400 font-medium text-sm">Kontrol penuh aksesibilitas staf dan keamanan data ROFF.</p>
+                    <p class="text-slate-400 font-medium text-sm">Kontrol penuh aksesibilitas staf dan keamanan data ROFF</p>
                 </div>
 
                 <button onclick="openModal()" class="w-full md:w-auto bg-{{ $accent }}-500 text-white px-8 py-4 rounded-[1.5rem] font-black uppercase text-[10px] tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-lg hover:-translate-y-1 active:scale-95 group">
@@ -91,12 +92,11 @@
                 </button>
             </div>
 
-            {{-- STATISTIK --}}
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-10 relative z-10">
                 <div class="glass-panel p-6 rounded-[2rem] flex justify-between items-center transition-all hover:bg-slate-800/80">
                     <div>
                         <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">Total Akun</p>
-                        <span class="text-3xl font-black text-white italic">{{ $users->count() }}</span>
+                        <span class="text-3xl font-black text-white italic">{{ $totalAkun }}</span>
                     </div>
                     <div class="w-10 h-10 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center text-lg shadow-inner"><i class="fa-solid fa-users"></i></div>
                 </div>
@@ -104,7 +104,7 @@
                 <div class="glass-panel p-6 rounded-[2rem] flex justify-between items-center border-emerald-500/20 bg-emerald-500/5">
                     <div>
                         <p class="text-[9px] font-black text-emerald-400 uppercase tracking-[0.3em] mb-2">Admin/Staf</p>
-                        <span class="text-3xl font-black text-emerald-400 italic">{{ $users->where('id_role', 2)->count() }}</span>
+                        <span class="text-3xl font-black text-emerald-400 italic">{{ $totalStaf }}</span>
                     </div>
                     <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-lg"><i class="fa-solid fa-user-tie"></i></div>
                 </div>
@@ -112,7 +112,7 @@
                 <div class="glass-panel p-6 rounded-[2rem] flex justify-between items-center border-rose-500/20 bg-rose-500/5">
                     <div>
                         <p class="text-[9px] font-black text-rose-400 uppercase tracking-[0.3em] mb-2">Nonaktif</p>
-                        <span class="text-3xl font-black text-rose-400 italic">{{ $users->where('is_active', false)->count() }}</span>
+                        <span class="text-3xl font-black text-rose-400 italic">{{ $totalNonaktif }}</span>
                     </div>
                     <div class="w-10 h-10 bg-rose-500/20 text-rose-400 rounded-full flex items-center justify-center text-lg"><i class="fa-solid fa-user-slash"></i></div>
                 </div>
@@ -120,7 +120,7 @@
                 <div class="glass-panel p-6 rounded-[2rem] flex justify-between items-center transition-all hover:bg-slate-800/80">
                     <div>
                         <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">Pelanggan</p>
-                        <span class="text-3xl font-black text-white italic">{{ $users->where('id_role', 3)->count() }}</span>
+                        <span class="text-3xl font-black text-white italic">{{ $totalPelanggan }}</span>
                     </div>
                     <div class="w-10 h-10 bg-slate-800 text-blue-400 rounded-full flex items-center justify-center text-lg shadow-inner"><i class="fa-solid fa-bag-shopping"></i></div>
                 </div>
@@ -140,10 +140,11 @@
                         </thead>
                         <tbody class="divide-y divide-slate-800/50 text-sm">
                             @forelse($users as $u)
-                            <tr class="hover:bg-slate-800/30 transition-all group {{ !$u->is_active ? 'user-inactive' : '' }}">
+                            {{-- ✨ PERBAIKAN LOGIKA STATUS --}}
+                            <tr class="hover:bg-slate-800/30 transition-all group {{ $u->status === 'Nonaktif' ? 'user-inactive' : '' }}">
                                 <td class="px-8 py-6">
                                     <div class="flex items-center gap-3">
-                                        @if(!$u->is_active)
+                                        @if($u->status === 'Nonaktif')
                                             <i class="fa-solid fa-ban text-rose-500 text-xs animate-pulse" title="Akun Dinonaktifkan"></i>
                                         @endif
                                         <div>
@@ -159,9 +160,10 @@
                                     </p>
                                 </td>
                                 <td class="px-8 py-6 text-center">
-                                    @if($u->id_role == 1)
+                                    {{-- ✨ PERBAIKAN LOGIKA ROLE --}}
+                                    @if($u->role === 'superadmin')
                                         <span class="bg-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-emerald-500/30">Superadmin</span>
-                                    @elseif($u->id_role == 2)
+                                    @elseif($u->role === 'admin')
                                         <span class="bg-blue-500/20 text-blue-400 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-blue-500/30">Admin / Staff</span>
                                     @else
                                         <span class="bg-slate-700 text-slate-300 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-slate-600">Pelanggan</span>
@@ -169,12 +171,12 @@
                                 </td>
                                 <td class="px-8 py-6">
                                     <div class="flex items-center justify-end gap-3">
-                                        {{-- ✅ FITUR BARU: TOGGLE STATUS (DITAMPILKAN UNTUK SELURUH ROLE KECUALI DIRI SENDIRI) --}}
-                                        @if($u->id_user != auth()->user()->id_user && $u->id_role != 1)
+                                        {{-- ✅ TOGGLE STATUS (PROTEKSI DIRI SENDIRI) --}}
+                                        @if($u->id_user != auth()->user()->id_user && $u->role !== 'superadmin')
                                             <form action="{{ route('superadmin.users.toggle', $u->id_user) }}" method="POST" class="m-0">
                                                 @csrf @method('PATCH')
-                                                <button type="submit" class="transition-all active:scale-90" title="{{ $u->is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}">
-                                                    @if($u->is_active)
+                                                <button type="submit" class="transition-all active:scale-90" title="{{ $u->status === 'Aktif' ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}">
+                                                    @if($u->status === 'Aktif')
                                                         <span class="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-2">
                                                             <i class="fa-solid fa-toggle-on text-xs"></i> Aktif
                                                         </span>
@@ -188,7 +190,7 @@
                                         @endif
 
                                         {{-- PROTEKSI HAPUS --}}
-                                        @if($u->id_user == auth()->user()->id_user || $u->id_role == 1)
+                                        @if($u->id_user == auth()->user()->id_user || $u->role === 'superadmin')
                                             <span class="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] italic pr-2">Protected</span>
                                         @else
                                             <form action="{{ route('superadmin.users.destroy', $u->id_user) }}" method="POST" onsubmit="return confirm('Peringatan! Menghapus akun akan menghapus seluruh data transaksi terkait. Lanjutkan?');" class="m-0">
@@ -202,7 +204,7 @@
                                 </td>
                             </tr>
                             @empty
-                            <tr><td colspan="4" class="p-24 text-center opacity-30">Tidak ada data terdeteksi.</td></tr>
+                            <tr><td colspan="4" class="p-24 text-center opacity-30">Tidak ada data terdeteksi</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -220,7 +222,7 @@
         <div class="absolute inset-0 bg-black/85 backdrop-blur-md transition-opacity" onclick="closeModal()"></div>
         <div class="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-[2.5rem] shadow-2xl p-8 md:p-10 max-h-[90vh] overflow-y-auto custom-scroll">
             <div class="flex justify-between items-center mb-8">
-                <h3 class="text-2xl font-black uppercase tracking-tight text-white">Tambah <span class="text-emerald-500 italic">Admin.</span></h3>
+                <h3 class="text-2xl font-black uppercase tracking-tight text-white">Tambah <span class="text-emerald-500 italic">Admin</span></h3>
                 <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 hover:bg-rose-500 hover:text-white transition-colors flex items-center justify-center">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>

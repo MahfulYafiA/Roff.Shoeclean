@@ -16,23 +16,22 @@ class User extends Authenticatable
     // 2. Primary Key menggunakan 'id_user'
     protected $primaryKey = 'id_user';
 
-    // 3. Timestamps aktif
+    // 3. Timestamps aktif (karena di ERD ada created_at & updated_at)
     public $timestamps = true; 
 
     /**
      * 4. Daftar kolom yang boleh diisi (Mass Assignment)
-     * ✅ UPDATE: Menambahkan 'is_active' untuk fitur kontrol admin
      */
     protected $fillable = [
         'nama',
         'email',
         'password',
-        'id_role',    
+        'role',       // ✨ UPDATE: Menggunakan role (ENUM)
+        'status',     // ✨ UPDATE: Menggunakan status (ENUM)
         'no_telp',
         'alamat',
         'foto_profil',
         'google_id',
-        'is_active', // 🚨 TAMBAHKAN INI
     ];
 
     // 5. Sembunyikan data sensitif
@@ -49,7 +48,7 @@ class User extends Authenticatable
         return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
-            'is_active'  => 'boolean', // 🚨 TAMBAHKAN INI agar terbaca true/false
+            // is_active dihapus karena sekarang full menggunakan 'status'
         ];
     }
 }

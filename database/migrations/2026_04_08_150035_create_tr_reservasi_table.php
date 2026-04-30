@@ -29,9 +29,6 @@ return new class extends Migration
             
             // Timestamps untuk created_at & updated_at
             $table->timestamps(); 
-            
-            $table->string('wa_pengantaran', 15)->nullable();
-            $table->text('alamat_pengantaran')->nullable();
 
             // Pemasangan "Kabel" Relasi (Foreign Key)
             // Menghubungkan id_user di sini ke id_user di tabel ms_user

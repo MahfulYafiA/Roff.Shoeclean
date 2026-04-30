@@ -25,37 +25,57 @@
     <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
         <div class="w-full px-4 md:px-6 lg:px-12 py-4 lg:py-6 flex justify-between items-center gap-2">
             
-            {{-- LOGO: Dikecilkan di HP --}}
+            {{-- LOGO --}}
             <a href="/" class="font-black text-xl lg:text-3xl tracking-tighter uppercase shrink-0">
                 ROFF.<span class="text-blue-600">SHOECLEAN</span>
             </a>
 
             <div class="flex items-center gap-3 lg:gap-10">
-                {{-- Menu Tengah (Hanya di Desktop) --}}
+                {{-- Menu Tengah (Desktop) --}}
                 <div class="hidden md:flex gap-10 items-center font-bold text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                    <a href="/" class="hover:text-blue-600 transition-colors">Beranda</a>
+                    <a href="#tentang" class="hover:text-blue-600 transition-colors">Tentang</a>
                     <a href="#layanan" class="hover:text-blue-600 transition-colors">Layanan</a>
-                    <a href="#alur" class="hover:text-blue-600 transition-colors">Alur Kerja</a>
+                    <a href="#lokasi" class="hover:text-blue-600 transition-colors">Lokasi</a>
+                    
+                    {{-- Tombol Dashboard Muncul Jika Sudah Login --}}
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="text-blue-600 hover:text-slate-900 transition-colors">Dashboard</a>
+                    @endauth
                 </div>
 
                 @auth
-                    {{-- PROFIL (Sudah Login) --}}
-                    <a href="{{ url('/dashboard') }}" class="flex items-center gap-2 lg:gap-3 bg-white border border-slate-200 p-1 lg:p-1.5 pr-3 lg:pr-5 rounded-2xl hover:border-blue-600 hover:shadow-lg transition-all shrink-0">
-                        <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-xl overflow-hidden bg-blue-600 flex-shrink-0">
-                            @if(auth()->user()->foto)
-                                <img src="{{ asset('storage/' . auth()->user()->foto) }}" class="w-full h-full object-cover">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-white font-black text-[10px] lg:text-xs">
-                                    {{ strtoupper(substr(auth()->user()->nama, 0, 2)) }}
-                                </div>
-                            @endif
-                        </div>
-                        <div class="flex flex-col text-left">
-                            <span class="text-[6px] lg:text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-0.5 lg:mb-1">Online</span>
-                            <span class="text-[9px] lg:text-xs font-black text-slate-900 leading-none truncate max-w-[50px] lg:max-w-none">
-                                {{ explode(' ', auth()->user()->nama)[0] }}
-                            </span>
-                        </div>
-                    </a>
+                    {{-- USER PANEL (Sudah Login) --}}
+                    <div class="flex items-center gap-4">
+                        {{-- Profil Card --}}
+                        <a href="{{ route('dashboard') }}" class="flex items-center gap-2 lg:gap-3 bg-white border border-slate-200 p-1 lg:p-1.5 pr-3 lg:pr-5 rounded-2xl hover:border-blue-600 hover:shadow-lg transition-all shrink-0">
+                            <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-xl overflow-hidden bg-blue-600 flex-shrink-0">
+                                @if(auth()->user()->foto)
+                                    <img src="{{ asset('storage/' . auth()->user()->foto) }}" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-white font-black text-[10px] lg:text-xs">
+                                        {{ strtoupper(substr(auth()->user()->nama, 0, 2)) }}
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="flex flex-col text-left">
+                                <span class="text-[6px] lg:text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-0.5 lg:mb-1">
+                                    {{ auth()->user()->id_role == 2 ? 'Staff' : 'Member' }}
+                                </span>
+                                <span class="text-[9px] lg:text-xs font-black text-slate-900 leading-none truncate max-w-[50px] lg:max-w-none">
+                                    {{ explode(' ', auth()->user()->nama)[0] }}
+                                </span>
+                            </div>
+                        </a>
+
+                        {{-- Tombol Keluar (Logout) --}}
+                        <form action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-700">
+                                Keluar <i class="fa-solid fa-right-from-bracket ml-1"></i>
+                            </button>
+                        </form>
+                    </div>
                 @else
                     {{-- TOMBOL (Belum Login) --}}
                     <div class="flex items-center gap-2 lg:gap-6 pl-2 lg:pl-6 border-l border-slate-200 shrink-0">
@@ -67,15 +87,13 @@
         </div>
     </nav>
 
-    <div class="pt-20"> {{-- Spacer agar konten tidak tertutup nav fixed --}}
+    <div class="pt-20">
         @yield('content')
     </div>
 
-    {{-- FOOTER RESPONSIF --}}
+    {{-- FOOTER --}}
     <footer class="py-12 lg:py-16 px-6 lg:px-12 bg-white border-t border-slate-100">
         <div class="max-w-full mx-auto flex flex-col md:flex-row justify-between items-center md:items-start gap-10 md:gap-12">
-            
-            {{-- Bagian Logo Footer --}}
             <div class="text-center md:text-left flex-1 w-full">
                 <a href="#" class="font-black text-2xl lg:text-3xl tracking-tighter block mb-3 uppercase italic">
                     ROFF.<span class="text-blue-600">SHOECLEAN</span>
@@ -85,7 +103,6 @@
                 </p>
             </div>
 
-            {{-- Bagian Instagram --}}
             <div class="flex flex-col items-center gap-4 flex-1 w-full">
                 <p class="text-[9px] lg:text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Ikuti Kami</p>
                 <a href="https://instagram.com/roff.shoeclean" target="_blank" class="group flex items-center gap-3 lg:gap-4 bg-slate-50 border border-slate-100 pl-2 pr-5 lg:pr-6 py-2 rounded-2xl hover:border-blue-600 hover:bg-white transition-all shadow-sm">
@@ -96,11 +113,9 @@
                 </a>
             </div>
 
-            {{-- Bagian Link Bantuan --}}
             <div class="flex flex-wrap justify-center md:justify-end items-center gap-4 lg:gap-8 font-black text-[9px] lg:text-[10px] uppercase tracking-[0.2em] text-slate-400 flex-1 w-full pt-4 md:pt-0">
                 <a href="https://wa.me/6281234567890" target="_blank" class="text-blue-600 flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full hover:bg-blue-600 hover:text-white transition-all">
-                    <i class="fa-brands fa-whatsapp text-sm"></i> 
-                    Hubungi Kami
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Hubungi Kami
                 </a>
                 <a href="#" class="hover:text-blue-600 transition-colors">Syarat & Ketentuan</a>
             </div>

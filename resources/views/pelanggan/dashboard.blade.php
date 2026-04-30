@@ -148,7 +148,7 @@
                         Selamat Datang, <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 italic">{{ auth()->user()->nama }}!</span>
                     </h1>
                     <p class="text-slate-300 font-medium text-sm md:text-base max-w-3xl leading-relaxed mb-0">
-                        Pusat layanan personal Anda. Ciptakan reservasi baru, lacak status perawatan sepatu kesayangan Anda, dan atur preferensi akun dari satu tempat.
+                        Pusat layanan personal Anda, Ciptakan reservasi baru, lacak status perawatan sepatu kesayangan Anda, dan atur preferensi akun dari satu tempat
                     </p>
                 </div>
             </div>

@@ -9,27 +9,30 @@ class DetailReservasi extends Model
 {
     use HasFactory;
 
-    // 1. Nama tabel sesuai desain Workbench
+    // 1. Nama tabel sesuai desain di database (XAMPP)
     protected $table = 'tr_detail_reservasi'; 
 
-    // 2. Primary Key kustom
+    // 2. Primary Key kustom (Bukan 'id')
     protected $primaryKey = 'id_detail'; 
 
-    // 3. Matikan timestamps karena tidak ada di migrasi tabel ini
+    /**
+     * 🚨 PENTING: Matikan timestamps karena tabel ini 
+     * tidak memiliki kolom created_at dan updated_at.
+     */
     public $timestamps = false;
 
-    // 4. Mencegah error Mass Assignment (✅ UPDATE: Tambah jumlah & sub_total)
+    // 3. Kolom yang diizinkan untuk diisi secara massal
     protected $fillable = [
         'id_reservasi',
         'id_layanan',
-        'harga',      // Penting untuk mengunci harga history
-        'jumlah',     // 🚨 Kolom baru (Pindahan dari tr_reservasi)
-        'sub_total'   // 🚨 Kolom baru (Hasil harga * jumlah)
+        'harga',      // Harga saat transaksi (history)
+        'jumlah',     // Jumlah sepatu per layanan
+        'sub_total'   // Total per baris layanan (harga * jumlah)
     ];
 
     /**
-     * Relasi ke tabel Reservasi
-     * Menghubungkan detail ini ke nota pesanan induknya
+     * Relasi ke tabel Reservasi (Induk)
+     * Menghubungkan detail ini ke data reservasi utamanya
      */
     public function reservasi()
     {
@@ -38,7 +41,7 @@ class DetailReservasi extends Model
 
     /**
      * Relasi ke tabel Layanan
-     * Memungkinkan kita mengambil info jasa (misal: Deep Clean) dari baris detail ini
+     * Mengambil info nama jasa (misal: Fast Clean) dari tabel ms_layanan
      */
     public function layanan()
     {

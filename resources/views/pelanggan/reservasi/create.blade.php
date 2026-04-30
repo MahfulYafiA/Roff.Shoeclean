@@ -11,65 +11,65 @@
         :root { --primary: #2563eb; --surface: #f8fafc; --text: #0f172a; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--surface); color: var(--text); overflow-x: hidden; }
         
-        .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .glass-card { background: white; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 20px -5px rgba(0,0,0,0.05); }
+        .glass-nav { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .white-card { background: white; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
 
-        /* ✅ HAPUS TOTAL IKON PANAH INPUT NUMBER */
+        /* HAPUS TOTAL IKON PANAH INPUT NUMBER */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
-        .bg-mesh { position: fixed; inset: 0; z-index: -3; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 32px 32px; opacity: 0.3; }
+        .bg-mesh { position: fixed; inset: 0; z-index: -3; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 32px 32px; opacity: 0.4; }
         
-        /* Custom Checkbox Behavior */
-        input[type="radio"]:checked + div { border-color: #2563eb; background-color: rgba(37, 99, 235, 0.03); }
-        input[type="radio"]:checked + div h4 { color: #2563eb; }
+        /* Custom Checkbox Behavior untuk Light Mode */
+        input[type="radio"]:checked + div { border-color: #2563eb; background-color: #eff6ff; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+        input[type="radio"]:checked + div h4 { color: #1d4ed8; }
 
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="antialiased flex flex-col min-h-screen relative">
+<body class="antialiased flex flex-col min-h-screen relative custom-scroll selection:bg-blue-600 selection:text-white">
 
     <div class="bg-mesh"></div>
 
     {{-- HEADER --}}
     <header class="glass-nav sticky top-0 px-4 md:px-10 py-4 flex justify-between items-center z-50">
         <div class="flex items-center gap-3">
-            <a href="{{ url('/dashboard') }}" class="w-10 h-10 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-blue-600 flex items-center justify-center transition-all shadow-sm">
+            <a href="{{ url('/dashboard') }}" class="w-10 h-10 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 flex items-center justify-center transition-all shadow-sm active:scale-95">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
-            <h1 class="font-black text-xl md:text-2xl uppercase tracking-tighter italic text-slate-900">
+            <h1 class="font-black text-xl md:text-2xl uppercase tracking-tighter italic text-slate-900 leading-none mt-1">
                 ROFF.<span class="text-blue-600">MEMBER</span>
             </h1>
         </div>
         <div class="hidden md:block text-right">
-            <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Online Booking</p>
-            <p class="font-bold text-xs text-slate-400 uppercase">Sesi Baru</p>
+            <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest leading-none">Online Booking</p>
+            <p class="font-bold text-[11px] text-slate-400 uppercase mt-1">Sesi Baru</p>
         </div>
     </header>
 
     {{-- MAIN CONTENT --}}
-    <main class="flex-1 w-full max-w-screen-2xl mx-auto p-4 md:p-10">
+    <main class="flex-1 w-full max-w-screen-xl mx-auto p-4 md:p-10 relative z-10">
         
-        <div class="mb-12 text-center">
-            <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-4 py-1.5 rounded-full mb-4">
+        <div class="mb-10 md:mb-14 text-center mt-4">
+            <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-4 py-1.5 rounded-full mb-4 shadow-sm">
                 <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
                 <p class="text-[9px] font-black text-blue-600 uppercase tracking-[0.3em]">Reservation System</p>
             </div>
-            <h1 class="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
-                Form <span class="text-blue-600">Reservasi.</span>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
+                Form <span class="text-blue-600">Reservasi</span>
             </h1>
         </div>
 
-        {{-- ✅ RADAR ERROR: Akan muncul jika validasi Controller gagal --}}
+        {{-- ALERTS ERROR VALIDASI --}}
         @if ($errors->any())
-            <div class="mb-8 bg-rose-50 border-2 border-rose-200 text-rose-600 p-6 rounded-[2rem] shadow-lg animate-bounce">
+            <div class="mb-8 bg-rose-50 border border-rose-200 text-rose-600 p-6 rounded-[2rem] shadow-sm animate-bounce">
                 <div class="flex items-center gap-3 mb-2">
                     <i class="fa-solid fa-circle-exclamation text-xl"></i>
                     <h4 class="font-black uppercase tracking-widest text-xs">Pemesanan Terhenti:</h4>
                 </div>
-                <ul class="list-disc list-inside text-xs font-bold space-y-1 ml-1">
+                <ul class="list-disc list-inside text-xs font-bold space-y-1 ml-1 opacity-80">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -77,83 +77,88 @@
             </div>
         @endif
 
-        <form id="formReservasi" action="{{ route('reservasi.store') }}" method="POST" class="space-y-10">
+        <form id="formReservasi" action="{{ route('reservasi.store') }}" method="POST" class="space-y-8 md:space-y-10">
             @csrf
 
             {{-- STEP 1: LAYANAN --}}
-            <section class="glass-card rounded-[2.5rem] p-6 md:p-10">
+            <section class="white-card rounded-[2.5rem] p-6 md:p-10">
                 <h3 class="font-black text-lg md:text-xl uppercase tracking-widest mb-8 flex items-center gap-4 text-slate-900">
-                    <span class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-xs">1</span> 
+                    <span class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-xs shadow-md shadow-blue-500/30">1</span> 
                     Pilih Jenis Layanan
                 </h3>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    @foreach($layanans as $l)
-                    <div class="bg-slate-50/50 border-2 border-slate-100 rounded-3xl p-6 flex items-center justify-between group transition-all hover:border-blue-200">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    @forelse($layanans as $l)
+                    <div class="bg-slate-50 border-2 border-slate-100 rounded-3xl p-5 md:p-6 flex items-center justify-between group transition-all hover:border-blue-200 hover:bg-blue-50/30">
                         <div>
-                            <h4 class="font-black text-slate-800 italic uppercase text-base tracking-tight mb-1">{{ $l->nama_layanan }}</h4>
+                            <h4 class="font-black text-slate-800 italic uppercase text-sm md:text-base tracking-tight mb-1">{{ $l->nama_layanan }}</h4>
                             <p class="text-blue-600 font-black text-sm">Rp {{ number_format($l->harga, 0, ',', '.') }} <span class="text-[10px] text-slate-400 font-bold tracking-widest uppercase">/ ps</span></p>
                         </div>
                         
-                        <div class="flex items-center gap-3 bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm">
-                            <button type="button" onclick="changeQty('{{ $l->id_layanan }}', -1)" class="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all">
+                        <div class="flex items-center gap-2 bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm">
+                            <button type="button" onclick="changeQty('{{ $l->id_layanan }}', -1)" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all active:scale-90">
                                 <i class="fa-solid fa-minus text-[10px]"></i>
                             </button>
                             <input type="number" name="layanan[{{ $l->id_layanan }}][jumlah]" id="qty-{{ $l->id_layanan }}" value="0" min="0" data-harga="{{ $l->harga }}" class="w-10 bg-transparent text-center font-black text-slate-900 text-lg outline-none layanan-qty">
-                            <button type="button" onclick="changeQty('{{ $l->id_layanan }}', 1)" class="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all">
+                            <button type="button" onclick="changeQty('{{ $l->id_layanan }}', 1)" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-500 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all active:scale-90">
                                 <i class="fa-solid fa-plus text-[10px]"></i>
                             </button>
                         </div>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="col-span-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-10 text-center">
+                        <i class="fa-solid fa-box-open text-3xl text-slate-300 mb-3"></i>
+                        <p class="text-slate-500 font-bold text-sm">Belum ada layanan yang tersedia saat ini</p>
+                    </div>
+                    @endforelse
                 </div>
             </section>
 
             {{-- STEP 2: PENYERAHAN & PENGAMBILAN --}}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
                 {{-- 2A --}}
-                <section class="glass-card rounded-[2.5rem] p-6 md:p-10 flex flex-col">
-                    <h3 class="font-black text-lg uppercase tracking-widest mb-8 flex items-center gap-3 text-slate-900">
-                        <span class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-xs">2A</span> 
+                <section class="white-card rounded-[2.5rem] p-6 md:p-10 flex flex-col">
+                    <h3 class="font-black text-lg md:text-xl uppercase tracking-widest mb-8 flex items-center gap-4 text-slate-900">
+                        <span class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-xs shadow-md shadow-blue-500/30">2A</span> 
                         Metode Penyerahan
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 items-stretch">
                         <label class="cursor-pointer group">
                             <input type="radio" name="metode_masuk" value="Antar Sendiri" class="sr-only delivery-in-radio" checked required>
-                            <div class="border-2 border-slate-100 bg-slate-50/30 rounded-2xl p-6 transition-all h-full flex flex-col justify-center">
-                                <h4 class="font-black text-xs text-slate-800 uppercase italic mb-1 tracking-tight">Antar Sendiri</h4>
-                                <p class="text-[10px] text-slate-400 font-medium leading-relaxed">Antar sepatu langsung ke toko.</p>
+                            <div class="border-2 border-slate-100 bg-slate-50/50 rounded-[1.5rem] p-6 transition-all h-full flex flex-col justify-center hover:border-slate-200 cursor-pointer">
+                                <h4 class="font-black text-xs md:text-sm text-slate-800 uppercase italic mb-1.5 tracking-tight transition-colors">Antar Sendiri</h4>
+                                <p class="text-[10px] md:text-xs text-slate-500 font-medium leading-relaxed">Antar sepatu langsung ke toko</p>
                             </div>
                         </label>
                         <label class="cursor-pointer group">
                             <input type="radio" name="metode_masuk" value="Jemput Kurir" class="sr-only delivery-in-radio">
-                            <div class="border-2 border-slate-100 bg-slate-50/30 rounded-2xl p-6 transition-all h-full flex flex-col justify-center">
-                                <h4 class="font-black text-xs text-slate-800 uppercase italic mb-1 tracking-tight">Dijemput Kurir</h4>
-                                <p class="text-[10px] text-slate-400 font-medium leading-relaxed">Kurir kami ambil ke lokasi Anda.</p>
+                            <div class="border-2 border-slate-100 bg-slate-50/50 rounded-[1.5rem] p-6 transition-all h-full flex flex-col justify-center hover:border-slate-200 cursor-pointer">
+                                <h4 class="font-black text-xs md:text-sm text-slate-800 uppercase italic mb-1.5 tracking-tight transition-colors">Dijemput Kurir</h4>
+                                <p class="text-[10px] md:text-xs text-slate-500 font-medium leading-relaxed">Kurir kami ambil ke lokasi Anda</p>
                             </div>
                         </label>
                     </div>
                 </section>
 
                 {{-- 2B --}}
-                <section class="glass-card rounded-[2.5rem] p-6 md:p-10 flex flex-col">
-                    <h3 class="font-black text-lg uppercase tracking-widest mb-8 flex items-center gap-3 text-slate-900">
-                        <span class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-xs">2B</span> 
+                <section class="white-card rounded-[2.5rem] p-6 md:p-10 flex flex-col">
+                    <h3 class="font-black text-lg md:text-xl uppercase tracking-widest mb-8 flex items-center gap-4 text-slate-900">
+                        <span class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-xs shadow-md shadow-blue-500/30">2B</span> 
                         Metode Pengambilan
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 items-stretch">
                         <label class="cursor-pointer group">
                             <input type="radio" name="metode_keluar" value="Ambil Sendiri" class="sr-only delivery-out-radio" checked required>
-                            <div class="border-2 border-slate-100 bg-slate-50/30 rounded-2xl p-6 transition-all h-full flex flex-col justify-center">
-                                <h4 class="font-black text-xs text-slate-800 uppercase italic mb-1 tracking-tight">Ambil Sendiri</h4>
-                                <p class="text-[10px] text-slate-400 font-medium leading-relaxed">Ambil di toko jika pengerjaan selesai.</p>
+                            <div class="border-2 border-slate-100 bg-slate-50/50 rounded-[1.5rem] p-6 transition-all h-full flex flex-col justify-center hover:border-slate-200 cursor-pointer">
+                                <h4 class="font-black text-xs md:text-sm text-slate-800 uppercase italic mb-1.5 tracking-tight transition-colors">Ambil Sendiri</h4>
+                                <p class="text-[10px] md:text-xs text-slate-500 font-medium leading-relaxed">Ambil di toko jika pengerjaan selesai</p>
                             </div>
                         </label>
                         <label class="cursor-pointer group">
                             <input type="radio" name="metode_keluar" value="Antar Kurir" class="sr-only delivery-out-radio">
-                            <div class="border-2 border-slate-100 bg-slate-50/30 rounded-2xl p-6 transition-all h-full flex flex-col justify-center">
-                                <h4 class="font-black text-xs text-slate-800 uppercase italic mb-1 tracking-tight">Diantar Kurir</h4>
-                                <p class="text-[10px] text-slate-400 font-medium leading-relaxed">Kami antar kembali ke rumah Anda.</p>
+                            <div class="border-2 border-slate-100 bg-slate-50/50 rounded-[1.5rem] p-6 transition-all h-full flex flex-col justify-center hover:border-slate-200 cursor-pointer">
+                                <h4 class="font-black text-xs md:text-sm text-slate-800 uppercase italic mb-1.5 tracking-tight transition-colors">Diantar Kurir</h4>
+                                <p class="text-[10px] md:text-xs text-slate-500 font-medium leading-relaxed">Kami antar kembali ke rumah Anda</p>
                             </div>
                         </label>
                     </div>
@@ -161,51 +166,57 @@
             </div>
 
             {{-- STEP 3: ALAMAT --}}
-            <section class="glass-card rounded-[2.5rem] p-6 md:p-10">
+            <section class="white-card rounded-[2.5rem] p-6 md:p-10">
                 <h3 class="font-black text-lg md:text-xl uppercase tracking-widest mb-8 flex items-center gap-4 text-slate-900">
-                    <span class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-xs">3</span> 
+                    <span class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-xs shadow-md shadow-blue-500/30">3</span> 
                     Alamat & Kapasitas
                 </h3>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-                    <div class="bg-slate-900 text-white p-8 rounded-[2rem] flex flex-col justify-center relative overflow-hidden">
-                        <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-2">Total Pesanan</p>
-                        <p class="text-6xl font-black italic"><span id="totalSepatuDisplay">0</span></p>
-                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2">Pasang Sepatu</p>
+                    
+                    {{-- TOTAL SEPATU INFO (Sesuai Desain Screenshot: Warna Biru Gelap) --}}
+                    <div class="bg-[#0f172a] text-white p-8 rounded-[2rem] flex flex-col justify-center relative overflow-hidden shadow-lg">
+                        <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl text-white pointer-events-none rotate-12"><i class="fa-solid fa-shoe-prints"></i></div>
+                        <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-2 relative z-10">Total Pesanan</p>
+                        <p class="text-6xl md:text-7xl font-black italic relative z-10 drop-shadow-md"><span id="totalSepatuDisplay">0</span></p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 relative z-10">Pasang Sepatu</p>
                     </div>
                     
-                    <div id="areaAlamat" class="lg:col-span-2 hidden transition-all duration-500">
-                        <textarea name="alamat_jemput" id="alamat_jemput" placeholder="Tulis Alamat Lengkap Penjemputan/Pengantaran (Nama Jalan, No. Rumah, Patokan)..." 
-                                  class="w-full h-full bg-slate-50 border-2 border-slate-100 text-slate-900 text-base rounded-[2rem] p-8 font-medium focus:border-blue-500 focus:bg-white outline-none transition-all shadow-inner min-h-[160px]">{{ old('alamat_jemput') }}</textarea>
+                    {{-- AREA INPUT ALAMAT (✅ NAME DIPERBAIKI JADI alamat_lengkap) --}}
+                    <div id="areaAlamat" class="lg:col-span-2 hidden transition-all duration-500 opacity-0">
+                        <textarea name="alamat_lengkap" id="alamat_lengkap" placeholder="Tulis Alamat Lengkap Penjemputan / Pengantaran (Cth: Perumahan Indah, Jl. Melati No.12, RT 01/RW 02)..." 
+                                  class="w-full h-full bg-slate-50 border-2 border-slate-100 text-slate-900 text-sm md:text-base rounded-[2rem] p-6 md:p-8 font-medium focus:border-blue-500 focus:bg-white focus:shadow-[0_0_0_4px_rgba(37,99,235,0.1)] outline-none transition-all min-h-[160px] lg:min-h-full resize-none">{{ old('alamat_lengkap') }}</textarea>
                     </div>
                 </div>
             </section>
 
             {{-- FOOTER CHECKOUT --}}
-            <div class="bg-white border-2 border-blue-600/10 p-6 md:p-10 rounded-[3rem] flex flex-col md:flex-row justify-between items-center gap-8 shadow-2xl relative overflow-hidden mt-10">
+            <div class="white-card p-6 md:p-10 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden mt-10 border-blue-100">
+                <div class="absolute left-0 top-0 w-32 h-32 bg-blue-50 rounded-br-full -z-0"></div>
                 
-                {{-- Field Metode Pembayaran Tersembunyi tapi Tetap Dikirim --}}
+                {{-- Field Metode Pembayaran Tersembunyi --}}
                 <input type="hidden" name="metode_pembayaran" value="Payment Gateway">
 
                 <div class="text-center md:text-left z-10">
-                    <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-1">Total Tagihan</p>
-                    <h2 class="text-5xl md:text-7xl font-black text-blue-600 italic tracking-tighter" id="totalTagihan">Rp 0</h2>
+                    <p class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-1.5">Total Tagihan</p>
+                    <h2 class="text-4xl md:text-6xl font-black text-blue-600 italic tracking-tighter" id="totalTagihan">Rp 0</h2>
                 </div>
-                <button type="submit" id="btnSubmit" class="w-full md:w-auto px-12 md:px-20 py-6 md:py-8 bg-blue-600 text-white font-black uppercase text-xs md:text-sm tracking-[0.3em] rounded-[2rem] shadow-xl shadow-blue-500/30 active:scale-95 transition-all hover:bg-slate-900 flex items-center justify-center gap-4 group z-10 disabled:opacity-30 disabled:grayscale">
+                
+                <button type="submit" id="btnSubmit" class="w-full md:w-auto px-10 md:px-16 py-5 md:py-6 bg-blue-600 text-white font-black uppercase text-xs md:text-sm tracking-[0.3em] rounded-full shadow-lg shadow-blue-500/30 active:scale-95 transition-all hover:bg-slate-900 flex items-center justify-center gap-4 group z-10 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed border border-blue-500">
                     Lanjut Checkout <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
                 </button>
-                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -z-0"></div>
             </div>
         </form>
 
-        <footer class="py-12 text-center opacity-20">
-            <p class="text-[9px] font-black uppercase tracking-[0.5em]">© 2026 ROFF.SHOECLEAN MASTER CONTROL</p>
+        <footer class="py-12 text-center opacity-40">
+            <p class="text-[9px] font-black uppercase tracking-[0.5em] text-slate-500">© 2026 ROFF.SHOECLEAN ONLINE BOOKING</p>
         </footer>
     </main>
 
     <script>
         function changeQty(id, delta) {
             const input = document.getElementById('qty-' + id);
-            let val = parseInt(input.value) + delta;
+            let val = parseInt(input.value) || 0;
+            val += delta;
             if (val < 0) val = 0;
             input.value = val;
             hitungTotalSemua();
@@ -218,7 +229,7 @@
             
             inputs.forEach(input => {
                 const qty = parseInt(input.value) || 0;
-                const harga = parseInt(input.getAttribute('data-harga'));
+                const harga = parseInt(input.getAttribute('data-harga')) || 0;
                 totalHarga += qty * harga;
                 totalSepatu += qty;
             });
@@ -230,22 +241,32 @@
             document.getElementById('totalSepatuDisplay').innerText = totalSepatu;
             
             const btn = document.getElementById('btnSubmit');
-            btn.disabled = (totalSepatu === 0);
+            if(totalSepatu === 0) {
+                btn.disabled = true;
+                btn.innerHTML = 'Pilih Layanan Dulu <i class="fa-solid fa-lock ml-2"></i>';
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = 'Lanjut Checkout <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform ml-2"></i>';
+            }
         }
 
         function toggleAlamatArea() {
             const selectedIn = document.querySelector('.delivery-in-radio:checked')?.value;
             const selectedOut = document.querySelector('.delivery-out-radio:checked')?.value;
             const isNeedKurir = (selectedIn === 'Jemput Kurir' || selectedOut === 'Antar Kurir');
+            
             const areaAlamat = document.getElementById('areaAlamat');
-            const inputAlamat = document.getElementById('alamat_jemput');
+            const inputAlamat = document.getElementById('alamat_lengkap'); // SESUAI CONTROLLER
 
             if (isNeedKurir) {
                 areaAlamat.classList.remove('hidden');
+                setTimeout(() => { areaAlamat.classList.add('opacity-100'); }, 10);
                 inputAlamat.required = true;
             } else {
-                areaAlamat.classList.add('hidden');
+                areaAlamat.classList.remove('opacity-100');
+                setTimeout(() => { areaAlamat.classList.add('hidden'); }, 300);
                 inputAlamat.required = false;
+                inputAlamat.value = ''; // Reset nilai
             }
         }
 
@@ -255,12 +276,15 @@
             });
             
             document.querySelectorAll('.layanan-qty').forEach(input => {
-                input.addEventListener('input', hitungTotalSemua);
+                input.addEventListener('input', function() {
+                    if(this.value < 0) this.value = 0;
+                    hitungTotalSemua();
+                });
             });
 
             document.getElementById('formReservasi').addEventListener('submit', function() {
                 const btn = document.getElementById('btnSubmit');
-                btn.innerHTML = 'MEMPROSES... <i class="fa-solid fa-circle-notch fa-spin ml-2"></i>';
+                btn.innerHTML = 'Memproses... <i class="fa-solid fa-circle-notch fa-spin ml-2"></i>';
                 btn.disabled = true;
             });
 

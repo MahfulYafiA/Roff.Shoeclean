@@ -40,13 +40,12 @@
     {{-- CONTAINER UTAMA --}}
     <div class="w-full max-w-5xl flex bg-white rounded-[2rem] md:rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(37,99,235,0.15)] overflow-hidden border border-slate-100/50 relative z-10">
         
-        {{-- KOLOM FORM --}}
+        {{-- KOLOM FORM (KIRI) --}}
         <div class="w-full lg:w-1/2 p-8 sm:p-10 md:p-12 lg:p-16 flex flex-col justify-center">
 
-            <div class="mb-8 md:mb-10 text-center sm:text-left">
-                <a href="{{ route('landing') }}" class="font-black text-2xl md:text-3xl tracking-tighter italic text-slate-900 mb-6 block">ROFF.<span class="text-blue-600">SHOECLEAN</span></a>
-                <h2 class="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-2">Selamat Datang!</h2>
-                <p class="text-slate-500 font-medium text-xs md:text-sm">Silakan masuk untuk memantau status sepatu Anda.</p>
+            <div class="mb-8 md:mb-10 text-center sm:text-left pt-2 md:pt-0">
+                <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-2 text-slate-900">Selamat Datang!</h2>
+                <p class="text-slate-500 font-medium text-xs md:text-sm">Silakan masuk untuk memantau status sepatu Anda</p>
             </div>
 
             @if($errors->any())
@@ -76,7 +75,6 @@
                         <input type="checkbox" name="remember" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
                         <span class="text-[11px] md:text-xs font-bold text-slate-500">Ingat Saya</span>
                     </label>
-                    {{-- 🚨 UPDATE: Link Lupa Sandi Arah ke Route Password Request Bawaan Laravel 🚨 --}}
                     <a href="{{ route('password.request') }}" class="text-[11px] md:text-xs font-bold text-blue-600 hover:text-slate-900 transition-colors">Lupa Sandi?</a>
                 </div>
 
@@ -108,7 +106,7 @@
             </p>
 
             {{-- TOMBOL KEMBALI DI BAWAH --}}
-            <div class="mt-8 text-center">
+            <div class="mt-8 text-center pb-2 md:pb-0">
                 <a href="{{ url('/') }}" class="inline-block text-[10px] md:text-[11px] font-black text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-[0.2em]">
                     Kembali
                 </a>
@@ -116,14 +114,24 @@
 
         </div>
 
-        {{-- KOLOM GAMBAR (Hanya Desktop) --}}
-        <div class="hidden lg:block lg:w-1/2 bg-blue-600 relative p-12 overflow-hidden flex flex-col justify-end">
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10"></div>
-            <div class="absolute inset-0 w-full h-full object-cover mix-blend-overlay bg-slate-900 opacity-40"></div>
+        {{-- KOLOM GAMBAR & LOGO (KANAN) - DIPERBAIKI POSISI KE TENGAH --}}
+        <div class="hidden lg:flex lg:w-1/2 relative p-12 lg:p-16 overflow-hidden flex-col justify-center items-start">
             
-            <div class="relative z-20 text-white mb-10">
-                <h3 class="text-4xl font-black tracking-tighter uppercase leading-[1.1] italic">Perawatan <br> Premium.</h3>
-                <p class="text-blue-50 font-medium text-sm mt-4 leading-relaxed max-w-sm">Akses dashboard Anda untuk melakukan reservasi online dan melacak proses cuci sepatu secara real-time.</p>
+            {{-- Background Color & Gradient --}}
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-slate-900 z-10"></div>
+            
+            {{-- Efek Glow Orbs agar tidak kosong --}}
+            <div class="absolute top-0 right-0 w-80 h-80 bg-cyan-400/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 z-10 pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/20 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3 z-10 pointer-events-none"></div>
+
+            <div class="relative z-20 text-white w-full">
+                {{-- LOGO ROFF --}}
+                <a href="{{ route('landing') }}" class="font-black text-2xl xl:text-3xl tracking-tighter italic text-white mb-10 xl:mb-14 inline-block drop-shadow-md">
+                    ROFF.<span class="text-blue-300">SHOECLEAN</span>
+                </a>
+                
+                <h3 class="text-4xl xl:text-5xl font-black tracking-tighter uppercase leading-[1.05] italic mb-6">Perawatan <br> Premium</h3>
+                <p class="text-blue-100/80 font-medium text-sm xl:text-base leading-relaxed max-w-md">Akses dashboard Anda untuk melakukan reservasi online dan melacak proses cuci sepatu secara real-time.</p>
             </div>
         </div>
 

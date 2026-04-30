@@ -13,7 +13,7 @@
         <div class="text-center mb-8">
             <a href="{{ route('landing') }}" class="font-black text-2xl tracking-tighter italic text-slate-900 mb-4 block">ROFF.<span class="text-blue-600">SHOECLEAN</span></a>
             <h2 class="text-2xl font-black uppercase tracking-tighter mb-2">Lupa Kata Sandi?</h2>
-            <p class="text-slate-500 font-medium text-xs md:text-sm">Masukkan email Anda, kami akan mengirimkan tautan untuk mengatur ulang kata sandi.</p>
+            <p class="text-slate-500 font-medium text-xs md:text-sm">Masukkan email Anda, kami akan mengirimkan tautan untuk mengatur ulang kata sandi</p>
         </div>
 
         @if(session('status'))

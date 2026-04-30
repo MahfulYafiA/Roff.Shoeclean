@@ -12,7 +12,7 @@
     <div class="w-full max-w-xl bg-white rounded-[2rem] shadow-2xl p-8 md:p-12 border border-slate-100 relative overflow-hidden">
         <div class="text-center mb-8">
             <h2 class="text-2xl font-black uppercase tracking-tighter mb-2 text-slate-900">Buat Sandi Baru</h2>
-            <p class="text-slate-500 font-medium text-xs md:text-sm">Silakan buat kata sandi baru untuk akun Anda.</p>
+            <p class="text-slate-500 font-medium text-xs md:text-sm">Silakan buat kata sandi baru untuk akun Anda</p>
         </div>
 
         @if($errors->any())

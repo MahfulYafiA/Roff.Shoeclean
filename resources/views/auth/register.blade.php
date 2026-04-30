@@ -48,7 +48,7 @@
         
         <div class="mb-8 text-center sm:text-left">
             <h2 class="text-2xl md:text-3xl font-black tracking-tighter mb-2 text-slate-900">Buat Akun</h2>
-            <p class="text-slate-500 font-medium text-xs md:text-sm">Daftarkan diri Anda untuk mulai membuat reservasi.</p>
+            <p class="text-slate-500 font-medium text-xs md:text-sm">Daftarkan diri Anda untuk mulai membuat reservasi</p>
         </div>
 
         {{-- 🚨 UPDATE NOTIFIKASI ERROR: Menampilkan semua pesan error dengan rapi --}}

@@ -25,10 +25,16 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('totalAntrean', 'totalSelesai'));
     }
 
+    /**
+     * Statistik Dashboard Utama Superadmin
+     */
     public function superDashboard()
     {
-        $users = User::all();
-        return view('superadmin.dashboard', compact('users'));
+        $totalOmzet = Reservasi::where('status', 'Selesai')->sum('total_harga');
+        $totalUser = User::count();
+        $pesananTerbaru = Reservasi::with('user')->orderBy('created_at', 'desc')->take(5)->get();
+
+        return view('superadmin.dashboard', compact('totalOmzet', 'totalUser', 'pesananTerbaru'));
     }
 
     // ========================================================
@@ -37,7 +43,8 @@ class AdminController extends Controller
 
     public function users()
     {
-        $users = User::where('id_role', 3)->orderBy('created_at', 'desc')->get();
+        // ✨ PERBAIKAN: Gunakan string role 'pelanggan'
+        $users = User::where('role', 'pelanggan')->orderBy('created_at', 'desc')->get();
         $totalPelanggan = $users->count();
 
         return view('admin.users', compact('users', 'totalPelanggan'));
@@ -49,7 +56,8 @@ class AdminController extends Controller
         try {
             $user = User::findOrFail($id);
             
-            if ($user->id_role === 1 || $user->id_role === 2) {
+            // ✨ PERBAIKAN: Gunakan string role
+            if ($user->role === 'superadmin' || $user->role === 'admin') {
                 return redirect()->back()->with('error', 'Akses Ditolak! Anda tidak bisa menghapus akun staf/admin.');
             }
 
@@ -76,31 +84,52 @@ class AdminController extends Controller
     // 3. MANAJEMEN USER (SUPERADMIN / OWNER SIDE)
     // ========================================================
 
+    /**
+     * ✨ UPDATE: Logika Hitung Statistik Manajemen User Menggunakan ENUM
+     */
     public function superUsers()
     {
         $users = User::orderBy('created_at', 'desc')->get();
-        return view('superadmin.users', compact('users'));
+
+        $totalAkun = $users->count();
+        
+        // ✨ PERBAIKAN: Filter berdasarkan string ENUM role
+        $totalStaf = $users->whereIn('role', ['superadmin', 'admin'])->count();
+        $totalPelanggan = $users->where('role', 'pelanggan')->count();
+        
+        // ✨ PERBAIKAN: Filter berdasarkan string ENUM status
+        $totalNonaktif = $users->where('status', 'Nonaktif')->count();
+
+        return view('superadmin.users', compact(
+            'users', 
+            'totalAkun', 
+            'totalStaf', 
+            'totalPelanggan', 
+            'totalNonaktif'
+        ));
     }
 
     /**
-     * ✅ FITUR BARU: Toggle Status Aktif/Nonaktif User
-     * Biar Superadmin bisa "pecat" sementara staf tanpa hapus data.
+     * ✨ UPDATE: Saklar Aktif/Nonaktif Menggunakan ENUM status
      */
     public function toggleUserStatus($id)
     {
         try {
             $user = User::findOrFail($id);
 
-            // Proteksi: Superadmin dilarang menonaktifkan dirinya sendiri
             if ($user->id_user === auth()->user()->id_user) {
                 return redirect()->back()->with('error', 'Waduh Mas, jangan nonaktifkan akun sendiri! Nanti nggak bisa login lagi lho. 😂');
             }
 
-            // Balikkan status: jika 1 jadi 0, jika 0 jadi 1
-            $user->is_active = !$user->is_active;
+            // Ganti logika dari is_active (boolean) menjadi status (string ENUM)
+            if ($user->status === 'Aktif') {
+                $user->status = 'Nonaktif';
+            } else {
+                $user->status = 'Aktif';
+            }
             $user->save();
 
-            $statusText = $user->is_active ? 'diaktifkan kembali' : 'dinonaktifkan';
+            $statusText = $user->status === 'Aktif' ? 'diaktifkan kembali' : 'dinonaktifkan';
             return redirect()->back()->with('success', "Akun {$user->nama} berhasil {$statusText}!");
             
         } catch (\Exception $e) {
@@ -108,6 +137,9 @@ class AdminController extends Controller
         }
     }
 
+    /**
+     * ✨ UPDATE: Tambah Admin Baru Menggunakan ENUM
+     */
     public function storeAdmin(Request $request)
     {
         $request->validate([
@@ -122,8 +154,8 @@ class AdminController extends Controller
             'no_telp'   => $request->no_telp,
             'email'     => $request->email,
             'password'  => Hash::make($request->password),
-            'id_role'   => 2, 
-            'is_active' => true, // Default saat dibuat langsung aktif
+            'role'      => 'admin',  // ✨ Menggunakan teks
+            'status'    => 'Aktif',  // ✨ Menggunakan teks
         ]);
 
         return redirect()->back()->with('success', 'Akun ADMIN baru berhasil ditambahkan!');
@@ -169,16 +201,6 @@ class AdminController extends Controller
                         ->get();
 
         return view('admin.antrean', compact('semuaPesanan'));
-    }
-
-    public function antreanKurir()
-    {
-        $antrean_kurir = Reservasi::with('user')
-                            ->whereIn('status', ['Diproses'])
-                            ->orderBy('updated_at', 'desc')
-                            ->get();
-
-        return view('admin.kurir', compact('antrean_kurir'));
     }
 
     public function updateStatus(Request $request, $id)

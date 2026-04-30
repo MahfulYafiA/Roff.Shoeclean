@@ -16,22 +16,22 @@ class Pembayaran extends Model
     protected $primaryKey = 'id_pembayaran';
 
     /**
-     * Kita aktifkan timestamps karena di file migrasi tr_pembayaran 
-     * ada $table->timestamps();
+     * 🚨 UPDATE PENTING:
+     * Kita set ke false karena tabel 'tr_pembayaran' di database Mas 
+     * belum punya kolom created_at dan updated_at.
      */
-    public $timestamps = true; 
+    public $timestamps = false; 
 
-    // ✅ UPDATE: Mendaftarkan kolom-kolom baru sesuai ERD Dosen
+    // ✅ Kolom yang boleh diisi mass-assignment
     protected $fillable = [
         'id_reservasi',
-        'metode_bayar', // Nama baru
-        'tanggal',      // Nama baru
-        'jumlah'        // Kolom baru
+        'metode_bayar',
+        'tanggal',
+        'jumlah'
     ];
 
     /**
-     * ✅ UPDATE: Agar 'tanggal' bisa kita format dengan ->format('d M Y') di view,
-     * kita tambahkan casting ke datetime.
+     * Casting kolom 'tanggal' agar bisa diformat sebagai waktu di View
      */
     protected $casts = [
         'tanggal' => 'datetime',

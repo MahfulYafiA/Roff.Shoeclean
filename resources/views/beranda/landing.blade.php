@@ -3,13 +3,12 @@
     $heroSetting = Illuminate\Support\Facades\DB::table('ms_pengaturan')->where('key', 'hero_image')->first();
     $heroPath = ($heroSetting && $heroSetting->value) 
                 ? asset('storage/' . $heroSetting->value) 
-                : asset('images/adidasspezial.png');
+                : asset('images/beranda.png'); // Sesuai dengan nama file di folder
 
-    // ✅ AMBIL DATA FOTO TENTANG KAMI DARI DATABASE
     $tentangSetting = Illuminate\Support\Facades\DB::table('ms_pengaturan')->where('key', 'tentang_image')->first();
     $tentangPath = ($tentangSetting && $tentangSetting->value) 
                 ? asset('storage/' . $tentangSetting->value) 
-                : asset('images/fototentangkami.jpeg'); // Gambar default jika admin belum upload
+                : asset('images/tentang roffshoeclean.jpeg'); // ✅ DISESUAIKAN DENGAN NAMA FILE ASLI
 @endphp
 
 <!DOCTYPE html>
@@ -228,7 +227,7 @@
                 <h1 class="text-4xl sm:text-5xl md:text-7xl lg:text-[7rem] xl:text-[8rem] font-black tracking-tighter md:leading-[1.0] uppercase mb-4 md:mb-10 text-gradient flex flex-col items-center md:items-start space-y-0 leading-tight">
                     <span data-aos="fade-up" data-aos-duration="1000" data-aos-delay="100">Rawat</span>
                     <span data-aos="fade-up" data-aos-duration="1000" data-aos-delay="300" class="text-premium-blue italic whitespace-nowrap pr-0 md:pr-10 leading-none py-1 md:py-0">Tanpa Harus</span>
-                    <span data-aos="fade-up" data-aos-duration="1000" data-aos-delay="500" class="text-premium-blue italic pr-0 md:pr-10 leading-tight">Antri.</span>
+                    <span data-aos="fade-up" data-aos-duration="1000" data-aos-delay="500" class="text-premium-blue italic pr-0 md:pr-10 leading-tight">Antri</span>
                 </h1>
                 
                 <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="700" class="hidden lg:flex flex-col sm:flex-row gap-4 md:gap-6 mt-6 md:mt-10 justify-center md:justify-start">
@@ -241,17 +240,9 @@
                 </div>
             </div>
 
-            <div class="lg:col-span-5 relative flex flex-col items-center justify-center md:justify-end w-full flex-grow mt-2 md:mt-0gap-4 md:gap-0" data-aos="zoom-in-left" data-aos-duration="1500" data-aos-delay="400">
+            <div class="lg:col-span-5 relative flex flex-col items-center justify-center md:justify-end w-full flex-grow mt-2 md:mt-0 gap-4 md:gap-0" data-aos="zoom-in-left" data-aos-duration="1500" data-aos-delay="400">
                 <div class="relative w-[70%] max-w-[280px] sm:max-w-[360px] md:max-w-md lg:max-w-[500px] xl:max-w-[600px] aspect-square md:aspect-[4/5] max-h-[40vh] md:max-h-none rounded-[2rem] md:rounded-[4rem] overflow-hidden glass-card luxury-shadow animate-float border-8 md:border-[10px] border-white mx-auto lg:mx-0 shadow-2xl">
                     <img src="{{ $heroPath }}" alt="Sepatu Premium" class="absolute inset-0 w-full h-full object-cover scale-105 hover:scale-110 transition-transform duration-[2s]">
-                    
-                    <div class="absolute bottom-3 left-3 right-3 md:bottom-10 md:left-10 md:right-10 bg-white/85 backdrop-blur-2xl p-4 md:p-10 rounded-2xl md:rounded-[2.5rem] border border-white shadow-2xl transition-transform hover:-translate-y-2 duration-500">
-                        <div class="flex items-center gap-2 md:gap-3.5 mb-1.5 md:mb-2.5">
-                            <div class="w-1.5 h-1.5 md:w-2.5 md:h-2.5 rounded-full bg-cyan-500 animate-pulse glow-shadow-light"></div>
-                            <p class="text-[7px] md:text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">Standar Kualitas</p>
-                        </div>
-                        <p class="text-sm md:text-3xl lg:text-4xl font-black text-slate-900 uppercase tracking-tighter leading-none leading-tight">Pembersihan <br><span class="text-premium-blue italic">Mendalam.</span></p>
-                    </div>
                 </div>
 
                 <div class="flex lg:hidden w-full max-w-[320px] sm:max-w-[360px] md:max-w-md mt-auto shrink-0 pt-4" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="600">
@@ -271,8 +262,8 @@
         <div class="w-full mx-auto relative z-10 flex flex-col justify-center h-full">
             <div class="mb-12 lg:mb-16 text-center md:text-left px-6 md:px-0" data-aos="fade-right" data-aos-duration="1000">
                 <span class="text-blue-600 font-black uppercase tracking-[0.35em] text-[10px] md:text-xs mb-3 md:mb-5 block">Panduan Reservasi</span>
-                <h2 class="font-black text-4xl sm:text-5xl md:text-7xl lg:text-8xlUppercase uppercase tracking-tighter text-slate-900 leading-[0.85]">
-                    Langkah <span class="text-premium-blue italic">Mudah.</span>
+                <h2 class="font-black text-4xl sm:text-5xl md:text-7xl lg:text-8xl uppercase tracking-tighter text-slate-900 leading-[0.85]">
+                    Langkah <span class="text-premium-blue italic">Mudah</span>
                 </h2>
             </div>
             
@@ -282,7 +273,7 @@
                     <div class="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-blue-100 to-blue-50 text-blue-600 rounded-2xl md:rounded-3xl flex items-center justify-center mb-6 md:mb-8 text-xl md:text-2xl font-black shadow-inner border border-blue-100">1</div>
                     <h5 class="font-black text-2xl md:text-3xl uppercase tracking-tight mb-3 md:mb-5 text-slate-900">Registrasi</h5>
                     <p class="text-slate-500 font-medium text-sm md:text-base lg:text-lg leading-relaxed">
-                        Daftarkan akun pelanggan Anda dengan aman dan cepat untuk mendapatkan akses ke sistem kami.
+                        Daftarkan akun pelanggan Anda dengan aman dan cepat untuk mendapatkan akses ke sistem kami
                     </p>
                 </div>
                 
@@ -291,7 +282,7 @@
                     <div class="w-12 h-12 md:w-14 md:h-14 bg-white/10 text-cyan-400 border border-cyan-500/30 rounded-2xl md:rounded-3xl flex items-center justify-center mb-6 md:mb-8 text-xl md:text-2xl font-black relative z-10 shadow-xl backdrop-blur">2</div>
                     <h5 class="font-black text-3xl md:text-4xl uppercase tracking-tight mb-3 md:mb-5 text-white relative z-10">Pilih Layanan</h5>
                     <p class="text-slate-300 font-medium text-base md:text-lg lg:text-xl leading-relaxed max-w-2xl relative z-10">
-                        Pilih jenis pencucian yang sesuai dengan material sepatu Anda. Transparansi harga tercatat jelas di dalam sistem.
+                        Pilih jenis pencucian yang sesuai dengan material sepatu Anda, Transparansi harga tercatat jelas di dalam sistem
                     </p>
                 </div>
                 
@@ -299,7 +290,7 @@
                     <div class="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-blue-100 to-blue-50 text-blue-600 rounded-2xl md:rounded-3xl flex items-center justify-center mb-6 md:mb-8 text-xl md:text-2xl font-black shadow-inner border border-blue-100">3</div>
                     <h5 class="font-black text-2xl md:text-3xl uppercase tracking-tight mb-3 md:mb-4 text-slate-900">Penyerahan</h5>
                     <p class="text-slate-500 font-medium text-sm md:text-base lg:text-lg leading-relaxed">
-                        Kirim sepatu ke toko kami atau gunakan layanan logistik. Data Anda akan langsung masuk ke dalam antrean pengerjaan.
+                        Kirim sepatu ke toko kami atau gunakan layanan logistik, Data Anda akan langsung masuk ke dalam antrean pengerjaan
                     </p>
                 </div>
                 
@@ -307,7 +298,7 @@
                     <div class="w-12 h-12 md:w-14 md:h-14 bg-white text-blue-600 shadow-xl rounded-2xl md:rounded-3xl flex items-center justify-center mb-6 md:mb-8 text-xl md:text-2xl font-black border border-slate-100">4</div>
                     <h5 class="font-black text-2xl md:text-3xl uppercase tracking-tight mb-3 md:mb-5 text-blue-800">Pantau Status</h5>
                     <p class="text-blue-700 font-medium text-sm md:text-base lg:text-lg leading-relaxed">
-                        Pantau setiap tahapan pengerjaan sepatu Anda secara real-time langsung melalui dasbor pelanggan.
+                        Pantau setiap tahapan pengerjaan sepatu Anda secara real-time langsung melalui dasbor pelanggan
                     </p>
                 </div>
             </div>
@@ -327,8 +318,8 @@
                 
                 <div class="text-center md:text-left flex flex-col items-center md:items-start w-full mt-6 md:mt-0" data-aos="fade-right" data-aos-duration="1200">
                     <span class="text-blue-600 font-black uppercase tracking-[0.35em] text-[10px] md:text-xs mb-2 md:mb-5 block">Tentang Kami</span>
-                    <h2 class="font-black text-4xl leading-tight sm:text-6xl lg:text-7xl xl:text-8xluppercase uppercase tracking-tighter text-slate-900 md:leading-[1.0] mb-6 md:mb-10">
-                        Perawatan Premium. <br class="hidden sm:block"> <span class="text-premium-blue italic">Jaminan Kualitas.</span>
+                    <h2 class="font-black text-4xl leading-tight sm:text-6xl lg:text-7xl xl:text-8xl uppercase tracking-tighter text-slate-900 md:leading-[1.0] mb-6 md:mb-10">
+                        Perawatan Premium <br class="hidden sm:block"> <span class="text-premium-blue italic">Jaminan Kualitas</span>
                     </h2>
                     
                     <div class="space-y-3 md:space-y-8 mx-auto md:mx-0 w-full px-2 md:px-0">
@@ -338,7 +329,7 @@
                     
                     <div class="mt-6 md:mt-16 pt-6 md:pt-10 border-t-2 border-slate-100 hidden md:flex items-center justify-start w-full" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="300">
                         <div class="flex items-center gap-4 md:gap-6 p-4 md:p-5 glass-card rounded-2xl md:rounded-3xl w-full md:w-auto hover-lift border-white shadow-xl shadow-blue-500/5 border-2 border-white/80">
-                            <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-tr from-cyan-400 via-blue-600 to-purple-600 rounded-xl md:rounded-3xl flex items-center justify-center text-white shadow-lg shadow-blue-500/40 shrink-0 border-2 border-white">
+                            <div class="w-12 h-12 md:w-16 h-16 bg-gradient-to-tr from-cyan-400 via-blue-600 to-purple-600 rounded-xl md:rounded-3xl flex items-center justify-center text-white shadow-lg shadow-blue-500/40 shrink-0 border-2 border-white">
                                 <i class="fa-solid fa-user-tie text-xl md:text-3xl"></i>
                             </div>
                             <div class="flex flex-col text-left pr-4 md:pr-16">
@@ -352,7 +343,7 @@
                 <div class="relative flex flex-col items-center justify-between lg:justify-end w-full flex-grow gap-6 md:gap-0" data-aos="fade-left" data-aos-duration="1500">
                     
                     <div class="relative w-[60%] max-w-[240px] sm:max-w-[360px] md:w-full md:max-w-[440px] xl:max-w-[500px] aspect-square rounded-[2.5rem] md:rounded-[4rem] overflow-hidden luxury-shadow border-8 md:border-[10px] border-white glass-card flex items-center justify-center p-2 md:p-3 group mx-auto lg:mx-0 my-auto shadow-2xl">
-                        {{-- ✅ MENGGUNAKAN VARIABEL GAMBAR DARI DATABASE --}}
+                        {{-- GAMBAR TENTANG --}}
                         <img src="{{ $tentangPath }}" alt="Tentang Roff" class="w-full h-full object-cover rounded-[2rem] md:rounded-[3rem] group-hover:scale-105 transition-transform duration-700">
                     </div>
 
@@ -361,7 +352,7 @@
                             <i class="fa-solid fa-user-tie text-lg"></i>
                         </div>
                         <div class="flex flex-col flex-grow text-left">
-                            <p class="font-black text-slate-900 text-sm sm:text-base mb-1leading-none tracking-tight">Rofi'i Alla Yusuffa</p>
+                            <p class="font-black text-slate-900 text-sm sm:text-base mb-1 leading-none tracking-tight">Rofi'i Alla Yusuffa</p>
                             <p class="text-[8px] sm:text-[9px] font-black tracking-[0.25em] text-blue-600 uppercase mt-0.5">Owner & Founder</p>
                         </div>
                         <div class="w-px h-10 bg-slate-300/80 shrink-0 mx-1"></div>
@@ -382,12 +373,12 @@
                 <div class="text-center md:text-left w-full" data-aos="fade-right" data-aos-duration="1000">
                     <span class="text-blue-600 font-black uppercase tracking-[0.35em] text-[10px] md:text-xs mb-3 block">Katalog Layanan</span>
                     <h2 class="font-black text-4xl sm:text-5xl md:text-7xl uppercase tracking-tighter text-slate-900 leading-[0.85]">
-                        Perawatan <br> <span class="text-premium-blue italic">Terbaik.</span>
+                        Perawatan <br> <span class="text-premium-blue italic">Terbaik</span>
                     </h2>
                 </div>
                 <div class="md:text-right w-full md:max-w-2xl border-r-4 border-blue-600 pr-6 py-1 text-left hidden md:block" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
                     <p class="text-slate-600 font-medium text-sm md:text-base lg:text-lg leading-relaxed">
-                        Kami menggunakan cairan pembersih premium yang terbukti aman untuk merawat segala jenis material sepatu kesayangan Anda.
+                        Kami menggunakan cairan pembersih premium yang terbukti aman untuk merawat segala jenis material sepatu kesayangan Anda
                     </p>
                 </div>
             </div>
@@ -395,12 +386,12 @@
             <div class="flex md:grid md:grid-cols-3 gap-6 md:gap-8 lg:gap-12 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-10 px-6 md:pb-0 md:px-0">
                 @foreach($layanans as $index => $layanan)
                     @php
-                        // Logika Fallback Gambar (Jika di DB kosong)
+                        // ✅ PERBAIKAN: SESUAIKAN DENGAN NAMA FILE ASLI DI PUBLIC/IMAGES
                         $fallback_image = 'default.png'; 
                         $nama_lower = strtolower($layanan->nama_layanan);
                         if(str_contains($nama_lower, 'fast')) { $fallback_image = 'fastclean.png'; } 
                         elseif(str_contains($nama_lower, 'deep')) { $fallback_image = 'deepclean.png'; } 
-                        elseif(str_contains($nama_lower, 'unyellowing')) { $fallback_image = 'unyellowing.png'; }
+                        elseif(str_contains($nama_lower, 'unyellowing')) { $fallback_image = 'Unyellowing.png'; } // U BESAR
                         
                         $harga_k = ($layanan->harga / 1000) . 'k';
                     @endphp
@@ -450,8 +441,8 @@
         <div class="w-full mx-auto relative z-10">
             <div class="mb-12 lg:mb-16 text-center md:text-left" data-aos="fade-right" data-aos-duration="1000">
                 <span class="text-blue-600 font-black uppercase tracking-[0.35em] text-[10px] md:text-xs mb-3 md:mb-4 block">Kunjungi Workshop</span>
-                <h2 class="font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xlUppercase uppercase tracking-tighter text-slate-900 leading-[0.85]">
-                    Lokasi <span class="text-premium-blue italic">Kami.</span>
+                <h2 class="font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl uppercase tracking-tighter text-slate-900 leading-[0.85]">
+                    Lokasi <span class="text-premium-blue italic">Kami</span>
                 </h2>
             </div>
 
@@ -529,7 +520,7 @@
                         </h2>
                     </a>
                     <p class="text-slate-400 text-[11px] md:text-[13px] leading-relaxed w-full max-w-sm">
-                        Solusi perawatan sepatu premium terbaik dengan standar kualitas tinggi. Kami mengembalikan kepercayaan diri Anda melalui sepatu yang bersih dan terawat sempurna.
+                        Solusi perawatan sepatu premium terbaik dengan standar kualitas tinggi, Kami mengembalikan kepercayaan diri Anda melalui sepatu yang bersih dan terawat sempurna
                     </p>
                 </div>
 
@@ -583,7 +574,7 @@
             <div class="w-full px-5 md:px-12 lg:px-20 mx-auto relative z-10 py-6 md:py-8">
                 <div class="flex flex-row justify-between items-center gap-3">
                     <p class="text-slate-400 text-[9px] md:text-[11px] font-black uppercase tracking-[0.25em] md:tracking-[0.35em] leading-none">
-                        © 2026 <span class="text-white/90">ROFF.SHOECLEAN</span> <span class="hidden md:inline">— ALL RIGHTS RESERVED.</span>
+                        © 2026 <span class="text-white/90">ROFF.SHOECLEAN</span> <span class="hidden md:inline">— ALL RIGHTS RESERVED</span>
                     </p>
                     <div class="flex items-center gap-3 md:gap-4 bg-white/5 px-4 md:px-6 py-2 md:py-3.5 rounded-full border-2 border-white/10 shadow-inner">
                         <div class="relative flex h-2 w-2 md:h-2.5 md:w-2.5">

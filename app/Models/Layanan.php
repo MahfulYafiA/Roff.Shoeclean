@@ -19,19 +19,18 @@ class Layanan extends Model
 
     /**
      * Agar fungsi create() dan update() di Controller lancar jaya.
-     * Kita tambahkan 'gambar' dan 'is_active' ke dalam array fillable.
+     * Kita masukkan kolom 'gambar' agar bisa diisi data secara massal.
      */
     protected $fillable = [
         'nama_layanan',
         'harga',
         'deskripsi',
-        'gambar',   // Mengizinkan pengisian path foto ke database
-        'is_active' // 🚨 BARU: Mengizinkan fitur ubah status aktif/nonaktif layanan
+        'status',
+        'gambar', // ✨ UPDATE: Menambahkan kolom gambar sesuai database terbaru
     ];
 
     /**
-     * Relasi ke Reservasi (Many-to-Many)
-     * Memungkinkan Mas melihat daftar pesanan apa saja yang menggunakan layanan ini
+     * Relasi ke Reservasi (Many-to-Many melalui tabel pivot)
      */
     public function reservasi()
     {

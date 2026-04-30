@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Pendapatan - ROFF.ADMIN</title>
+    <title>Laporan Pendapatan - ROFF.MANAGEMENT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,8 +37,8 @@
 <body class="text-slate-200 antialiased flex h-screen overflow-hidden relative">
 
     @php
-        // ✅ LOGIKA CERDAS: Cek id_role (1 = Superadmin, 2 = Admin)
-        $isSuper = auth()->user()->id_role == 1;
+        // ✨ PERBAIKAN: Menggunakan string ENUM 'role'
+        $isSuper = auth()->user()->role === 'superadmin';
         $accentColor = $isSuper ? 'emerald' : 'blue';
         $accentHex = $isSuper ? 'text-emerald-500' : 'text-blue-500';
     @endphp

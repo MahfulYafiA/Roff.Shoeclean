@@ -17,29 +17,29 @@ class DatabaseSeeder extends Seeder
 
         // 2. Mengisi Data User (Superadmin)
         User::create([
-            'nama'      => 'Rofi\'i (Owner)',
-            'email'     => 'superadmin@roff.com',
-            'password'  => Hash::make('admin123'),
-            'id_role'   => 1, // 1 untuk Superadmin
-            'no_telp'   => '08123456789',
+            'nama'      => 'superadmin',
+            'email'     => 'superadmin@gmail.com',
+            'password'  => Hash::make('superadmin123'),
+            'id_role'   => 1, 
+            'no_telp'   => '08888888888',
         ]);
 
         // 3. Mengisi Data User (Admin/Kasir)
         User::create([
-            'nama'      => 'Staf Kasir',
-            'email'     => 'admin@roff.com',
+            'nama'      => 'admin',
+            'email'     => 'admin@gmail.com',
             'password'  => Hash::make('admin123'),
-            'id_role'   => 2, // 2 untuk Admin
-            'no_telp'   => '08555555555',
+            'id_role'   => 2,
+            'no_telp'   => '08999999999',
         ]);
 
         // 4. Mengisi Data User (Pelanggan)
         User::create([
-            'nama'      => 'mahful',
-            'email'     => 'mahful@gmail.com',
-            'password'  => Hash::make('mahful123'),
-            'id_role'   => 3, // 3 untuk Pelanggan
-            'no_telp'   => '08987654321',
+            'nama'      => 'pelanggan',
+            'email'     => 'pelanggan@gmail.com',
+            'password'  => Hash::make('pelanggan123'),
+            'id_role'   => 3,
+            'no_telp'   => '08989898989',
         ]);
 
         $this->command->info('Database ROFF SHOECLEAN berhasil diisi data master!');
