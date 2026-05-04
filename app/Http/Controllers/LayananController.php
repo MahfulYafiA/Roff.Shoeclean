@@ -6,23 +6,31 @@ use Illuminate\Http\Request;
 use App\Models\Layanan;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\Auth;
 
 class LayananController extends Controller
 {
+    /**
+     * 1. Menampilkan Daftar Layanan (Universal Admin & Superadmin)
+     */
     public function index()
     {
         $layanans = Layanan::orderBy('id_layanan', 'desc')->get();
-        $userRole = auth()->user()->role;
+        $userRole = Auth::user()->role;
 
+        // Mengarahkan ke view yang sesuai dengan role
         if ($userRole === 'superadmin') {
             return view('superadmin.layanan', compact('layanans'));
         } elseif ($userRole === 'admin') {
             return view('admin.layanan', compact('layanans'));
-        } else {
-            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
-        }
+        } 
+        
+        return redirect()->route('dashboard')->with('error', 'Akses ditolak.');
     }
 
+    /**
+     * 2. Update Banner Utama Website
+     */
     public function updateHero(Request $request)
     {
         $request->validate([
@@ -31,15 +39,14 @@ class LayananController extends Controller
 
         try {
             if ($request->hasFile('hero_image')) {
-                // KITA PAKSA HAPUS DATA LAMA
+                // Cari data lama untuk dihapus filenya
                 $oldSetting = DB::table('ms_pengaturan')->where('key', 'hero_image')->first();
                 if ($oldSetting && $oldSetting->value) {
                     Storage::disk('public')->delete($oldSetting->value);
                 }
 
-                // SIMPAN DENGAN NAMA TETAP (TIDAK ACAK)
+                // Simpan dengan nama tetap agar mudah dipanggil
                 $path = 'banners/banner_utama.png';
-                // Gunakan fitur Storage::put untuk menimpa file dengan aman
                 Storage::disk('public')->put($path, file_get_contents($request->file('hero_image')));
 
                 DB::table('ms_pengaturan')->updateOrInsert(
@@ -54,6 +61,9 @@ class LayananController extends Controller
         }
     }
 
+    /**
+     * 3. Update Gambar "Tentang Kami"
+     */
     public function updateTentang(Request $request)
     {
         $request->validate([
@@ -67,7 +77,6 @@ class LayananController extends Controller
                     Storage::disk('public')->delete($oldSetting->value);
                 }
 
-                // SIMPAN DENGAN NAMA TETAP
                 $path = 'tentang/tentang_toko.png';
                 Storage::disk('public')->put($path, file_get_contents($request->file('tentang_image')));
 
@@ -76,13 +85,16 @@ class LayananController extends Controller
                     ['value' => $path, 'updated_at' => now()]
                 );
 
-                return redirect()->back()->with('success', 'Gambar "Tentang Kami" berhasil diperbarui!');
+                return redirect()->back()->with('success', 'Gambar Tentang Kami berhasil diperbarui!');
             }
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal update gambar: ' . $e->getMessage());
         }
     }
 
+    /**
+     * 4. Tambah Layanan Baru
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -108,10 +120,13 @@ class LayananController extends Controller
 
             return redirect()->back()->with('success', 'Layanan baru berhasil ditambahkan!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menambah layanan: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menambah layanan.');
         }
     }
 
+    /**
+     * 5. Update Data Layanan
+     */
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -141,10 +156,13 @@ class LayananController extends Controller
 
             return redirect()->back()->with('success', 'Detail layanan berhasil diperbarui.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal update layanan: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal update layanan.');
         }
     }
 
+    /**
+     * 6. Hapus Layanan Permanen
+     */
     public function destroy($id)
     {
         try {
@@ -159,17 +177,23 @@ class LayananController extends Controller
         }
     }
 
+    /**
+     * 7. Saklar Status (Toggle)
+     * Sinkron dengan route('layanan.toggle') di web.php
+     */
     public function toggleStatus($id)
     {
         try {
             $layanan = Layanan::findOrFail($id);
+            
+            // Toggle Aktif <-> Nonaktif
             $layanan->status = ($layanan->status === 'Aktif') ? 'Nonaktif' : 'Aktif';
             $layanan->save();
 
             $msg = $layanan->status === 'Aktif' ? 'diaktifkan' : 'dinonaktifkan';
             return redirect()->back()->with('success', "Layanan {$layanan->nama_layanan} berhasil {$msg}.");
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal mengubah status: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal mengubah status layanan.');
         }
     }
 }

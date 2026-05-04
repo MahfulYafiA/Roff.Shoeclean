@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Reservasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -18,19 +19,19 @@ class UserController extends Controller
      */
     public function dashboard()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
-        // 🚨 GEMBOK ROLE: Pengecekan disesuaikan dengan kolom 'role' (teks)
+        // 🚨 GEMBOK ROLE: Mencegah salah masuk dashboard
         if ($user->role === 'superadmin') {
             return redirect()->route('superadmin.dashboard');
         } elseif ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
-        // Mengambil 5 riwayat pesanan terbaru dengan Eager Loading
+        // Mengambil 5 riwayat pesanan terbaru
         $riwayat = Reservasi::with(['detail.layanan', 'pembayaran'])
                     ->where('id_user', $user->id_user)
-                    ->latest('id_reservasi') // Lebih simpel daripada orderBy
+                    ->latest('id_reservasi') 
                     ->take(5) 
                     ->get();
 
@@ -42,16 +43,12 @@ class UserController extends Controller
      */
     public function riwayat()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
-        // 🚨 GEMBOK ROLE: Pengecekan disesuaikan dengan kolom 'role' (teks)
-        if ($user->role === 'superadmin') {
-            return redirect()->route('superadmin.dashboard');
-        } elseif ($user->role === 'admin') {
-            return redirect()->route('admin.dashboard');
+        if ($user->role !== 'pelanggan') {
+            return redirect()->route('dashboard');
         }
 
-        // Mengambil semua data riwayat pesanan
         $riwayat = Reservasi::with(['detail.layanan', 'pembayaran'])
                     ->where('id_user', $user->id_user)
                     ->latest('id_reservasi')
@@ -70,17 +67,15 @@ class UserController extends Controller
      */
     public function index()
     {
-        // Ambil semua data user urut dari yang paling baru daftar
         $users = User::orderBy('created_at', 'desc')->get();
 
-        // ✨ PERBAIKAN LOGIKA STATISTIK (MENGGUNAKAN ENUM)
+        // Statistik menggunakan ENUM sesuai database
         $totalAkun      = User::count();
         $totalStaf      = User::whereIn('role', ['superadmin', 'admin'])->count();
         $totalPelanggan = User::where('role', 'pelanggan')->count();
         $totalNonaktif  = User::where('status', 'Nonaktif')->count();
 
-        // Pengecekan view untuk superadmin/admin
-        if (auth()->user()->role === 'superadmin') {
+        if (Auth::user()->role === 'superadmin') {
             return view('superadmin.users', compact('users', 'totalAkun', 'totalStaf', 'totalPelanggan', 'totalNonaktif'));
         }
         
@@ -92,11 +87,16 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        // 🚨 SINKRONISASI: Menyesuaikan Max Character dengan Workbench
         $request->validate([
-            'nama'     => 'required|string|max:100',
-            'email'    => 'required|email|unique:ms_user,email', // Pastikan tabel ms_user
-            'no_telp'  => 'required|string|max:20',
+            'nama'     => 'required|string|max:40', // Sesuai VARCHAR(40)
+            'email'    => 'required|email|max:50|unique:ms_user,email', // Sesuai VARCHAR(50)
+            'no_telp'  => 'required|string|max:15', // Sesuai VARCHAR(15)
             'password' => 'required|min:8',
+        ], [
+            'nama.max' => 'Nama maksimal 40 karakter.',
+            'no_telp.max' => 'Nomor telepon maksimal 15 karakter.',
+            'email.unique' => 'Email sudah terdaftar.',
         ]);
 
         try {
@@ -104,14 +104,14 @@ class UserController extends Controller
                 'nama'     => $request->nama,
                 'email'    => $request->email,
                 'no_telp'  => $request->no_telp,
-                'password' => Hash::make($request->password), // Enkripsi password
-                'role'     => 'admin',  // ✨ BUKAN id_role lagi
-                'status'   => 'Aktif',  // ✨ BUKAN is_active lagi
+                'password' => Hash::make($request->password),
+                'role'     => 'admin', 
+                'status'   => 'Aktif', 
             ]);
 
             return redirect()->back()->with('success', 'Admin staf baru berhasil ditambahkan!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menambah staf: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menambah staf.');
         }
     }
 
@@ -123,22 +123,16 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
             
-            // Mencegah superadmin menonaktifkan dirinya sendiri
-            if ($user->id_user == auth()->user()->id_user) {
-                return redirect()->back()->with('error', 'Anda tidak bisa menonaktifkan akun Anda sendiri!');
+            if ($user->id_user == Auth::user()->id_user) {
+                return redirect()->back()->with('error', 'Anda tidak bisa menonaktifkan diri sendiri!');
             }
 
-            // ✨ PERBAIKAN LOGIKA STATUS ENUM
-            if ($user->status === 'Aktif') {
-                $user->status = 'Nonaktif';
-            } else {
-                $user->status = 'Aktif';
-            }
-            
+            // Toggle ENUM Status
+            $user->status = ($user->status === 'Aktif') ? 'Nonaktif' : 'Aktif';
             $user->save();
 
-            $msg = $user->status === 'Aktif' ? 'diaktifkan' : 'dinonaktifkan';
-            return redirect()->back()->with('success', "Akun {$user->nama} berhasil {$msg}.");
+            $statusText = $user->status === 'Aktif' ? 'diaktifkan' : 'dinonaktifkan';
+            return redirect()->back()->with('success', "Akun {$user->nama} berhasil {$statusText}.");
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal mengubah status akun.');
         }
@@ -152,16 +146,14 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
             
-            // Keamanan: Akun Superadmin tidak boleh dihapus sembarangan
             if ($user->role === 'superadmin') {
-                return redirect()->back()->with('error', 'Keamanan Sistem: Akun Superadmin tidak dapat dihapus!');
+                return redirect()->back()->with('error', 'Akun Superadmin tidak dapat dihapus!');
             }
 
             $user->delete();
             return redirect()->back()->with('success', 'Akun berhasil dihapus permanen.');
         } catch (\Exception $e) {
-            // Error ini biasanya muncul kalau akun sudah punya transaksi di tr_reservasi (Foreign Key)
-            return redirect()->back()->with('error', 'Gagal menghapus akun. Pastikan akun tidak memiliki riwayat transaksi.');
+            return redirect()->back()->with('error', 'Gagal menghapus akun. User ini mungkin memiliki riwayat transaksi.');
         }
     }
 }

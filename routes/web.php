@@ -18,7 +18,6 @@ use App\Http\Controllers\DashboardController;
 // 1. RUTE LANDING PAGE (Publik)
 // ==========================================
 Route::get('/', function () {
-    // ✨ PERBAIKAN: Mengecek apakah kolom 'status' sudah ada sebelum Query
     $layanans = Schema::hasColumn('ms_layanan', 'status') ? Layanan::where('status', 'Aktif')->get() : [];
     return view('beranda.landing', compact('layanans'));
 })->name('landing');
@@ -51,12 +50,15 @@ Route::middleware('auth')->group(function () {
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // ✨ DASHBOARD SWITCHER: Pintu otomatis berdasarkan id_role (1, 2, atau 3)
+    // Dashboard Switcher otomatis berdasarkan role
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Update Banner & Tentang (Akses Universal Staf/Owner)
+    // ✨ RUTE UNIVERSAL (Satu nama rute untuk semua Dashboard)
     Route::post('/update-hero-banner', [LayananController::class, 'updateHero'])->name('update.hero.universal');
     Route::post('/update-tentang-kami', [LayananController::class, 'updateTentang'])->name('update.tentang.universal');
+    
+    // Rute Toggle Status Layanan (Universal) - Pastikan menggunakan PATCH
+    Route::patch('/layanan/toggle/{id}', [LayananController::class, 'toggleStatus'])->name('layanan.toggle');
 
     // Pengaturan Profil User
     Route::prefix('profil')->name('profil.')->group(function () {
@@ -73,26 +75,28 @@ Route::middleware('auth')->group(function () {
         Route::post('/baru', [ReservasiController::class, 'store'])->name('store');
         Route::get('/riwayat', [UserController::class, 'riwayat'])->name('riwayat');
         Route::get('/pembayaran/{id}', [ReservasiController::class, 'pembayaran'])->name('pembayaran');
-        Route::post('/pilih-pengembalian/{id}', [ReservasiController::class, 'pilihPengembalian'])->name('pilih-pengembalian');
     });
 
     // ==========================================
-    // 4. AREA ADMIN / STAF KASIR (Role 2)
+    // 4. AREA ADMIN / STAF KASIR
     // ==========================================
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-        Route::get('/users', [AdminController::class, 'users'])->name('users');
-        Route::delete('/users/{id}', [AdminController::class, 'destroyUser'])->name('users.destroy');
+        
+        // Rute Antrean & Hapus Reservasi
         Route::get('/antrean', [AdminController::class, 'antrean'])->name('antrean');
         Route::post('/reservasi/update/{id}', [AdminController::class, 'updateStatus'])->name('reservasi.update');
         Route::delete('/reservasi/delete/{id}', [AdminController::class, 'destroy'])->name('reservasi.destroy');
+        
+        // Rute User Pelanggan & Hapus User
+        Route::get('/users', [AdminController::class, 'users'])->name('users');
+        Route::delete('/users/{id}', [AdminController::class, 'destroyUser'])->name('users.destroy');
         
         // Manajemen Layanan (Admin Side)
         Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.index');
         Route::post('/layanan', [LayananController::class, 'store'])->name('layanan.store');
         Route::put('/layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');
         Route::delete('/layanan/{id}', [LayananController::class, 'destroy'])->name('layanan.destroy');
-        Route::post('/layanan/{id}/toggle', [LayananController::class, 'toggleStatus'])->name('layanan.toggle');
         
         Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
         Route::get('/kasir-offline', [AdminTransaksiController::class, 'createOffline'])->name('transaksi.offline');
@@ -100,7 +104,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // ==========================================
-    // 5. AREA SUPERADMIN / OWNER (Role 1)
+    // 5. AREA SUPERADMIN / OWNER
     // ==========================================
     Route::prefix('superadmin')->name('superadmin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'superDashboard'])->name('dashboard');
@@ -117,6 +121,5 @@ Route::middleware('auth')->group(function () {
         Route::post('/layanan', [LayananController::class, 'store'])->name('layanan.store');
         Route::put('/layanan/{id}', [LayananController::class, 'update'])->name('layanan.update');
         Route::delete('/layanan/{id}', [LayananController::class, 'destroy'])->name('layanan.destroy');
-        Route::post('/layanan/{id}/toggle', [LayananController::class, 'toggleStatus'])->name('layanan.toggle'); 
     });
 });

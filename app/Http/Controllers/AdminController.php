@@ -10,6 +10,7 @@ use App\Models\Pembayaran;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash; 
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -19,18 +20,16 @@ class AdminController extends Controller
     
     public function dashboard()
     {
-        $totalAntrean = Reservasi::whereIn('status', ['Diajukan', 'Diproses'])->count();
-        $totalSelesai = Reservasi::where('status', 'Selesai')->count();
+        // ✨ SINKRON: Menggunakan lowercase sesuai ENUM database
+        $totalAntrean = Reservasi::whereIn('status', ['diajukan', 'diproses'])->count();
+        $totalSelesai = Reservasi::where('status', 'selesai')->count();
 
         return view('admin.dashboard', compact('totalAntrean', 'totalSelesai'));
     }
 
-    /**
-     * Statistik Dashboard Utama Superadmin
-     */
     public function superDashboard()
     {
-        $totalOmzet = Reservasi::where('status', 'Selesai')->sum('total_harga');
+        $totalOmzet = Reservasi::where('status', 'selesai')->sum('total_harga');
         $totalUser = User::count();
         $pesananTerbaru = Reservasi::with('user')->orderBy('created_at', 'desc')->take(5)->get();
 
@@ -43,7 +42,6 @@ class AdminController extends Controller
 
     public function users()
     {
-        // ✨ PERBAIKAN: Gunakan string role 'pelanggan'
         $users = User::where('role', 'pelanggan')->orderBy('created_at', 'desc')->get();
         $totalPelanggan = $users->count();
 
@@ -56,12 +54,13 @@ class AdminController extends Controller
         try {
             $user = User::findOrFail($id);
             
-            // ✨ PERBAIKAN: Gunakan string role
             if ($user->role === 'superadmin' || $user->role === 'admin') {
                 return redirect()->back()->with('error', 'Akses Ditolak! Anda tidak bisa menghapus akun staf/admin.');
             }
 
-            if ($user->foto_profil) { Storage::disk('public')->delete($user->foto_profil); }
+            if ($user->foto_profil) { 
+                Storage::disk('public')->delete($user->foto_profil); 
+            }
 
             $idReservasis = Reservasi::where('id_user', $id)->pluck('id_reservasi');
             foreach ($idReservasis as $idRes) {
@@ -84,20 +83,13 @@ class AdminController extends Controller
     // 3. MANAJEMEN USER (SUPERADMIN / OWNER SIDE)
     // ========================================================
 
-    /**
-     * ✨ UPDATE: Logika Hitung Statistik Manajemen User Menggunakan ENUM
-     */
     public function superUsers()
     {
         $users = User::orderBy('created_at', 'desc')->get();
 
         $totalAkun = $users->count();
-        
-        // ✨ PERBAIKAN: Filter berdasarkan string ENUM role
         $totalStaf = $users->whereIn('role', ['superadmin', 'admin'])->count();
         $totalPelanggan = $users->where('role', 'pelanggan')->count();
-        
-        // ✨ PERBAIKAN: Filter berdasarkan string ENUM status
         $totalNonaktif = $users->where('status', 'Nonaktif')->count();
 
         return view('superadmin.users', compact(
@@ -109,44 +101,34 @@ class AdminController extends Controller
         ));
     }
 
-    /**
-     * ✨ UPDATE: Saklar Aktif/Nonaktif Menggunakan ENUM status
-     */
     public function toggleUserStatus($id)
     {
         try {
             $user = User::findOrFail($id);
 
-            if ($user->id_user === auth()->user()->id_user) {
-                return redirect()->back()->with('error', 'Waduh Mas, jangan nonaktifkan akun sendiri! Nanti nggak bisa login lagi lho. 😂');
+            if ($user->id_user === Auth::user()->id_user) {
+                return redirect()->back()->with('error', 'Anda tidak bisa menonaktifkan akun sendiri.');
             }
 
-            // Ganti logika dari is_active (boolean) menjadi status (string ENUM)
-            if ($user->status === 'Aktif') {
-                $user->status = 'Nonaktif';
-            } else {
-                $user->status = 'Aktif';
-            }
+            $user->status = ($user->status === 'Aktif') ? 'Nonaktif' : 'Aktif';
             $user->save();
 
             $statusText = $user->status === 'Aktif' ? 'diaktifkan kembali' : 'dinonaktifkan';
             return redirect()->back()->with('success', "Akun {$user->nama} berhasil {$statusText}!");
             
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal mengubah status: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal mengubah status.');
         }
     }
 
-    /**
-     * ✨ UPDATE: Tambah Admin Baru Menggunakan ENUM
-     */
     public function storeAdmin(Request $request)
     {
+        // ✨ SINKRON: Mengetatkan validasi karakter sesuai Workbench
         $request->validate([
-            'nama'     => 'required|string|max:40',
-            'no_telp'  => 'required|string|max:20',
-            'email'    => 'required|email|unique:ms_user,email|max:50',
-            'password' => 'required|min:6',
+            'nama'     => 'required|string|max:40', // Sesuai VARCHAR(40)
+            'no_telp'  => 'required|string|max:15', // Sesuai VARCHAR(15)
+            'email'    => 'required|email|unique:ms_user,email|max:50', // Sesuai VARCHAR(50)
+            'password' => 'required|min:8',
         ]);
 
         User::create([
@@ -154,8 +136,8 @@ class AdminController extends Controller
             'no_telp'   => $request->no_telp,
             'email'     => $request->email,
             'password'  => Hash::make($request->password),
-            'role'      => 'admin',  // ✨ Menggunakan teks
-            'status'    => 'Aktif',  // ✨ Menggunakan teks
+            'role'      => 'admin',  
+            'status'    => 'Aktif',  
         ]);
 
         return redirect()->back()->with('success', 'Akun ADMIN baru berhasil ditambahkan!');
@@ -167,18 +149,12 @@ class AdminController extends Controller
         try {
             $user = User::findOrFail($id);
             
-            if ($user->id_user === auth()->user()->id_user) {
+            if ($user->id_user === Auth::user()->id_user) {
                 return redirect()->back()->with('error', 'Anda tidak bisa menghapus akun Anda sendiri!');
             }
 
-            if ($user->foto_profil) { Storage::disk('public')->delete($user->foto_profil); }
-
-            $idReservasis = Reservasi::where('id_user', $id)->pluck('id_reservasi');
-            foreach ($idReservasis as $idRes) {
-                $pembayaran = Pembayaran::where('id_reservasi', $idRes)->first();
-                if ($pembayaran && $pembayaran->bukti_pembayaran) {
-                    Storage::disk('public')->delete($pembayaran->bukti_pembayaran);
-                }
+            if ($user->foto_profil) { 
+                Storage::disk('public')->delete($user->foto_profil); 
             }
 
             $user->delete();
@@ -186,12 +162,12 @@ class AdminController extends Controller
             return redirect()->back()->with('success', 'Akun berhasil dihapus selamanya dari sistem.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal hapus: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal hapus.');
         }
     }
 
     // ========================================================
-    // 4. MONITOR ANTREAN, KURIR & LAPORAN
+    // 4. MONITOR ANTREAN & LAPORAN
     // ========================================================
 
     public function antrean()
@@ -205,17 +181,18 @@ class AdminController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
+        // ✨ SINKRON: Menggunakan lowercase sesuai ENUM image_9c097c.png
         $request->validate([
-            'status' => 'required|in:Diajukan,Diproses,Selesai,Batalkan'
+            'status' => 'required|in:diajukan,diproses,selesai,batalkan'
         ]);
 
         try {
             $reservasi = Reservasi::findOrFail($id);
             $reservasi->status = $request->status;
 
-            if ($request->status == 'Selesai' && $reservasi->status_bayar != 'Lunas') {
+            if ($request->status == 'selesai' && $reservasi->status_bayar != 'Lunas') {
                 $pembayaran = Pembayaran::where('id_reservasi', $id)->first();
-                if ($pembayaran && in_array($pembayaran->metode_bayar, ['Bayar di Toko', 'Bayar di Kasir', 'Cash', 'COD'])) {
+                if ($pembayaran && in_array($pembayaran->metode_bayar, ['Bayar di Toko', 'Cash', 'COD', 'Tunai', 'Transfer Manual'])) {
                     $reservasi->status_bayar = 'Lunas';
                     $pembayaran->update(['tanggal' => now()]);
                 }
@@ -231,7 +208,7 @@ class AdminController extends Controller
     public function superLaporan()
     {
         $laporan = Reservasi::with(['user', 'detail.layanan'])
-                        ->where('status', 'Selesai')
+                        ->where('status', 'selesai')
                         ->orderBy('updated_at', 'desc')
                         ->get();
 
@@ -253,7 +230,7 @@ class AdminController extends Controller
             return redirect()->back()->with('success', 'Data antrean berhasil dihapus beserta detailnya!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal menghapus data antrean: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menghapus data.');
         }
     }
 }

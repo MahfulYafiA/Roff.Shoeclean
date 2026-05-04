@@ -12,29 +12,26 @@ class Layanan extends Model
     protected $table = 'ms_layanan';
     protected $primaryKey = 'id_layanan';
     
-    /**
-     * Sesuai migrasi, kita tidak menggunakan timestamps di ms_layanan
-     */
+    public $incrementing = true;
+    protected $keyType = 'int';
+    
     public $timestamps = false;
 
-    /**
-     * Agar fungsi create() dan update() di Controller lancar jaya.
-     * Kita masukkan kolom 'gambar' agar bisa diisi data secara massal.
-     */
     protected $fillable = [
         'nama_layanan',
         'harga',
         'deskripsi',
         'status',
-        'gambar', // ✨ UPDATE: Menambahkan kolom gambar sesuai database terbaru
+        'gambar', 
     ];
 
-    /**
-     * Relasi ke Reservasi (Many-to-Many melalui tabel pivot)
-     */
+    protected $casts = [
+        'harga' => 'integer',
+    ];
+
     public function reservasi()
     {
         return $this->belongsToMany(Reservasi::class, 'tr_detail_reservasi', 'id_layanan', 'id_reservasi')
-                    ->withPivot('harga');
+                    ->withPivot('id_detail', 'harga', 'jumlah', 'sub_total');
     }
 }

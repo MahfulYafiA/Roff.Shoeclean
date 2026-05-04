@@ -10,6 +10,7 @@ use App\Models\Pembayaran;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Auth;
 
 // Impor library Midtrans
 use Midtrans\Config;
@@ -22,9 +23,8 @@ class ReservasiController extends Controller
      */
     public function create()
     {
-        // 🔥 UPDATE DISINI: Ubah 'Tersedia' menjadi 'Aktif' sesuai ENUM database kita
         $layanans = Layanan::where('status', 'Aktif')->get();
-        $user = auth()->user();
+        $user = Auth::user();
         
         return view('pelanggan.reservasi.create', compact('layanans', 'user'));
     }
@@ -36,7 +36,7 @@ class ReservasiController extends Controller
     {
         $reservasi = Reservasi::with(['user', 'detail.layanan', 'pembayaran'])
                     ->where('id_reservasi', $id)
-                    ->where('id_user', auth()->user()->id_user)
+                    ->where('id_user', Auth::user()->id_user)
                     ->firstOrFail();
 
         if ($reservasi->status_bayar == 'Lunas') {
@@ -56,23 +56,21 @@ class ReservasiController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validasi Input (Sudah diubah ke alamat_lengkap)
         $request->validate([
             'layanan'           => 'required|array',
             'metode_masuk'      => 'required|in:Antar Sendiri,Jemput Kurir',
             'metode_keluar'     => 'required|in:Ambil Sendiri,Antar Kurir',
             'metode_pembayaran' => 'required',
-            'alamat_lengkap'    => 'nullable|string|max:255', // UPDATE DISINI
+            'alamat_lengkap'    => 'nullable|string|max:200', // Sesuai VARCHAR(200) di image_9c097c.png
         ]);
 
         DB::beginTransaction();
 
         try {
-            $user = auth()->user();
+            $user = Auth::user();
             $total_harga = 0;
             $items_terpilih = [];
 
-            // 2. Kalkulasi Total dan Siapkan Item
             foreach ($request->layanan as $id_layanan => $data) {
                 $qty = (int) $data['jumlah'];
                 if ($qty > 0) {
@@ -91,28 +89,26 @@ class ReservasiController extends Controller
             }
 
             if (empty($items_terpilih)) {
-                return back()->withErrors(['Mohon tentukan jumlah pasang sepatu minimal 1 pada layanan yang dipilih.'])->withInput();
+                return back()->withErrors(['Mohon tentukan jumlah pasang sepatu minimal 1.'])->withInput();
             }
 
-            // Update alamat di profile user jika user mengisi alamat baru
             if ($request->alamat_lengkap) {
                 User::where('id_user', $user->id_user)->update(['alamat' => $request->alamat_lengkap]);
             }
 
-            // 3. SIMPAN KE tr_reservasi (Header)
+            // ✨ SINKRONISASI: Status diubah menjadi 'diajukan' (lowercase) sesuai image_9c097c.png
             $reservasi = Reservasi::create([
                 'id_user'           => $user->id_user,
                 'tanggal_reservasi' => now()->toDateString(),
                 'metode_layanan'    => ($request->metode_masuk == 'Jemput Kurir') ? 'Pick-up' : 'Drop-off', 
                 'metode_masuk'      => $request->metode_masuk,
                 'metode_keluar'     => $request->metode_keluar,
-                'status'            => 'Menunggu Konfirmasi',
+                'status'            => 'diajukan', 
                 'status_bayar'      => 'Belum Lunas', 
                 'total_harga'       => $total_harga,
                 'alamat_lengkap'    => $request->alamat_lengkap,
             ]);
 
-            // 4. SIMPAN KE tr_detail_reservasi
             foreach ($items_terpilih as $item) {
                 DetailReservasi::create([
                     'id_reservasi' => $reservasi->id_reservasi,
@@ -123,15 +119,15 @@ class ReservasiController extends Controller
                 ]);
             }
 
-            // 5. SIMPAN KE tr_pembayaran
             Pembayaran::create([
                 'id_reservasi' => $reservasi->id_reservasi,
                 'metode_bayar' => 'Payment Gateway',
+                'tanggal'      => now(),
+                'jumlah'       => 0,
             ]);
 
             DB::commit();
 
-            // 6. LANJUT KE PROSES MIDTRANS
             $reservasiLengkap = Reservasi::with(['user', 'detail.layanan'])->find($reservasi->id_reservasi);
             $snapToken = $this->generateMidtransToken($reservasiLengkap);
 
@@ -144,13 +140,10 @@ class ReservasiController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("ERROR RESERVASI: " . $e->getMessage());
-            return back()->withErrors(['Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()])->withInput();
+            return back()->withErrors(['Terjadi kesalahan: ' . $e->getMessage()])->withInput();
         }
     }
 
-    /**
-     * Fungsi Pembuat Snap Token Midtrans
-     */
     private function generateMidtransToken($reservasi)
     {
         Config::$serverKey = env('MIDTRANS_SERVER_KEY');
@@ -179,15 +172,12 @@ class ReservasiController extends Controller
                 'phone'      => $reservasi->user->no_telp ?? '',
             ],
             'item_details'     => $item_details,
-            'enabled_payments' => ['bca_va', 'dana', 'qris', 'other_qris', 'gopay', 'shopeepay']
+            'enabled_payments' => ['bca_va', 'dana', 'qris', 'gopay', 'shopeepay']
         ];
 
         return Snap::getSnapToken($params);
     }
 
-    /**
-     * Webhook Midtrans Callback
-     */
     public function callback(Request $request)
     {
         $serverKey = env('MIDTRANS_SERVER_KEY');
@@ -202,14 +192,16 @@ class ReservasiController extends Controller
                 DB::beginTransaction();
                 try {
                     if ($request->transaction_status == 'settlement' || $request->transaction_status == 'capture') {
-                        $reservasi->update(['status' => 'Diproses', 'status_bayar' => 'Lunas']);
+                        // ✨ SINKRONISASI: Gunakan 'diproses' sesuai ENUM di image_9c097c.png
+                        $reservasi->update(['status' => 'diproses', 'status_bayar' => 'Lunas']);
                         $pembayaran->update([
                             'tanggal' => now(),
                             'jumlah' => $request->gross_amount,
-                            'metode_bayar' => 'Payment Gateway'
+                            'metode_bayar' => 'Midtrans (' . $request->payment_type . ')'
                         ]);
                     } else if (in_array($request->transaction_status, ['deny', 'expire', 'cancel'])) {
-                        $reservasi->update(['status' => 'Dibatalkan']);
+                        // ✨ SINKRONISASI: Gunakan 'batalkan' sesuai ENUM di image_9c097c.png
+                        $reservasi->update(['status' => 'batalkan']);
                     }
                     
                     DB::commit();

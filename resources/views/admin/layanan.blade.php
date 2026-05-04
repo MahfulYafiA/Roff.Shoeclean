@@ -29,12 +29,12 @@
 
     // LOGIKA TAMPILAN FOTO LAMA
     $currentHero = ($dbHero && $dbHero->value && file_exists(public_path('storage/' . $dbHero->value))) 
-                   ? asset('storage/' . $dbHero->value) . '?t=' . time() 
-                   : 'https://placehold.co/600x400/1e293b/475569?text=Kosong';
+                    ? asset('storage/' . $dbHero->value) . '?t=' . time() 
+                    : 'https://placehold.co/600x400/1e293b/475569?text=Kosong';
 
     $currentAbout = ($dbTentang && $dbTentang->value && file_exists(public_path('storage/' . $dbTentang->value))) 
-                    ? asset('storage/' . $dbTentang->value) . '?t=' . time() 
-                    : 'https://placehold.co/600x400/1e293b/475569?text=Kosong';
+                     ? asset('storage/' . $dbTentang->value) . '?t=' . time() 
+                     : 'https://placehold.co/600x400/1e293b/475569?text=Kosong';
 @endphp
 
 <body class="text-slate-200 antialiased flex h-screen overflow-hidden relative selection:bg-blue-500 selection:text-white">
@@ -95,7 +95,7 @@
                 </button>
             </div>
 
-            {{-- SECTION PENGATURAN GAMBAR (KEMBALI HADIR UNTUK ADMIN) --}}
+            {{-- SECTION PENGATURAN GAMBAR --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 relative z-10">
                 
                 {{-- CARD 1: BANNER WEBSITE --}}
@@ -200,12 +200,15 @@
                                 <td class="px-8 py-5 font-black text-blue-400 text-lg tracking-tighter">Rp {{ number_format($l->harga, 0, ',', '.') }}</td>
                                 <td class="px-8 py-5 text-right whitespace-nowrap">
                                     <div class="flex justify-end gap-3">
-                                        <form action="{{ route('admin.layanan.toggle', $l->id_layanan) }}" method="POST" class="m-0 inline-block">
+                                        {{-- ✨ FIX: GANTI admin.layanan.toggle MENJADI layanan.toggle --}}
+                                        <form action="{{ route('layanan.toggle', $l->id_layanan) }}" method="POST" class="m-0 inline-block">
                                             @csrf
+                                            @method('PATCH')
                                             <button type="submit" class="w-11 h-11 rounded-full transition-all flex items-center justify-center shadow-lg active:scale-90 border border-slate-700 hover:border-transparent {{ $l->status == 'Aktif' ? 'bg-slate-800 text-blue-400 hover:bg-blue-500 hover:text-white' : 'bg-slate-800/50 text-slate-500 hover:bg-slate-600 hover:text-white' }}">
                                                 <i class="fa-solid {{ $l->status == 'Aktif' ? 'fa-toggle-on' : 'fa-toggle-off' }} text-base"></i>
                                             </button>
                                         </form>
+
                                         <button onclick='openEditModal({{ $l->id_layanan }}, "{{ $l->nama_layanan }}", "{{ $l->deskripsi }}", {{ $l->harga }}, "{{ $l->gambar ? asset('storage/' . $l->gambar) : '' }}")' class="w-11 h-11 rounded-full bg-slate-800 text-slate-400 hover:bg-blue-500 hover:text-white border border-slate-700 transition-all flex items-center justify-center shadow-lg hover:scale-110 active:scale-95">
                                             <i class="fa-solid fa-pen-to-square text-sm"></i>
                                         </button>
@@ -239,7 +242,7 @@
         </div>
     </main>
 
-    {{-- MODAL EDIT LAYANAN (MODERN 2-COLUMN UNTUK ADMIN) --}}
+    {{-- MODAL EDIT LAYANAN --}}
     <div id="modalEdit" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeEditModal()"></div>
         <div class="relative w-full max-w-5xl bg-slate-900 border border-slate-700 rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-hidden">
@@ -253,7 +256,6 @@
                 @csrf @method('PUT')
                 <div class="p-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
                     
-                    {{-- Kolom Kiri: Visual & Dasar --}}
                     <div class="space-y-8">
                         <div class="bg-slate-800/30 p-6 rounded-[2rem] border border-white/5">
                             <label class="block text-[10px] font-black uppercase text-blue-500 mb-6 tracking-[0.2em] text-center">Pratinjau Foto Layanan</label>
@@ -292,7 +294,6 @@
                         </div>
                     </div>
 
-                    {{-- Kolom Kanan: Deskripsi --}}
                     <div class="flex flex-col">
                         <label class="block text-[10px] font-black uppercase text-blue-500 mb-4 ml-1 tracking-[0.2em]">Deskripsi Layanan</label>
                         <textarea id="edit_deskripsi" name="deskripsi" required class="flex-1 w-full bg-slate-800 border border-slate-700 px-8 py-8 rounded-[2.5rem] text-sm font-medium text-slate-300 leading-relaxed outline-none focus:border-blue-500 transition-all resize-none min-h-[350px] custom-scroll" placeholder="Tulis deskripsi detail..."></textarea>

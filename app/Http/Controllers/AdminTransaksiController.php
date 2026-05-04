@@ -18,7 +18,8 @@ class AdminTransaksiController extends Controller
      */
     public function createOffline()
     {
-        $layanans = Layanan::all();
+        // Hanya ambil layanan yang statusnya 'Aktif'
+        $layanans = Layanan::where('status', 'Aktif')->get();
         return view('admin.transaksi.offline', compact('layanans'));
     }
 
@@ -40,13 +41,14 @@ class AdminTransaksiController extends Controller
 
         try {
             // 1. CARI ATAU BUAT AKUN DUMMY UNTUK PELANGGAN OFFLINE
-            // Agar strukturnya rapi, kita tetap butuh id_user. Kita buat akun "Walk-in"
+            // Menggunakan struktur tabel ms_user yang baru (role & status adalah string/enum)
             $user_offline = User::firstOrCreate(
-                ['email' => 'offline_' . time() . '@roff.com'], // Email unik dummy
+                ['email' => 'offline_' . time() . '@roff.com'], 
                 [
-                    'nama'     => $request->nama_pelanggan . ' (Offline)',
-                    'password' => Hash::make('rahasia'), // Password acak
-                    'id_role'  => 3,
+                    'nama'    => $request->nama_pelanggan . ' (Offline)',
+                    'password' => Hash::make('rahasia'),
+                    'role'     => 'pelanggan', // ✨ SINKRON: Menggunakan string 'pelanggan', bukan id_role
+                    'status'   => 'Aktif',    // ✨ SINKRON: Status default akun
                     'no_telp'  => $request->no_telp,
                 ]
             );
@@ -56,20 +58,18 @@ class AdminTransaksiController extends Controller
 
             // 2. SIMPAN RESERVASI
             $reservasi = Reservasi::create([
-                'id_user'             => $user_offline->id_user,
-                'tanggal_reservasi'   => now()->toDateString(),
-                'metode_layanan'      => 'Drop-off', // Offline pasti Drop-off
-                'status'              => 'Diproses', // Langsung diproses karena sudah di toko
-                'status_bayar'        => $request->status_bayar,
-                'total_harga'         => $sub_total,
-                'alamat_jemput'       => null,
+                'id_user'           => $user_offline->id_user,
+                'tanggal_reservasi' => now()->toDateString(),
+                'metode_layanan'    => 'Drop-off', 
+                'status'            => 'diproses',     // ✨ SINKRON: Menggunakan lowercase sesuai ENUM image_9c097c.png
+                'status_bayar'      => $request->status_bayar,
+                'total_harga'       => $sub_total,
+                'alamat_lengkap'    => null,           // ✨ SINKRON: Nama kolom alamat_lengkap, bukan alamat_jemput
             ]);
-
-            $id_res_baru = $reservasi->id_reservasi ?? $reservasi->id;
 
             // 3. SIMPAN DETAIL
             DetailReservasi::create([
-                'id_reservasi' => $id_res_baru,
+                'id_reservasi' => $reservasi->id_reservasi, // Laravel otomatis ambil id_reservasi karena sudah didefinisikan di Model
                 'id_layanan'   => $request->id_layanan,
                 'harga'        => $layanan->harga,
                 'jumlah'       => $request->jumlah,
@@ -78,10 +78,10 @@ class AdminTransaksiController extends Controller
 
             // 4. SIMPAN PEMBAYARAN
             Pembayaran::create([
-                'id_reservasi'  => $id_res_baru,
-                'tanggal'       => ($request->status_bayar == 'Lunas') ? now() : null,
-                'jumlah'        => ($request->status_bayar == 'Lunas') ? $sub_total : null,
-                'metode_bayar'  => $request->metode_bayar,
+                'id_reservasi' => $reservasi->id_reservasi,
+                'tanggal'      => ($request->status_bayar == 'Lunas') ? now() : null,
+                'jumlah'       => ($request->status_bayar == 'Lunas') ? $sub_total : 0,
+                'metode_bayar' => $request->metode_bayar,
             ]);
 
             DB::commit();
@@ -90,7 +90,7 @@ class AdminTransaksiController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withErrors(['Gagal menyimpan transaksi offline: ' . $e->getMessage()])->withInput();
+            return redirect()->back()->withErrors(['Gagal: ' . $e->getMessage()])->withInput();
         }
     }
 }
