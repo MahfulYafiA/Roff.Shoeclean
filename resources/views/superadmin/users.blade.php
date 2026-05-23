@@ -27,7 +27,6 @@
 <body class="text-slate-200 antialiased flex h-screen overflow-hidden relative">
 
     @php
-        // ✨ PERBAIKAN: Menggunakan ENUM role
         $isSuper = auth()->user()->role === 'superadmin';
         $accent = $isSuper ? 'emerald' : 'blue';
     @endphp
@@ -72,6 +71,17 @@
             @if(session('error'))
                 <div class="bg-rose-500/20 border border-rose-500/50 text-rose-400 px-6 py-4 rounded-2xl mb-8 text-xs font-bold shadow-lg flex items-center gap-3 backdrop-blur-sm relative z-10">
                     <i class="fa-solid fa-triangle-exclamation text-lg"></i> {{ session('error') }}
+                </div>
+            @endif
+            
+            {{-- ALERT VALIDASI ERROR (Penting saat Edit/Tambah Gagal) --}}
+            @if ($errors->any())
+                <div class="bg-rose-500/20 border border-rose-500/50 text-rose-400 px-6 py-4 rounded-2xl mb-8 text-xs font-bold shadow-lg backdrop-blur-sm relative z-10">
+                    <ul class="list-disc list-inside">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
 
@@ -140,7 +150,6 @@
                         </thead>
                         <tbody class="divide-y divide-slate-800/50 text-sm">
                             @forelse($users as $u)
-                            {{-- ✨ PERBAIKAN LOGIKA STATUS --}}
                             <tr class="hover:bg-slate-800/30 transition-all group {{ $u->status === 'Nonaktif' ? 'user-inactive' : '' }}">
                                 <td class="px-8 py-6">
                                     <div class="flex items-center gap-3">
@@ -160,7 +169,6 @@
                                     </p>
                                 </td>
                                 <td class="px-8 py-6 text-center">
-                                    {{-- ✨ PERBAIKAN LOGIKA ROLE --}}
                                     @if($u->role === 'superadmin')
                                         <span class="bg-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-emerald-500/30">Superadmin</span>
                                     @elseif($u->role === 'admin')
@@ -171,7 +179,8 @@
                                 </td>
                                 <td class="px-8 py-6">
                                     <div class="flex items-center justify-end gap-3">
-                                        {{-- ✅ TOGGLE STATUS (PROTEKSI DIRI SENDIRI) --}}
+                                        
+                                        {{-- ✅ TOGGLE STATUS --}}
                                         @if($u->id_user != auth()->user()->id_user && $u->role !== 'superadmin')
                                             <form action="{{ route('superadmin.users.toggle', $u->id_user) }}" method="POST" class="m-0">
                                                 @csrf @method('PATCH')
@@ -188,6 +197,11 @@
                                                 </button>
                                             </form>
                                         @endif
+
+                                        {{-- ✨ TOMBOL EDIT --}}
+                                        <button onclick="openEditModal('{{ $u->id_user }}', '{{ addslashes($u->nama) }}', '{{ $u->email }}', '{{ $u->no_telp }}', '{{ $u->role }}')" class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all flex items-center justify-center active:scale-90" title="Edit Akun">
+                                            <i class="fa-solid fa-pen text-xs"></i>
+                                        </button>
 
                                         {{-- PROTEKSI HAPUS --}}
                                         @if($u->id_user == auth()->user()->id_user || $u->role === 'superadmin')
@@ -217,12 +231,12 @@
         </div>
     </main>
 
-    {{-- MODAL TAMBAH ADMIN --}}
+    {{-- MODAL TAMBAH ADMIN (Dinamis dengan $accent) --}}
     <div id="modalAdmin" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/85 backdrop-blur-md transition-opacity" onclick="closeModal()"></div>
         <div class="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-[2.5rem] shadow-2xl p-8 md:p-10 max-h-[90vh] overflow-y-auto custom-scroll">
             <div class="flex justify-between items-center mb-8">
-                <h3 class="text-2xl font-black uppercase tracking-tight text-white">Tambah <span class="text-emerald-500 italic">Admin</span></h3>
+                <h3 class="text-2xl font-black uppercase tracking-tight text-white">Tambah <span class="text-{{ $accent }}-500 italic">Admin</span></h3>
                 <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 hover:bg-rose-500 hover:text-white transition-colors flex items-center justify-center">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
@@ -232,24 +246,72 @@
                 @csrf
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">Nama Lengkap</label>
-                    <input type="text" name="nama" required placeholder="Contoh: Staf Kasir Baru" class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-emerald-500 focus:bg-slate-800 outline-none transition-all">
+                    <input type="text" name="nama" required placeholder="Contoh: Staf Kasir Baru" class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-{{ $accent }}-500 focus:bg-slate-800 outline-none transition-all">
                 </div>
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">No WhatsApp</label>
-                    <input type="text" name="no_telp" required placeholder="08xxxx" class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-emerald-500 outline-none">
+                    <input type="text" name="no_telp" required placeholder="08xxxx" class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-{{ $accent }}-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">Email Staf</label>
-                    <input type="email" name="email" required placeholder="staf@roff.com" class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-emerald-500 outline-none">
+                    <input type="email" name="email" required placeholder="staf@roff.com" class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-{{ $accent }}-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">Akses Sandi</label>
-                    <input type="password" name="password" required placeholder="Minimal 8 Karakter" class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-emerald-500 outline-none">
+                    <input type="password" name="password" required placeholder="Minimal 8 Karakter" class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-{{ $accent }}-500 outline-none">
                 </div>
                 
                 <div class="pt-6 mt-6 border-t border-slate-800">
-                    <button type="submit" class="w-full bg-emerald-500 text-white py-4 rounded-[1.2rem] font-black uppercase text-[11px] tracking-widest hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-3">
-                        <i class="fa-solid fa-save"></i> Daftarkan Akun Staf
+                    <button type="submit" class="w-full bg-{{ $accent }}-500 text-white py-4 rounded-[1.2rem] font-black uppercase text-[11px] tracking-widest hover:bg-{{ $accent }}-400 transition-all shadow-lg shadow-{{ $accent }}-500/20 active:scale-95 flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-save"></i> Daftarkan Akun
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- ✨ FITUR BARU: MODAL EDIT USER (Dinamis dengan $accent) --}}
+    <div id="modalEdit" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/85 backdrop-blur-md transition-opacity" onclick="closeEditModal()"></div>
+        <div class="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-[2.5rem] shadow-2xl p-8 md:p-10 max-h-[90vh] overflow-y-auto custom-scroll">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-2xl font-black uppercase tracking-tight text-white">Edit <span class="text-{{ $accent }}-500 italic">User</span></h3>
+                <button onclick="closeEditModal()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 hover:bg-rose-500 hover:text-white transition-colors flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <form id="formEditUser" action="" method="POST" class="space-y-5 m-0">
+                @csrf
+                @method('PUT')
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">Nama Lengkap</label>
+                    <input type="text" id="edit_nama" name="nama" required class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-{{ $accent }}-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">No WhatsApp</label>
+                    <input type="text" id="edit_no_telp" name="no_telp" required class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-{{ $accent }}-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">Email</label>
+                    <input type="email" id="edit_email" name="email" required class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-{{ $accent }}-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">Role / Hak Akses</label>
+                    <select id="edit_role" name="role" required class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-{{ $accent }}-500 outline-none appearance-none">
+                        <option value="pelanggan">Pelanggan</option>
+                        <option value="admin">Admin / Staf</option>
+                        <option value="superadmin">Superadmin</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 ml-1">Sandi Baru (Opsional)</label>
+                    <input type="password" name="password" placeholder="Kosongkan jika tidak ingin mengubah sandi" class="w-full bg-slate-800/50 border border-slate-700 px-5 py-4 rounded-xl text-sm font-bold text-white focus:border-{{ $accent }}-500 outline-none">
+                </div>
+                
+                <div class="pt-6 mt-6 border-t border-slate-800">
+                    <button type="submit" class="w-full bg-{{ $accent }}-500 text-white py-4 rounded-[1.2rem] font-black uppercase text-[11px] tracking-widest hover:bg-{{ $accent }}-400 transition-all shadow-lg shadow-{{ $accent }}-500/20 active:scale-95 flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-save"></i> Simpan Perubahan
                     </button>
                 </div>
             </form>
@@ -257,9 +319,26 @@
     </div>
 
     <script>
+        // Modal Tambah
         const modal = document.getElementById('modalAdmin');
         function openModal() { modal.classList.replace('hidden', 'flex'); }
         function closeModal() { modal.classList.replace('flex', 'hidden'); }
+
+        // Modal Edit
+        const modalEdit = document.getElementById('modalEdit');
+        function openEditModal(id, nama, email, no_telp, role) {
+            document.getElementById('edit_nama').value = nama;
+            document.getElementById('edit_email').value = email;
+            document.getElementById('edit_no_telp').value = no_telp;
+            document.getElementById('edit_role').value = role;
+            
+            // Set URL action secara dinamis
+            let url = "{{ route('superadmin.users.update', ':id') }}";
+            document.getElementById('formEditUser').action = url.replace(':id', id);
+            
+            modalEdit.classList.replace('hidden', 'flex');
+        }
+        function closeEditModal() { modalEdit.classList.replace('flex', 'hidden'); }
     </script>
 </body>
 </html>

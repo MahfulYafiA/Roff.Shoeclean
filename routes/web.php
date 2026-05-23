@@ -77,6 +77,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/pembayaran/{id}', [ReservasiController::class, 'pembayaran'])->name('pembayaran');
     });
 
+    // ✨ RUTE AJAX POLLING REAL-TIME (Memantau Perubahan Status Tanpa Refresh)
+    Route::get('/cek-status-realtime', [ReservasiController::class, 'cekStatusTerbaru'])->name('cek.status.realtime');
+
     // ==========================================
     // 4. AREA ADMIN / STAF KASIR
     // ==========================================
@@ -115,6 +118,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/users', [AdminController::class, 'storeAdmin'])->name('users.store');
         Route::delete('/users/{id}', [AdminController::class, 'destroySuperUser'])->name('users.destroy');
         Route::patch('/users/{id}/toggle', [AdminController::class, 'toggleUserStatus'])->name('users.toggle');
+        
+        // ✨ INI JEMBATAN BARUNYA UNTUK FITUR EDIT USER
+        Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
 
         // Manajemen Katalog Layanan (Superadmin Side)
         Route::get('/layanan', [LayananController::class, 'index'])->name('layanan.index');

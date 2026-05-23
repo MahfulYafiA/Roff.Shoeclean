@@ -28,8 +28,7 @@ class UserController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        // Mengambil 5 riwayat pesanan terbaru
-        $riwayat = Reservasi::with(['detail.layanan', 'pembayaran'])
+        $riwayat = Reservasi::with(['detail.layanan'])
                     ->where('id_user', $user->id_user)
                     ->latest('id_reservasi') 
                     ->take(5) 
@@ -49,7 +48,7 @@ class UserController extends Controller
             return redirect()->route('dashboard');
         }
 
-        $riwayat = Reservasi::with(['detail.layanan', 'pembayaran'])
+        $riwayat = Reservasi::with(['detail.layanan'])
                     ->where('id_user', $user->id_user)
                     ->latest('id_reservasi')
                     ->get();
@@ -87,11 +86,10 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        // 🚨 SINKRONISASI: Menyesuaikan Max Character dengan Workbench
         $request->validate([
-            'nama'     => 'required|string|max:40', // Sesuai VARCHAR(40)
-            'email'    => 'required|email|max:50|unique:ms_user,email', // Sesuai VARCHAR(50)
-            'no_telp'  => 'required|string|max:15', // Sesuai VARCHAR(15)
+            'nama'     => 'required|string|max:40', 
+            'email'    => 'required|email|max:50|unique:ms_user,email', 
+            'no_telp'  => 'required|string|max:15', 
             'password' => 'required|min:8',
         ], [
             'nama.max' => 'Nama maksimal 40 karakter.',
@@ -116,6 +114,55 @@ class UserController extends Controller
     }
 
     /**
+     * ✨ FITUR BARU: Memperbarui data User (Edit Profil/Role/Password)
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nama'     => 'required|string|max:40',
+            'no_telp'  => 'required|string|max:15',
+            // Validasi email ini akan mengabaikan email milik user yang sedang diedit agar tidak error "Email sudah terdaftar"
+            'email'    => 'required|email|max:50|unique:ms_user,email,'.$id.',id_user',
+            'role'     => 'required|in:admin,pelanggan,superadmin',
+            'password' => 'nullable|string|min:8'
+        ], [
+            'nama.max' => 'Nama maksimal 40 karakter.',
+            'no_telp.max' => 'Nomor telepon maksimal 15 karakter.',
+            'email.unique' => 'Email ini sudah dipakai oleh pengguna lain.',
+        ]);
+
+        try {
+            $user = User::findOrFail($id);
+            
+            // Proteksi: Mencegah Superadmin menurunkan pangkatnya sendiri secara tidak sengaja
+            if ($user->id_user == Auth::user()->id_user && $request->role !== 'superadmin' && $user->role === 'superadmin') {
+                 return redirect()->back()->with('error', 'Peringatan: Anda tidak bisa mencabut status Owner Anda sendiri!');
+            }
+
+            // Proteksi: Mencegah Admin biasa mengubah akun Superadmin
+            if ($user->role === 'superadmin' && Auth::user()->role !== 'superadmin') {
+                return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk mengedit akun Owner!');
+            }
+
+            $user->nama = $request->nama;
+            $user->no_telp = $request->no_telp;
+            $user->email = $request->email;
+            $user->role = $request->role;
+
+            // Jika kolom password diisi, maka enkripsi dan update. Jika kosong, biarkan password lama.
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->password);
+            }
+
+            $user->save();
+
+            return redirect()->back()->with('success', 'Data akun atas nama '.$request->nama.' berhasil diperbarui!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memperbarui data pengguna: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Fitur Saklar (Toggle) Aktif / Nonaktif Akun
      */
     public function toggle($id)
@@ -127,7 +174,6 @@ class UserController extends Controller
                 return redirect()->back()->with('error', 'Anda tidak bisa menonaktifkan diri sendiri!');
             }
 
-            // Toggle ENUM Status
             $user->status = ($user->status === 'Aktif') ? 'Nonaktif' : 'Aktif';
             $user->save();
 

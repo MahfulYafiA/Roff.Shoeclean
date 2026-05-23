@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Reservasi;
 use App\Models\User; 
 use App\Models\DetailReservasi;
-use App\Models\Pembayaran;
+// Model Pembayaran sudah dihapus dari sini
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash; 
@@ -62,13 +62,7 @@ class AdminController extends Controller
                 Storage::disk('public')->delete($user->foto_profil); 
             }
 
-            $idReservasis = Reservasi::where('id_user', $id)->pluck('id_reservasi');
-            foreach ($idReservasis as $idRes) {
-                $pembayaran = Pembayaran::where('id_reservasi', $idRes)->first();
-                if ($pembayaran && $pembayaran->bukti_pembayaran) {
-                    Storage::disk('public')->delete($pembayaran->bukti_pembayaran);
-                }
-            }
+            // Kodingan hapus bukti_pembayaran dihilangkan karena fiturnya sudah diganti Midtrans/Otomatis
 
             $user->delete();
             DB::commit();
@@ -172,7 +166,8 @@ class AdminController extends Controller
 
     public function antrean()
     {
-        $semuaPesanan = Reservasi::with(['user', 'detail.layanan', 'pembayaran'])
+        // Relasi 'pembayaran' SUDAH DIHAPUS DARI SINI
+        $semuaPesanan = Reservasi::with(['user', 'detail.layanan'])
                         ->orderBy('created_at', 'desc')
                         ->get();
 
@@ -190,11 +185,11 @@ class AdminController extends Controller
             $reservasi = Reservasi::findOrFail($id);
             $reservasi->status = $request->status;
 
+            // LOGIKA BARU: Update status Lunas langsung di tabel tr_reservasi
             if ($request->status == 'selesai' && $reservasi->status_bayar != 'Lunas') {
-                $pembayaran = Pembayaran::where('id_reservasi', $id)->first();
-                if ($pembayaran && in_array($pembayaran->metode_bayar, ['Bayar di Toko', 'Cash', 'COD', 'Tunai', 'Transfer Manual'])) {
+                if (in_array($reservasi->metode_bayar, ['Bayar di Toko', 'Cash', 'COD', 'Tunai', 'Transfer Manual', 'Transfer Bank'])) {
                     $reservasi->status_bayar = 'Lunas';
-                    $pembayaran->update(['tanggal' => now()]);
+                    $reservasi->tanggal_bayar = now(); // Langsung isi tanggal bayar di tabel reservasi
                 }
             }
 
@@ -205,16 +200,27 @@ class AdminController extends Controller
         }
     }
 
-    public function superLaporan()
+    // ========================================================
+    // ✨ FIX: SEKARANG SUPERADMIN SUDAH BISA FILTER TANGGAL
+    // ========================================================
+    public function superLaporan(Request $request)
     {
+        // 1. Ambil input filter tanggal dari form. Jika kosong, set otomatis ke HARI INI
+        $tgl_mulai = $request->get('tgl_mulai', now()->toDateString());
+        $tgl_selesai = $request->get('tgl_selesai', now()->toDateString());
+
+        // 2. Query Data dengan tambahan klausa filter rentang tanggal
         $laporan = Reservasi::with(['user', 'detail.layanan'])
                         ->where('status', 'selesai')
+                        ->whereBetween('tanggal_reservasi', [$tgl_mulai, $tgl_selesai])
                         ->orderBy('updated_at', 'desc')
                         ->get();
 
+        // 3. Hitung total omzet dari data yang berhasil difilter
         $totalOmzet = $laporan->sum('total_harga');
 
-        return view('superadmin.laporan', compact('laporan', 'totalOmzet'));
+        // 4. Kirim seluruh variabel ke view superadmin.laporan
+        return view('superadmin.laporan', compact('laporan', 'totalOmzet', 'tgl_mulai', 'tgl_selesai'));
     }
 
     public function destroy($id)
@@ -223,7 +229,8 @@ class AdminController extends Controller
         try {
             $reservasi = Reservasi::findOrFail($id);
             DetailReservasi::where('id_reservasi', $id)->delete();
-            Pembayaran::where('id_reservasi', $id)->delete();
+            // Penghapusan tabel Pembayaran dimatikan karena tabelnya sudah tidak ada
+            
             $reservasi->delete();
 
             DB::commit();

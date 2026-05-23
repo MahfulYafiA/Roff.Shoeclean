@@ -166,11 +166,10 @@
                     <p class="text-slate-500 text-[10px] lg:text-[11px] font-bold uppercase tracking-widest opacity-80 relative z-10">Update Data Diri & Alamat</p>
                 </a>
 
-                {{-- KOTAK 2: BUAT RESERVASI (IKON SUDAH DIPERBAIKI) --}}
+                {{-- KOTAK 2: BUAT RESERVASI --}}
                 <a href="{{ route('reservasi.create') }}" class="glass-card group p-6 lg:p-10 rounded-[2rem] flex flex-col justify-center items-start h-full border-blue-200 relative overflow-hidden">
                     <div class="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0"></div>
                     <div class="w-14 h-14 lg:w-16 lg:h-16 bg-blue-600 text-white rounded-[1.2rem] flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30 group-hover:scale-110 group-hover:bg-white group-hover:text-blue-600 transition-all duration-500 relative z-10">
-                        {{-- Ikon Baru yang dijamin tidak hilang --}}
                         <i class="fa-solid fa-calendar-plus text-2xl"></i>
                     </div>
                     <h3 class="font-black text-xl lg:text-2xl text-slate-900 mb-2 uppercase tracking-tighter leading-none group-hover:text-white transition-colors relative z-10">Buat Reservasi</h3>

@@ -8,35 +8,25 @@ use App\Models\Reservasi;
 class LaporanController extends Controller
 {
     /**
-     * Menampilkan Laporan dengan Filter Periode
+     * Menampilkan Laporan untuk ADMIN
      */
     public function index(Request $request)
     {
-        // 1. Ambil input filter tanggal dari user
-        $tgl_mulai = $request->get('tgl_mulai');
-        $tgl_selesai = $request->get('tgl_selesai');
+        // 1. Tangkap input filter tanggal (default: hari ini)
+        $tgl_mulai = $request->get('tgl_mulai', now()->toDateString());
+        $tgl_selesai = $request->get('tgl_selesai', now()->toDateString());
 
-        // 2. Query Data dengan Eager Loading (Termasuk relasi pembayaran untuk revisi detail)
-        $query = Reservasi::with(['user', 'layanan', 'pembayaran'])
-                    ->where('status', 'Selesai') // Laporan biasanya hanya untuk yang sudah selesai
-                    ->orderBy('tanggal_reservasi', 'desc');
+        // 2. Query Data dengan tambahan klausa filter rentang tanggal
+        $laporan = Reservasi::with(['user', 'detail.layanan'])
+                    ->where('status', 'selesai') 
+                    ->whereBetween('tanggal_reservasi', [$tgl_mulai, $tgl_selesai])
+                    ->orderBy('updated_at', 'desc')
+                    ->get();
 
-        // 3. Logika Filter Periode
-        if ($tgl_mulai && $tgl_selesai) {
-            // Jika user memilih rentang tanggal
-            $query->whereBetween('tanggal_reservasi', [$tgl_mulai, $tgl_selesai]);
-        } else {
-            // Default: Tampilkan data bulan berjalan jika filter kosong
-            $query->whereMonth('tanggal_reservasi', date('m'))
-                  ->whereYear('tanggal_reservasi', date('Y'));
-        }
-
-        $laporan = $query->get();
-
-        // 4. Menghitung total omzet khusus dari data yang sudah di-filter
+        // 3. Hitung total omzet
         $totalOmzet = $laporan->sum('total_harga');
 
-        // 5. Kirim data ke view
+        // 4. Kirim data ke view admin.laporan
         return view('admin.laporan', compact('laporan', 'totalOmzet', 'tgl_mulai', 'tgl_selesai'));
     }
 }

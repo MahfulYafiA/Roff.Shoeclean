@@ -101,7 +101,7 @@
                 <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter mb-2 uppercase italic leading-none">
                     Riwayat <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">Cucian</span>
                 </h1>
-                <p class="text-slate-500 font-medium text-xs md:text-sm mt-2">Pantau setiap tahap pengerjaan sepatu kesayangan Anda</p>
+                <p class="text-slate-500 font-medium text-xs md:text-sm mt-2">Pantau setiap detail pesanan sepatu kesayangan Anda secara real-time</p>
             </div>
 
             @if(session('success'))
@@ -115,13 +115,12 @@
                 @forelse($riwayat as $r)
                 
                 @php
-                    // Variabel Super Cerdas mendeteksi status batal
-                    $isCancelled = in_array($r->status, ['dibatalkan', 'batalkan', 'batal']);
+                    $statusLokal = strtolower($r->status);
+                    $isCancelled = in_array($statusLokal, ['dibatalkan', 'batalkan', 'batal']);
                 @endphp
 
                 <div class="glass-card rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 group flex flex-col {{ $isCancelled ? 'opacity-80 grayscale-[30%]' : '' }}">
                     
-                    {{-- ✅ BANNER JIKA DIBATALKAN --}}
                     @if($isCancelled)
                         <div class="bg-rose-50 border border-rose-200 text-rose-600 px-4 py-3 rounded-[1rem] mb-6 flex items-center justify-center gap-2 shadow-sm">
                             <i class="fa-solid fa-circle-xmark"></i>
@@ -130,31 +129,43 @@
                     @endif
 
                     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 md:gap-8">
-                        {{-- Info Pesanan --}}
-                        <div class="flex items-center gap-4 md:gap-6 w-full lg:w-1/3">
-                            <div class="w-14 h-14 md:w-16 md:h-16 bg-white rounded-[1.2rem] flex items-center justify-center border border-slate-200 shadow-sm shrink-0 {{ !$isCancelled ? 'group-hover:border-cyan-300' : '' }} transition-colors">
+                        {{-- Info Pesanan & List Layanan --}}
+                        <div class="flex items-start gap-4 md:gap-6 w-full lg:w-1/2">
+                            <div class="w-14 h-14 md:w-16 md:h-16 bg-white rounded-[1.2rem] flex items-center justify-center border border-slate-200 shadow-sm shrink-0 {{ !$isCancelled ? 'group-hover:border-cyan-300' : '' }} transition-colors mt-1">
                                 <i class="fa-solid fa-box-open {{ !$isCancelled ? 'text-cyan-500 group-hover:scale-110' : 'text-slate-400' }} text-xl md:text-2xl transition-transform"></i>
                             </div>
-                            <div>
-                                <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5 md:mb-1">Order ID #ORD-{{ $r->id_reservasi }}</p>
-                                <h3 class="text-lg md:text-xl font-black italic text-slate-900 leading-tight {{ !$isCancelled ? 'group-hover:text-cyan-600' : '' }} transition-colors">
-                                    {{ $r->layanan->first()?->nama_layanan ?? 'Layanan' }}
-                                </h3>
-                                <p class="text-xs md:text-sm font-bold text-slate-600 mt-1">Total: <span class="{{ !$isCancelled ? 'text-cyan-600' : 'text-slate-500' }} font-black">Rp {{ number_format($r->total_harga, 0, ',', '.') }}</span></p>
+                            <div class="flex-1">
+                                <p class="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Order ID #ORD-{{ $r->id_reservasi }}</p>
+                                
+                                <div class="flex flex-wrap gap-1.5 mb-3">
+                                    @foreach($r->detail as $det)
+                                        @php
+                                            $nm = strtolower($det->layanan->nama_layanan ?? '');
+                                            if(str_contains($nm, 'fast')) { $bCls = 'bg-blue-600'; }
+                                            elseif(str_contains($nm, 'deep')) { $bCls = 'bg-amber-500'; }
+                                            elseif(str_contains($nm, 'unyellow')) { $bCls = 'bg-purple-600'; }
+                                            else { $bCls = 'bg-slate-700'; }
+                                        @endphp
+                                        <span class="{{ $bCls }} text-white px-2.5 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] shadow-sm {{ $isCancelled ? 'opacity-70' : '' }}">
+                                            {{ $det->layanan->nama_layanan ?? 'Custom' }} <span class="opacity-80">({{ $det->jumlah }} PSG)</span>
+                                        </span>
+                                    @endforeach
+                                </div>
+
+                                <p class="text-xs md:text-sm font-bold text-slate-600">Total Tagihan: <span class="{{ !$isCancelled ? 'text-cyan-600' : 'text-slate-500' }} font-black text-sm md:text-base">Rp {{ number_format($r->total_harga, 0, ',', '.') }}</span></p>
                             </div>
                         </div>
 
-                        {{-- Progress Bar SINKRON DENGAN ADMIN & KONDISI BATAL --}}
+                        {{-- Progress Bar --}}
                         <div class="flex-1 w-full max-w-md px-2 md:px-4">
                             <div class="relative py-4">
                                 <div class="absolute top-1/2 left-0 w-full h-1.5 bg-slate-200/60 -translate-y-1/2 rounded-full"></div>
                                 @php
                                     $progress = '0%';
-                                    // Logika progres: Kalau dibatalkan, progres mati di 0%.
                                     if(!$isCancelled) {
                                         $progress = '15%'; 
-                                        if(in_array($r->status, ['Diproses', 'Dicuci'])) $progress = '50%';
-                                        if(in_array($r->status, ['Selesai', 'Siap Diambil', 'Menunggu Kurir', 'Sedang Diantar'])) $progress = '100%';
+                                        if(in_array($statusLokal, ['diproses', 'dicuci'])) $progress = '50%';
+                                        if(in_array($statusLokal, ['selesai', 'siap diambil', 'menunggu kurir', 'sedang diantar'])) $progress = '100%';
                                     }
                                 @endphp
                                 
@@ -162,26 +173,23 @@
                                      style="width: {{ $progress }}"></div>
 
                                 <div class="relative flex justify-between">
-                                    {{-- Titik 1: DIAJUKAN --}}
                                     <div class="flex flex-col items-center gap-2">
                                         <div class="w-4 h-4 md:w-5 md:h-5 rounded-full border-4 border-white shadow-sm {{ !$isCancelled ? 'bg-cyan-500' : 'bg-slate-300' }} transition-colors z-10"></div>
                                         <span class="text-[8px] md:text-[9px] font-black uppercase tracking-widest {{ !$isCancelled ? 'text-cyan-600' : 'text-slate-400' }}">Diajukan</span>
                                     </div>
-                                    {{-- Titik 2: DIPROSES --}}
                                     <div class="flex flex-col items-center gap-2">
-                                        <div class="w-4 h-4 md:w-5 md:h-5 rounded-full border-4 border-white shadow-sm {{ !$isCancelled && in_array($r->status, ['Diproses', 'Dicuci', 'Selesai', 'Siap Diambil', 'Menunggu Kurir', 'Sedang Diantar']) ? 'bg-blue-500' : 'bg-slate-300' }} transition-colors z-10"></div>
-                                        <span class="text-[8px] md:text-[9px] font-black uppercase tracking-widest {{ !$isCancelled && in_array($r->status, ['Diproses', 'Dicuci', 'Selesai', 'Siap Diambil', 'Menunggu Kurir', 'Sedang Diantar']) ? 'text-blue-600' : 'text-slate-400' }}">Diproses</span>
+                                        <div class="w-4 h-4 md:w-5 md:h-5 rounded-full border-4 border-white shadow-sm {{ !$isCancelled && in_array($statusLokal, ['diproses', 'dicuci', 'selesai', 'siap diambil', 'menunggu kurir', 'sedang diantar']) ? 'bg-blue-500' : 'bg-slate-300' }} transition-colors z-10"></div>
+                                        <span class="text-[8px] md:text-[9px] font-black uppercase tracking-widest {{ !$isCancelled && in_array($statusLokal, ['diproses', 'dicuci', 'selesai', 'siap diambil', 'menunggu kurir', 'sedang diantar']) ? 'text-blue-600' : 'text-slate-400' }}">Diproses</span>
                                     </div>
-                                    {{-- Titik 3: SELESAI --}}
                                     <div class="flex flex-col items-center gap-2">
-                                        <div class="w-4 h-4 md:w-5 md:h-5 rounded-full border-4 border-white shadow-sm {{ !$isCancelled && in_array($r->status, ['Selesai', 'Siap Diambil', 'Menunggu Kurir', 'Sedang Diantar']) ? 'bg-purple-500' : 'bg-slate-300' }} transition-colors z-10"></div>
-                                        <span class="text-[8px] md:text-[9px] font-black uppercase tracking-widest {{ !$isCancelled && in_array($r->status, ['Selesai', 'Siap Diambil', 'Menunggu Kurir', 'Sedang Diantar']) ? 'text-purple-600' : 'text-slate-400' }}">Selesai</span>
+                                        <div class="w-4 h-4 md:w-5 md:h-5 rounded-full border-4 border-white shadow-sm {{ !$isCancelled && in_array($statusLokal, ['selesai', 'siap diambil', 'menunggu kurir', 'sedang diantar']) ? 'bg-purple-500' : 'bg-slate-300' }} transition-colors z-10"></div>
+                                        <span class="text-[8px] md:text-[9px] font-black uppercase tracking-widest {{ !$isCancelled && in_array($statusLokal, ['selesai', 'siap diambil', 'menunggu kurir', 'sedang diantar']) ? 'text-purple-600' : 'text-slate-400' }}">Selesai</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Status Badge / Bayar Sekarang --}}
+                        {{-- Tombol Aksi --}}
                         <div class="shrink-0 w-full lg:w-auto flex flex-col items-center lg:items-end justify-center">
                             @if($r->status_bayar == 'Belum Lunas' && !$isCancelled)
                                 <a href="{{ route('reservasi.pembayaran', $r->id_reservasi) }}" class="bg-cyan-500 text-white px-8 py-4 rounded-[1rem] font-black text-xs uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-cyan-500/30 w-full text-center hover:scale-105 active:scale-95">Bayar Sekarang</a>
@@ -189,7 +197,7 @@
                                 <div class="px-8 py-4 rounded-xl bg-white border border-slate-200 {{ $isCancelled ? 'text-rose-500' : 'text-slate-800' }} font-black text-[10px] md:text-xs uppercase tracking-[0.2em] text-center italic w-full shadow-sm flex items-center justify-center gap-2">
                                     @if(!$isCancelled)
                                         <span class="w-2 h-2 rounded-full bg-cyan-500 animate-ping"></span> 
-                                        {{ $r->status }}
+                                        {{ strtoupper($r->status) }}
                                     @else
                                         <i class="fa-solid fa-xmark"></i> DIBATALKAN
                                     @endif
@@ -198,36 +206,34 @@
                         </div>
                     </div>
 
-                    {{-- Info Logistik --}}
+                    {{-- Info Logistik & Pembayaran --}}
                     <div class="mt-8 pt-6 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50 p-6 rounded-[2rem]">
                         <div>
-                            <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">2A. Penyerahan Ke Toko</p>
+                            <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Penyerahan Ke Toko</p>
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center {{ !$isCancelled ? 'text-blue-500' : 'text-slate-400' }} shadow-sm border border-slate-100">
                                     <i class="fa-solid {{ $r->metode_masuk == 'Jemput Kurir' ? 'fa-motorcycle' : 'fa-store' }}"></i>
                                 </div>
                                 <div>
                                     <p class="font-black text-slate-800 text-sm italic uppercase tracking-tight">{{ $r->metode_masuk }}</p>
-                                    <p class="text-[10px] text-slate-500 font-medium">Status: {{ $r->status == 'Menunggu Konfirmasi' ? 'Menunggu' : ($isCancelled ? 'Dibatalkan' : 'Diterima') }}</p>
+                                    <p class="text-[10px] text-slate-500 font-medium">Status: {{ in_array($statusLokal, ['menunggu konfirmasi', 'diajukan']) ? 'Menunggu' : ($isCancelled ? 'Dibatalkan' : 'Diterima') }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="md:border-l md:border-slate-200 md:pl-8">
-                            <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">2B. Pengambilan Selesai</p>
+                            <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Pengambilan Selesai</p>
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center {{ !$isCancelled ? 'text-purple-500' : 'text-slate-400' }} shadow-sm border border-slate-100">
                                     <i class="fa-solid {{ $r->metode_keluar == 'Antar Kurir' ? 'fa-truck-fast' : 'fa-hand-holding-box' }}"></i>
                                 </div>
                                 <div>
                                     <p class="font-black text-slate-800 text-sm italic uppercase tracking-tight">{{ $r->metode_keluar }}</p>
-                                    <p class="text-[10px] text-slate-500 font-medium">Status: {{ $r->status == 'Selesai' ? 'Siap' : ($isCancelled ? 'Dibatalkan' : 'Menunggu Selesai') }}</p>
+                                    <p class="text-[10px] text-slate-500 font-medium">Status: {{ $statusLokal == 'selesai' ? 'Siap' : ($isCancelled ? 'Dibatalkan' : 'Menunggu Selesai') }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Detail Pembayaran --}}
-                    @if($r->pembayaran)
                     <div class="mt-6 pt-5 border-t border-dashed border-slate-200 w-full">
                         <div class="flex items-center gap-2 mb-3">
                             <i class="fa-solid fa-file-invoice-dollar {{ !$isCancelled ? 'text-cyan-500' : 'text-slate-400' }} text-xs"></i>
@@ -236,35 +242,34 @@
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div>
                                 <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Metode</p>
-                                <p class="text-[10px] font-black text-slate-800">{{ $r->pembayaran->metode_bayar }}</p>
+                                <p class="text-[10px] font-black text-slate-800 uppercase italic tracking-tighter">{{ $r->metode_bayar ?? 'Belum dipilih' }}</p>
                             </div>
                             <div>
                                 <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Status</p>
-                                <span class="px-2.5 py-1 rounded-md text-[9px] font-black uppercase {{ $r->status_bayar == 'Lunas' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500' }}">
-                                    {{ $isCancelled ? 'BATAL' : $r->status_bayar }}
+                                <span class="px-2.5 py-1 rounded-md text-[9px] font-black uppercase {{ strtolower($r->status_bayar) == 'lunas' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500' }}">
+                                    {{ $isCancelled ? 'BATAL' : ($r->status_bayar ?? 'Belum Lunas') }}
                                 </span>
                             </div>
                             <div>
-                                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tanggal</p>
-                                <p class="text-[10px] font-black text-slate-800">{{ $r->pembayaran->tanggal ? \Carbon\Carbon::parse($r->pembayaran->tanggal)->format('d M Y') : '-' }}</p>
+                                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tanggal Bayar</p>
+                                <p class="text-[10px] font-black text-slate-800">{{ $r->tanggal_bayar ? \Carbon\Carbon::parse($r->tanggal_bayar)->format('d M Y') : '-' }}</p>
                             </div>
                             <div>
-                                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total</p>
-                                <p class="text-[10px] font-black {{ !$isCancelled ? 'text-cyan-600' : 'text-slate-500' }}">Rp {{ number_format($r->total_harga, 0, ',', '.') }}</p>
+                                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Biaya</p>
+                                <p class="text-[11px] font-black {{ !$isCancelled ? 'text-cyan-600' : 'text-slate-500' }}">Rp {{ number_format($r->total_harga, 0, ',', '.') }}</p>
                             </div>
                         </div>
                     </div>
-                    @endif
 
                 </div>
                 @empty
                 <div class="text-center py-20 glass-card rounded-[3rem] px-6">
-                    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-                        <i class="fa-solid fa-box-open text-3xl"></i>
+                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                        <i class="fa-solid fa-box-open text-2xl"></i>
                     </div>
                     <h3 class="text-lg font-black text-slate-900 uppercase tracking-tighter mb-1">Belum Ada Riwayat</h3>
                     <p class="text-slate-500 font-medium text-sm mb-6">Anda belum pernah melakukan pemesanan cucian sepatu</p>
-                    <a href="{{ route('reservasi.create') }}" class="bg-cyan-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-cyan-500/30 inline-block">Buat Pesanan Baru</a>
+                    <a href="{{ route('reservasi.create') }}" class="bg-cyan-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-cyan-500/30 inline-block hover:scale-105">Buat Pesanan Baru</a>
                 </div>
                 @endforelse
             </div>
@@ -275,5 +280,59 @@
         </div>
     </main>
 
+    {{-- ✨ SCRIPT REAL-TIME AJAX POLLING LOKAL ✨ --}}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Simpan status awal saat halaman pertama kali dibuka
+            let statusAwal = {};
+            
+            @foreach($riwayat as $r)
+                statusAwal["{{ $r->id_reservasi }}"] = "{{ strtolower($r->status) }}";
+            @endforeach
+
+            // 2. Jalankan radar pengecekan setiap 5 detik (5000 milidetik)
+            setInterval(function() {
+                fetch("{{ route('cek.status.realtime') }}")
+                    .then(response => response.json())
+                    .then(data => {
+                        let adaPerubahan = false;
+
+                        // 3. Bandingkan data dari database dengan status awal di layar
+                        data.forEach(pesanan => {
+                            let id = pesanan.id_reservasi;
+                            let statusBaru = pesanan.status.toLowerCase();
+
+                            // Jika statusnya beda, berarti Admin baru saja mengubahnya!
+                            if (statusAwal[id] && statusAwal[id] !== statusBaru) {
+                                adaPerubahan = true;
+                                console.log(`Status ID #${id} berubah dari ${statusAwal[id]} menjadi ${statusBaru}`);
+                            }
+                        });
+
+                        // 4. Jika ada yang berubah, munculkan notifikasi & refresh halaman otomatis
+                        if (adaPerubahan) {
+                            // Tampilkan popup notifikasi cantik di pojok layar
+                            const notif = document.createElement('div');
+                            notif.innerHTML = `
+                                <div class="fixed bottom-6 right-6 bg-cyan-500 text-white px-6 py-4 rounded-2xl shadow-[0_10px_40px_rgba(6,182,212,0.5)] flex items-center gap-3 z-[9999] animate-bounce">
+                                    <i class="fa-solid fa-bell text-xl"></i>
+                                    <div>
+                                        <p class="text-[10px] font-black uppercase tracking-widest opacity-80">Notifikasi Sistem</p>
+                                        <p class="text-sm font-bold">Status cucian Anda diperbarui!</p>
+                                    </div>
+                                </div>
+                            `;
+                            document.body.appendChild(notif);
+
+                            // Refresh halaman setelah 2 detik agar efek visualnya terlihat
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 2000);
+                        }
+                    })
+                    .catch(error => console.log("Gagal mengecek status:", error));
+            }, 5000); // 5000 = 5 Detik
+        });
+    </script>
 </body>
 </html>

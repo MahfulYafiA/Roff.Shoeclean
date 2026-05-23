@@ -155,7 +155,8 @@
                             </div>
                         </label>
                         <label class="cursor-pointer group">
-                            <input type="radio" name="metode_keluar" value="Antar Kurir" class="sr-only delivery-out-radio">
+                            {{-- ✨ FIX: Value diubah menjadi Diantar Kurir ✨ --}}
+                            <input type="radio" name="metode_keluar" value="Diantar Kurir" class="sr-only delivery-out-radio">
                             <div class="border-2 border-slate-100 bg-slate-50/50 rounded-[1.5rem] p-6 transition-all h-full flex flex-col justify-center hover:border-slate-200 cursor-pointer">
                                 <h4 class="font-black text-xs md:text-sm text-slate-800 uppercase italic mb-1.5 tracking-tight transition-colors">Diantar Kurir</h4>
                                 <p class="text-[10px] md:text-xs text-slate-500 font-medium leading-relaxed">Kami antar kembali ke rumah Anda</p>
@@ -173,7 +174,7 @@
                 </h3>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
                     
-                    {{-- TOTAL SEPATU INFO (Sesuai Desain Screenshot: Warna Biru Gelap) --}}
+                    {{-- TOTAL SEPATU INFO --}}
                     <div class="bg-[#0f172a] text-white p-8 rounded-[2rem] flex flex-col justify-center relative overflow-hidden shadow-lg">
                         <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl text-white pointer-events-none rotate-12"><i class="fa-solid fa-shoe-prints"></i></div>
                         <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-2 relative z-10">Total Pesanan</p>
@@ -181,7 +182,7 @@
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 relative z-10">Pasang Sepatu</p>
                     </div>
                     
-                    {{-- AREA INPUT ALAMAT (✅ NAME DIPERBAIKI JADI alamat_lengkap) --}}
+                    {{-- AREA INPUT ALAMAT --}}
                     <div id="areaAlamat" class="lg:col-span-2 hidden transition-all duration-500 opacity-0">
                         <textarea name="alamat_lengkap" id="alamat_lengkap" placeholder="Tulis Alamat Lengkap Penjemputan / Pengantaran (Cth: Perumahan Indah, Jl. Melati No.12, RT 01/RW 02)..." 
                                   class="w-full h-full bg-slate-50 border-2 border-slate-100 text-slate-900 text-sm md:text-base rounded-[2rem] p-6 md:p-8 font-medium focus:border-blue-500 focus:bg-white focus:shadow-[0_0_0_4px_rgba(37,99,235,0.1)] outline-none transition-all min-h-[160px] lg:min-h-full resize-none">{{ old('alamat_lengkap') }}</textarea>
@@ -193,7 +194,7 @@
             <div class="white-card p-6 md:p-10 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden mt-10 border-blue-100">
                 <div class="absolute left-0 top-0 w-32 h-32 bg-blue-50 rounded-br-full -z-0"></div>
                 
-                {{-- Field Metode Pembayaran Tersembunyi --}}
+                {{-- Field Metode Pembayaran Tersembunyi (Aman dikirim Null/Payment Gateway, Controller akan handle) --}}
                 <input type="hidden" name="metode_pembayaran" value="Payment Gateway">
 
                 <div class="text-center md:text-left z-10">
@@ -253,10 +254,11 @@
         function toggleAlamatArea() {
             const selectedIn = document.querySelector('.delivery-in-radio:checked')?.value;
             const selectedOut = document.querySelector('.delivery-out-radio:checked')?.value;
-            const isNeedKurir = (selectedIn === 'Jemput Kurir' || selectedOut === 'Antar Kurir');
+            // ✨ FIX: Sesuaikan pengecekan JS dengan tulisan Diantar Kurir ✨
+            const isNeedKurir = (selectedIn === 'Jemput Kurir' || selectedOut === 'Diantar Kurir');
             
             const areaAlamat = document.getElementById('areaAlamat');
-            const inputAlamat = document.getElementById('alamat_lengkap'); // SESUAI CONTROLLER
+            const inputAlamat = document.getElementById('alamat_lengkap');
 
             if (isNeedKurir) {
                 areaAlamat.classList.remove('hidden');

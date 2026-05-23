@@ -25,12 +25,15 @@ class Reservasi extends Model
         'status_bayar',
         'total_harga',
         'metode_masuk',
-        'metode_keluar'
+        'metode_keluar',
+        'metode_bayar',   // <-- SUDAH DITAMBAHKAN
+        'tanggal_bayar'   // <-- SUDAH DITAMBAHKAN
     ];
 
     protected $casts = [
         'tanggal_reservasi' => 'date',
         'total_harga' => 'integer',
+        'tanggal_bayar' => 'datetime', // <-- DITAMBAHKAN AGAR LARAVEL OTOMATIS BACA SEBAGAI FORMAT WAKTU
     ];
 
     public function user()
@@ -43,10 +46,11 @@ class Reservasi extends Model
         return $this->hasMany(DetailReservasi::class, 'id_reservasi', 'id_reservasi');
     }
 
-    public function pembayaran()
-    {
-        return $this->hasOne(Pembayaran::class, 'id_reservasi', 'id_reservasi');
-    }
+    // FUNGSI INI DIMATIKAN (DI-COMMENT) KARENA TABEL PEMBAYARAN SUDAH DIHAPUS
+    // public function pembayaran()
+    // {
+    //     return $this->hasOne(Pembayaran::class, 'id_reservasi', 'id_reservasi');
+    // }
 
     public function layanan()
     {

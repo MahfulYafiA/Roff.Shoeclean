@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\Layanan;
 use App\Models\Reservasi;
 use App\Models\DetailReservasi;
-use App\Models\Pembayaran;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -24,73 +23,95 @@ class AdminTransaksiController extends Controller
     }
 
     /**
-     * Memproses penyimpanan transaksi offline
+     * Memproses penyimpanan transaksi offline multi-layanan
      */
     public function storeOffline(Request $request)
     {
+        // 1. Validasi Data
         $request->validate([
             'nama_pelanggan' => 'required|string|max:40',
-            'no_telp'        => 'nullable|string|max:15',
-            'id_layanan'     => 'required|exists:ms_layanan,id_layanan',
-            'jumlah'         => 'required|integer|min:1',
-            'metode_bayar'   => 'required|in:Tunai,Transfer Manual',
-            'status_bayar'   => 'required|in:Lunas,Belum Lunas',
+            'no_whatsapp'    => 'nullable|string|max:20', 
+            'layanan'        => 'required|array', 
+            'metode_bayar'   => 'required|string',
+            'status_lunas'   => 'required|string|in:Lunas,Belum Lunas', 
+            'metode_keluar'  => 'required|string', 
+            'alamat_lengkap' => 'nullable|string|max:200',
         ]);
+
+        // 2. Filter Pesanan Kosong (Hanya simpan layanan dengan QTY > 0)
+        $pesanan_aktif = array_filter($request->layanan, function($jumlah) {
+            return $jumlah > 0;
+        });
+
+        if(empty($pesanan_aktif)) {
+            return redirect()->back()->withErrors(['Harap pilih minimal 1 layanan cucian!'])->withInput();
+        }
 
         DB::beginTransaction();
 
         try {
-            // 1. CARI ATAU BUAT AKUN DUMMY UNTUK PELANGGAN OFFLINE
-            // Menggunakan struktur tabel ms_user yang baru (role & status adalah string/enum)
+            // 3. Buat Akun Dummy untuk Pelanggan Walk-in
             $user_offline = User::firstOrCreate(
-                ['email' => 'offline_' . time() . '@roff.com'], 
+                ['email' => 'offline_' . uniqid() . '@roff.com'], 
                 [
-                    'nama'    => $request->nama_pelanggan . ' (Offline)',
-                    'password' => Hash::make('rahasia'),
-                    'role'     => 'pelanggan', // ✨ SINKRON: Menggunakan string 'pelanggan', bukan id_role
-                    'status'   => 'Aktif',    // ✨ SINKRON: Status default akun
-                    'no_telp'  => $request->no_telp,
+                    'nama'     => $request->nama_pelanggan . ' (Walk-in)',
+                    'password' => Hash::make('rahasia_offline'),
+                    'role'     => 'pelanggan',
+                    'status'   => 'Aktif',
+                    'no_telp'  => $request->no_whatsapp ?? '-',
                 ]
             );
 
-            $layanan = Layanan::findOrFail($request->id_layanan);
-            $sub_total = $layanan->harga * $request->jumlah;
+            // 4. Kalkulasi Grand Total secara Dinamis dari Server
+            $grand_total = 0;
+            $detail_items = []; 
+            
+            foreach($pesanan_aktif as $id_layanan => $jumlah) {
+                $layanan = Layanan::findOrFail($id_layanan);
+                $sub_total = $layanan->harga * $jumlah;
+                $grand_total += $sub_total;
 
-            // 2. SIMPAN RESERVASI
+                $detail_items[] = [
+                    'id_layanan' => $id_layanan,
+                    'harga'      => $layanan->harga,
+                    'jumlah'     => $jumlah,
+                    'sub_total'  => $sub_total
+                ];
+            }
+
+            // 5. Simpan Header Reservasi
             $reservasi = Reservasi::create([
                 'id_user'           => $user_offline->id_user,
                 'tanggal_reservasi' => now()->toDateString(),
                 'metode_layanan'    => 'Drop-off', 
-                'status'            => 'diproses',     // ✨ SINKRON: Menggunakan lowercase sesuai ENUM image_9c097c.png
-                'status_bayar'      => $request->status_bayar,
-                'total_harga'       => $sub_total,
-                'alamat_lengkap'    => null,           // ✨ SINKRON: Nama kolom alamat_lengkap, bukan alamat_jemput
+                'metode_masuk'      => 'Antar Sendiri', 
+                'metode_keluar'     => $request->metode_keluar, 
+                'status'            => 'diproses',      
+                'status_bayar'      => $request->status_lunas,
+                'total_harga'       => $grand_total,
+                'alamat_lengkap'    => $request->alamat_lengkap ?? 'Pelanggan Walk-in (Tanpa Alamat)', 
+                'metode_bayar'      => $request->metode_bayar,
+                'tanggal_bayar'     => ($request->status_lunas == 'Lunas') ? now() : null,
             ]);
 
-            // 3. SIMPAN DETAIL
-            DetailReservasi::create([
-                'id_reservasi' => $reservasi->id_reservasi, // Laravel otomatis ambil id_reservasi karena sudah didefinisikan di Model
-                'id_layanan'   => $request->id_layanan,
-                'harga'        => $layanan->harga,
-                'jumlah'       => $request->jumlah,
-                'sub_total'    => $sub_total,
-            ]);
-
-            // 4. SIMPAN PEMBAYARAN
-            Pembayaran::create([
-                'id_reservasi' => $reservasi->id_reservasi,
-                'tanggal'      => ($request->status_bayar == 'Lunas') ? now() : null,
-                'jumlah'       => ($request->status_bayar == 'Lunas') ? $sub_total : 0,
-                'metode_bayar' => $request->metode_bayar,
-            ]);
+            // 6. Simpan Detail Reservasi (Multi-Layanan)
+            foreach($detail_items as $item) {
+                DetailReservasi::create([
+                    'id_reservasi' => $reservasi->id_reservasi, 
+                    'id_layanan'   => $item['id_layanan'],
+                    'harga'        => $item['harga'],
+                    'jumlah'       => $item['jumlah'],
+                    'sub_total'    => $item['sub_total'],
+                ]);
+            }
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Transaksi Offline berhasil dicatat! (Atas Nama: ' . $request->nama_pelanggan . ')');
+            return redirect()->route('admin.antrean')->with('success', 'Transaksi Kasir Offline berhasil! (Atas Nama: ' . $request->nama_pelanggan . ')');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withErrors(['Gagal: ' . $e->getMessage()])->withInput();
+            return redirect()->back()->withErrors(['Gagal Menyimpan Transaksi: ' . $e->getMessage()])->withInput();
         }
     }
 }

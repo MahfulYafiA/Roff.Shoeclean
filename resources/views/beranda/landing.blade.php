@@ -242,7 +242,7 @@
 
             {{-- Tombol Aksi Sejajar --}}
             <div data-aos="fade-up" data-aos-duration="1000" data-aos-delay="700" class="flex flex-col sm:flex-row gap-4 md:gap-5 justify-center w-full sm:w-auto">
-                <a href="{{ route('reservasi.create') }}" class="group bg-blue-600 hover:bg-blue-500 text-white px-8 md:px-10 py-4 md:py-5 rounded-full font-black uppercase text-[10px] md:text-xs tracking-[0.25em] flex items-center justify-center gap-3 transition-all duration-300 shadow-xl shadow-blue-600/40 hover:scale-105">
+                <a href="#layanan" class="group bg-blue-600 hover:bg-blue-500 text-white px-8 md:px-10 py-4 md:py-5 rounded-full font-black uppercase text-[10px] md:text-xs tracking-[0.25em] flex items-center justify-center gap-3 transition-all duration-300 shadow-xl shadow-blue-600/40 hover:scale-105">
                     Reservasi
                 </a>
                 <a href="#alur" class="group bg-transparent border-2 border-white hover:bg-white text-white hover:text-slate-900 px-8 md:px-10 py-4 md:py-5 rounded-full font-black uppercase text-[10px] md:text-xs tracking-[0.25em] flex items-center justify-center gap-3 transition-all duration-300 shadow-xl hover:scale-105">

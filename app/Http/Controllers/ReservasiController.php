@@ -6,35 +6,25 @@ use Illuminate\Http\Request;
 use App\Models\Layanan;
 use App\Models\Reservasi;
 use App\Models\DetailReservasi;
-use App\Models\Pembayaran;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log; 
 use Illuminate\Support\Facades\Auth;
-
-// Impor library Midtrans
 use Midtrans\Config;
 use Midtrans\Snap;
 
 class ReservasiController extends Controller
 {
-    /**
-     * Menampilkan Form Reservasi
-     */
     public function create()
     {
         $layanans = Layanan::where('status', 'Aktif')->get();
         $user = Auth::user();
-        
         return view('pelanggan.reservasi.create', compact('layanans', 'user'));
     }
 
-    /**
-     * Menampilkan Form Pembayaran (Pemicu Snap Midtrans)
-     */
     public function pembayaran($id)
     {
-        $reservasi = Reservasi::with(['user', 'detail.layanan', 'pembayaran'])
+        $reservasi = Reservasi::with(['user', 'detail.layanan'])
                     ->where('id_reservasi', $id)
                     ->where('id_user', Auth::user()->id_user)
                     ->firstOrFail();
@@ -52,16 +42,17 @@ class ReservasiController extends Controller
     }
 
     /**
-     * Menyimpan data reservasi ke Database
+     * SINKRONISASI ENUM PADA FUNGSI STORE
      */
     public function store(Request $request)
     {
         $request->validate([
             'layanan'           => 'required|array',
             'metode_masuk'      => 'required|in:Antar Sendiri,Jemput Kurir',
-            'metode_keluar'     => 'required|in:Ambil Sendiri,Antar Kurir',
+            // ✨ FIX: Sesuaikan dengan ENUM 'Diantar Kurir' (sebelumnya Antar Kurir)
+            'metode_keluar'     => 'required|in:Ambil Sendiri,Diantar Kurir',
             'metode_pembayaran' => 'required',
-            'alamat_lengkap'    => 'nullable|string|max:200', // Sesuai VARCHAR(200) di image_9c097c.png
+            'alamat_lengkap'    => 'nullable|string|max:200', 
         ]);
 
         DB::beginTransaction();
@@ -75,15 +66,12 @@ class ReservasiController extends Controller
                 $qty = (int) $data['jumlah'];
                 if ($qty > 0) {
                     $layanan = Layanan::findOrFail($id_layanan);
-                    $sub_total = $layanan->harga * $qty;
-                    $total_harga += $sub_total;
-
+                    $total_harga += ($layanan->harga * $qty);
                     $items_terpilih[] = [
                         'id_layanan' => $id_layanan,
                         'harga'      => $layanan->harga,
                         'jumlah'     => $qty,
-                        'sub_total'  => $sub_total,
-                        'nama'       => $layanan->nama_layanan
+                        'sub_total'  => $layanan->harga * $qty
                     ];
                 }
             }
@@ -96,7 +84,6 @@ class ReservasiController extends Controller
                 User::where('id_user', $user->id_user)->update(['alamat' => $request->alamat_lengkap]);
             }
 
-            // ✨ SINKRONISASI: Status diubah menjadi 'diajukan' (lowercase) sesuai image_9c097c.png
             $reservasi = Reservasi::create([
                 'id_user'           => $user->id_user,
                 'tanggal_reservasi' => now()->toDateString(),
@@ -107,6 +94,9 @@ class ReservasiController extends Controller
                 'status_bayar'      => 'Belum Lunas', 
                 'total_harga'       => $total_harga,
                 'alamat_lengkap'    => $request->alamat_lengkap,
+                // ✨ FIX: Set NULL karena 'Payment Gateway' sudah dihapus dari ENUM
+                'metode_bayar'      => null, 
+                'tanggal_bayar'     => null, 
             ]);
 
             foreach ($items_terpilih as $item) {
@@ -118,13 +108,6 @@ class ReservasiController extends Controller
                     'sub_total'    => $item['sub_total'],
                 ]);
             }
-
-            Pembayaran::create([
-                'id_reservasi' => $reservasi->id_reservasi,
-                'metode_bayar' => 'Payment Gateway',
-                'tanggal'      => now(),
-                'jumlah'       => 0,
-            ]);
 
             DB::commit();
 
@@ -139,7 +122,6 @@ class ReservasiController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("ERROR RESERVASI: " . $e->getMessage());
             return back()->withErrors(['Terjadi kesalahan: ' . $e->getMessage()])->withInput();
         }
     }
@@ -172,12 +154,16 @@ class ReservasiController extends Controller
                 'phone'      => $reservasi->user->no_telp ?? '',
             ],
             'item_details'     => $item_details,
-            'enabled_payments' => ['bca_va', 'dana', 'qris', 'gopay', 'shopeepay']
+            // ✨ FIX: Batasi hanya BCA dan QRIS agar sesuai ENUM database
+            'enabled_payments' => ['bca_va', 'qris']
         ];
 
         return Snap::getSnapToken($params);
     }
 
+    /**
+     * ✨ FIX: LOGIKA CALLBACK YANG SANGAT KETAT SESUAI ENUM ('Transfer BCA', 'QRIS')
+     */
     public function callback(Request $request)
     {
         $serverKey = env('MIDTRANS_SERVER_KEY');
@@ -186,26 +172,39 @@ class ReservasiController extends Controller
         if ($hashed == $request->signature_key) {
             $id_asli = explode('-', $request->order_id)[0];
             $reservasi = Reservasi::find($id_asli);
-            $pembayaran = Pembayaran::where('id_reservasi', $id_asli)->first();
 
-            if ($reservasi && $pembayaran) {
+            if ($reservasi) {
                 DB::beginTransaction();
                 try {
                     if ($request->transaction_status == 'settlement' || $request->transaction_status == 'capture') {
-                        // ✨ SINKRONISASI: Gunakan 'diproses' sesuai ENUM di image_9c097c.png
-                        $reservasi->update(['status' => 'diproses', 'status_bayar' => 'Lunas']);
-                        $pembayaran->update([
-                            'tanggal' => now(),
-                            'jumlah' => $request->gross_amount,
-                            'metode_bayar' => 'Midtrans (' . $request->payment_type . ')'
+                        
+                        $paymentType = $request->payment_type;
+                        $metodeFinal = "";
+
+                        // Pemaksaan string agar sama persis dengan ENUM di database
+                        if ($paymentType == 'bank_transfer' && $request->va_numbers[0]['bank'] == 'bca') {
+                            $metodeFinal = 'Transfer BCA';
+                        } elseif ($paymentType == 'qris') {
+                            $metodeFinal = 'QRIS';
+                        } else {
+                            // Backup jika ada metode lain yang lolos, paksa ke salah satu agar tidak Error 500
+                            $metodeFinal = 'Transfer BCA'; 
+                        }
+
+                        $reservasi->update([
+                            'status'        => 'diproses', 
+                            'status_bayar'  => 'Lunas',
+                            'tanggal_bayar' => now(), 
+                            'metode_bayar'  => $metodeFinal 
                         ]);
+                        
                     } else if (in_array($request->transaction_status, ['deny', 'expire', 'cancel'])) {
-                        // ✨ SINKRONISASI: Gunakan 'batalkan' sesuai ENUM di image_9c097c.png
                         $reservasi->update(['status' => 'batalkan']);
                     }
                     
                     DB::commit();
                     return response()->json(['message' => 'Success'], 200);
+                    
                 } catch (\Exception $e) {
                     DB::rollBack();
                     return response()->json(['message' => 'Error'], 500);
@@ -213,5 +212,13 @@ class ReservasiController extends Controller
             }
         }
         return response()->json(['message' => 'Invalid Signature'], 403);
+    }
+
+    public function cekStatusTerbaru()
+    {
+        $riwayat = Reservasi::where('id_user', Auth::user()->id_user)
+                            ->select('id_reservasi', 'status')
+                            ->get();
+        return response()->json($riwayat);
     }
 }

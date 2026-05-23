@@ -16,7 +16,6 @@
             border: 1px solid rgba(255, 255, 255, 0.05); 
         }
         
-        /* Modifikasi Scrollbar agar cantik */
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
@@ -25,18 +24,15 @@
         .modal-active { overflow: hidden; }
         .detail-modal-bg { transition: all 0.3s ease; }
         
-        /* Animasi Modal Diperbaiki */
         .detail-modal-content { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); transform: translateY(20px) scale(0.95); opacity: 0; }
         #detailModal.active .detail-modal-bg { opacity: 1; visibility: visible; }
         #detailModal.active .detail-modal-content { transform: translateY(0) scale(1); opacity: 1; }
         
-        /* Custom Select Options */
         select option { background-color: #1e293b; color: #f8fafc; font-weight: 800; padding: 12px; }
     </style>
 </head>
 
 @php
-    // LOGIKA BUNGLON
     $isSuper = auth()->user()->id_role == 1 || auth()->user()->role === 'superadmin';
     $accent = $isSuper ? 'emerald' : 'blue';
 @endphp
@@ -77,10 +73,8 @@
         </header>
 
         <div class="p-6 md:p-12 flex-1 overflow-y-auto custom-scroll relative">
-            {{-- Background Glow --}}
             <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-{{ $accent }}-600/10 blur-[150px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/4"></div>
 
-            {{-- HEADER TITLE --}}
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 md:mb-10 relative z-10">
                 <div>
                     <div class="inline-flex items-center gap-2 bg-{{ $accent }}-500/10 border border-{{ $accent }}-500/20 px-4 py-1.5 rounded-full mb-4">
@@ -96,7 +90,6 @@
 
             {{-- SUMMARY CARDS --}}
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 md:gap-8 mb-10 relative z-10">
-                {{-- Card 1: Total --}}
                 <div class="glass-panel p-6 md:p-8 rounded-[2rem] flex flex-col justify-center transition-all hover:border-{{ $accent }}-500/50 group relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-{{ $accent }}-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div class="flex justify-between items-center mb-2">
@@ -106,7 +99,6 @@
                     <h3 class="text-4xl md:text-5xl font-black text-white italic tracking-tighter drop-shadow-md">{{ $semuaPesanan->count() }}</h3>
                 </div>
 
-                {{-- Card 2: Baru --}}
                 <div class="glass-panel relative overflow-hidden p-6 md:p-8 rounded-[2rem] flex flex-col justify-center transition-all border-amber-500/30 hover:border-amber-500/60 group">
                     <div class="absolute inset-0 bg-amber-500/10 group-hover:bg-amber-500/20 transition-colors"></div>
                     <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-500/30 blur-2xl rounded-full pointer-events-none"></div>
@@ -115,18 +107,21 @@
                             <p class="text-[9px] md:text-[10px] font-black text-amber-400 uppercase tracking-[0.2em]">Baru Diajukan</p>
                             <i class="fa-solid fa-bell text-amber-500/50 group-hover:text-amber-400 animate-pulse text-lg"></i>
                         </div>
-                        <h3 class="text-4xl md:text-5xl font-black text-amber-400 italic tracking-tighter drop-shadow-md">{{ $semuaPesanan->whereIn('status', ['Diajukan', 'Menunggu Konfirmasi'])->count() }}</h3>
+                        <h3 class="text-4xl md:text-5xl font-black text-amber-400 italic tracking-tighter drop-shadow-md">
+                            {{ $semuaPesanan->filter(fn($p) => in_array(strtolower($p->status), ['diajukan', 'menunggu konfirmasi']))->count() }}
+                        </h3>
                     </div>
                 </div>
 
-                {{-- Card 3: Selesai --}}
                 <div class="glass-panel p-6 md:p-8 rounded-[2rem] flex flex-col justify-center transition-all hover:border-emerald-500/50 group relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div class="flex justify-between items-center mb-2">
                         <p class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] group-hover:text-emerald-400 transition-colors">Sudah Selesai</p>
                         <i class="fa-solid fa-check-double text-slate-600 group-hover:text-emerald-500 transition-colors text-lg"></i>
                     </div>
-                    <h3 class="text-4xl md:text-5xl font-black text-emerald-500 italic tracking-tighter drop-shadow-md">{{ $semuaPesanan->where('status', 'Selesai')->count() }}</h3>
+                    <h3 class="text-4xl md:text-5xl font-black text-emerald-500 italic tracking-tighter drop-shadow-md">
+                        {{ $semuaPesanan->filter(fn($p) => strtolower($p->status) == 'selesai')->count() }}
+                    </h3>
                 </div>
             </div>
 
@@ -138,7 +133,7 @@
                             <tr class="bg-slate-800/50 border-b border-slate-700 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
                                 <th class="px-6 md:px-8 py-5 md:py-6">ID Order</th>
                                 <th class="px-6 md:px-8 py-5 md:py-6">Pelanggan</th>
-                                <th class="px-6 md:px-8 py-5 md:py-6">Layanan</th>
+                                <th class="px-6 md:px-8 py-5 md:py-6">Layanan & Qty</th>
                                 <th class="px-6 md:px-8 py-5 md:py-6">Pembayaran</th>
                                 <th class="px-6 md:px-8 py-5 md:py-6 text-center">Status</th>
                                 <th class="px-6 md:px-8 py-5 md:py-6 text-right">Aksi Status</th>
@@ -147,55 +142,75 @@
                         <tbody class="divide-y divide-slate-800/50 text-sm">
                             @forelse($semuaPesanan as $p)
                             @php
-                                $layananNama = $p->detail->first()->layanan->nama_layanan ?? 'N/A';
-                                $metodeBayar = $p->pembayaran->metode_bayar ?? 'Cash';
+                                // ✨ LOGIKA MULTIPLE LAYANAN UNTUK MODAL & TABEL ✨
+                                $layananArray = [];
+                                $totalSepatu = 0;
+                                foreach($p->detail as $d) {
+                                    $layananArray[] = "• " . ($d->layanan->nama_layanan ?? 'Custom') . " (" . $d->jumlah . " Psg)";
+                                    $totalSepatu += $d->jumlah;
+                                }
+                                $layananGabung = implode("<br>", $layananArray);
+
+                                $metodeBayar = $p->metode_bayar ?? 'Payment Gateway';
                                 $noTelp = $p->user->no_telp ?? '';
+                                $alamat = $p->alamat_lengkap ?? 'Ambil di Toko';
                                 
-                                $statusClass = match($p->status) {
-                                    'Selesai' => 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]',
-                                    'Diajukan', 'Menunggu Konfirmasi' => 'bg-amber-500/10 text-amber-400 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]',
-                                    'Diproses' => 'bg-blue-500/10 text-blue-400 border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)]',
-                                    'Batalkan', 'Dibatalkan' => 'bg-red-500/10 text-red-400 border-red-500/30',
+                                $statusLokal = strtolower($p->status); 
+                                $statusClass = match($statusLokal) {
+                                    'selesai' => 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]',
+                                    'diajukan', 'menunggu konfirmasi' => 'bg-amber-500/10 text-amber-400 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]',
+                                    'diproses' => 'bg-blue-500/10 text-blue-400 border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)]',
+                                    'batalkan', 'dibatalkan' => 'bg-red-500/10 text-red-400 border-red-500/30',
                                     default => 'bg-slate-800/50 text-slate-300 border-slate-600',
                                 };
 
-                                $statusTeks = $p->status == 'Menunggu Konfirmasi' ? 'DIAJUKAN' : $p->status;
+                                $statusTeks = in_array($statusLokal, ['menunggu konfirmasi', 'diajukan']) ? 'DIAJUKAN' : strtoupper($statusLokal);
                             @endphp
                             <tr class="group hover:bg-slate-800/30 transition-all cursor-pointer">
                                 
                                 {{-- ID ORDER --}}
-                                <td onclick="showDetail('{{ $p->id_reservasi }}', '{{ addslashes($p->user?->nama ?? 'N/A') }}', '{{ addslashes($layananNama) }}', '{{ $p->detail->first()->jumlah ?? 1 }}', '{{ addslashes($p->alamat_jemput ?? 'Ambil Sendiri') }}', '{{ $statusTeks }}', '{{ $metodeBayar }}', '{{ $noTelp }}')" class="px-6 md:px-8 py-5 md:py-6">
+                                <td onclick="showDetail('{{ $p->id_reservasi }}', '{{ addslashes($p->user?->nama ?? 'N/A') }}', '{!! addslashes($layananGabung) !!}', '{{ $totalSepatu }}', '{!! addslashes($alamat) !!}', '{{ $statusTeks }}', '{{ $metodeBayar }}', '{{ $noTelp }}')" class="px-6 md:px-8 py-5 md:py-6">
                                     <span class="font-black text-{{ $accent }}-400 italic uppercase tracking-tighter text-base">#{{ $p->id_reservasi }}</span>
                                 </td>
 
                                 {{-- PELANGGAN --}}
-                                <td onclick="showDetail('{{ $p->id_reservasi }}', '{{ addslashes($p->user?->nama ?? 'N/A') }}', '{{ addslashes($layananNama) }}', '{{ $p->detail->first()->jumlah ?? 1 }}', '{{ addslashes($p->alamat_jemput ?? 'Ambil Sendiri') }}', '{{ $statusTeks }}', '{{ $metodeBayar }}', '{{ $noTelp }}')" class="px-6 md:px-8 py-5 md:py-6">
+                                <td onclick="showDetail('{{ $p->id_reservasi }}', '{{ addslashes($p->user?->nama ?? 'N/A') }}', '{!! addslashes($layananGabung) !!}', '{{ $totalSepatu }}', '{!! addslashes($alamat) !!}', '{{ $statusTeks }}', '{{ $metodeBayar }}', '{{ $noTelp }}')" class="px-6 md:px-8 py-5 md:py-6">
                                     <p class="font-black text-white uppercase italic leading-tight group-hover:text-{{ $accent }}-400 transition-colors">{{ $p->user?->nama ?? 'N/A' }}</p>
-                                    <p class="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-widest truncate max-w-[180px]"><i class="fa-solid fa-location-dot mr-1"></i> {{ $p->alamat_jemput ?? 'Ambil di Toko' }}</p>
+                                    <p class="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-widest truncate max-w-[180px]"><i class="fa-solid fa-location-dot mr-1"></i> {{ $p->metode_keluar ?? 'Ambil di Toko' }}</p>
                                 </td>
 
-                                {{-- LAYANAN --}}
-                                <td onclick="showDetail('{{ $p->id_reservasi }}', '{{ addslashes($p->user?->nama ?? 'N/A') }}', '{{ addslashes($layananNama) }}', '{{ $p->detail->first()->jumlah ?? 1 }}', '{{ addslashes($p->alamat_jemput ?? 'Ambil Sendiri') }}', '{{ $statusTeks }}', '{{ $metodeBayar }}', '{{ $noTelp }}')" class="px-6 md:px-8 py-5 md:py-6">
-                                    <span class="font-black text-slate-200 uppercase tracking-tighter">{{ $layananNama }}</span>
-                                    <span class="block text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1"><i class="fa-solid fa-shoe-prints mr-1"></i> {{ $p->detail->first()->jumlah ?? 1 }} PASANG</span>
+                                {{-- LAYANAN & QTY BERWARNA --}}
+                                <td onclick="showDetail('{{ $p->id_reservasi }}', '{{ addslashes($p->user?->nama ?? 'N/A') }}', '{!! addslashes($layananGabung) !!}', '{{ $totalSepatu }}', '{!! addslashes($alamat) !!}', '{{ $statusTeks }}', '{{ $metodeBayar }}', '{{ $noTelp }}')" class="px-6 md:px-8 py-4 md:py-5">
+                                    <div class="flex flex-col gap-1.5">
+                                        @foreach($p->detail as $det)
+                                            @php
+                                                $nm = strtolower($det->layanan->nama_layanan ?? '');
+                                                if(str_contains($nm, 'fast')) { $bCls = 'text-blue-400 bg-blue-500/10 border-blue-500/30'; }
+                                                elseif(str_contains($nm, 'deep')) { $bCls = 'text-amber-400 bg-amber-500/10 border-amber-500/30'; }
+                                                elseif(str_contains($nm, 'unyellow')) { $bCls = 'text-purple-400 bg-purple-500/10 border-purple-500/30'; }
+                                                else { $bCls = 'text-slate-300 bg-slate-800/50 border-slate-600'; }
+                                            @endphp
+                                            <div class="flex items-center gap-2">
+                                                <span class="px-2 py-0.5 rounded text-[8.5px] font-black uppercase tracking-widest border {{ $bCls }}">
+                                                    {{ $det->layanan->nama_layanan ?? 'Custom' }}
+                                                </span>
+                                                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">{{ $det->jumlah }} PSG</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </td>
 
                                 {{-- PEMBAYARAN --}}
                                 <td class="px-6 md:px-8 py-5 md:py-6">
                                     <div class="flex flex-col gap-2 items-start">
-                                        <span class="text-[9px] font-black {{ $p->status_bayar == 'Lunas' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-slate-400 bg-slate-800 border-slate-700' }} uppercase tracking-widest border px-3 py-1.5 rounded-full">
+                                        <span class="text-[9px] font-black {{ strtolower($p->status_bayar) == 'lunas' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-slate-400 bg-slate-800 border-slate-700' }} uppercase tracking-widest border px-3 py-1.5 rounded-full">
                                             {{ $metodeBayar }} ({{ $p->status_bayar ?? 'Belum Lunas' }})
                                         </span>
-                                        @if($p->pembayaran && $p->pembayaran->bukti_pembayaran)
-                                            <button onclick="openImageModal('{{ asset('storage/' . $p->pembayaran->bukti_pembayaran) }}')" class="text-blue-400 hover:text-blue-300 transition-colors font-black text-[9px] uppercase tracking-widest flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 rounded-lg border border-blue-500/20 active:scale-95">
-                                                <i class="fa-solid fa-image text-xs"></i> Cek Bukti
-                                            </button>
-                                        @endif
                                     </div>
                                 </td>
 
                                 {{-- STATUS BADGE --}}
-                                <td onclick="showDetail('{{ $p->id_reservasi }}', '{{ addslashes($p->user?->nama ?? 'N/A') }}', '{{ addslashes($layananNama) }}', '{{ $p->detail->first()->jumlah ?? 1 }}', '{{ addslashes($p->alamat_jemput ?? 'Ambil Sendiri') }}', '{{ $statusTeks }}', '{{ $metodeBayar }}', '{{ $noTelp }}')" class="px-6 md:px-8 py-5 md:py-6 text-center">
+                                <td onclick="showDetail('{{ $p->id_reservasi }}', '{{ addslashes($p->user?->nama ?? 'N/A') }}', '{!! addslashes($layananGabung) !!}', '{{ $totalSepatu }}', '{!! addslashes($alamat) !!}', '{{ $statusTeks }}', '{{ $metodeBayar }}', '{{ $noTelp }}')" class="px-6 md:px-8 py-5 md:py-6 text-center">
                                     <span class="px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border {{ $statusClass }}">
                                         {{ $statusTeks }}
                                     </span>
@@ -207,10 +222,10 @@
                                         <form action="{{ route('admin.reservasi.update', $p->id_reservasi) }}" method="POST" class="relative">
                                             @csrf
                                             <select name="status" onchange="this.form.submit()" class="text-[10px] font-black uppercase bg-slate-800/80 border border-slate-600 text-white rounded-xl pl-4 pr-8 py-2.5 outline-none focus:border-{{ $accent }}-500 focus:ring-1 focus:ring-{{ $accent }}-500 cursor-pointer shadow-sm transition-all hover:bg-slate-700 appearance-none text-center">
-                                                <option value="Diajukan" {{ in_array($p->status, ['Diajukan', 'Menunggu Konfirmasi']) ? 'selected' : '' }}>DIAJUKAN</option>
-                                                <option value="Diproses" {{ $p->status == 'Diproses' ? 'selected' : '' }}>DIPROSES</option>
-                                                <option value="Selesai" {{ $p->status == 'Selesai' ? 'selected' : '' }}>SELESAI</option>
-                                                <option value="Batalkan" {{ $p->status == 'Batalkan' ? 'selected' : '' }}>BATALKAN</option>
+                                                <option value="diajukan" {{ in_array($statusLokal, ['diajukan', 'menunggu konfirmasi']) ? 'selected' : '' }}>DIAJUKAN</option>
+                                                <option value="diproses" {{ $statusLokal == 'diproses' ? 'selected' : '' }}>DIPROSES</option>
+                                                <option value="selesai" {{ $statusLokal == 'selesai' ? 'selected' : '' }}>SELESAI</option>
+                                                <option value="batalkan" {{ in_array($statusLokal, ['batalkan', 'dibatalkan']) ? 'selected' : '' }}>BATALKAN</option>
                                             </select>
                                             <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
                                         </form>
@@ -244,13 +259,12 @@
         </div>
     </main>
 
-    {{-- MODAL DETAIL (DIPERBAIKI JADI LEBIH MEWAH) --}}
+    {{-- MODAL DETAIL --}}
     <div id="detailModal" class="fixed inset-0 z-[100] invisible flex items-center justify-center p-4">
         <div class="detail-modal-bg absolute inset-0 bg-black/80 backdrop-blur-md opacity-0" onclick="closeDetail()"></div>
         
         <div class="detail-modal-content relative w-full max-w-lg bg-slate-900 border border-slate-700 rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] p-8 max-h-[90vh] overflow-y-auto custom-scroll">
             
-            {{-- Header Modal --}}
             <div class="flex justify-between items-center mb-8 border-b border-slate-800 pb-6">
                 <div>
                     <h3 class="text-2xl font-black text-white italic uppercase tracking-tight leading-none">Detail <span class="text-{{ $accent }}-500">Order</span></h3>
@@ -262,8 +276,6 @@
             </div>
             
             <div class="space-y-4">
-                
-                {{-- Status Bar --}}
                 <div class="flex justify-between items-center bg-{{ $accent }}-500/10 p-5 rounded-2xl border border-{{ $accent }}-500/20 shadow-inner">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-{{ $accent }}-500/20 flex items-center justify-center text-{{ $accent }}-400"><i class="fa-solid fa-info text-lg"></i></div>
@@ -274,7 +286,6 @@
                     </div>
                 </div>
 
-                {{-- Info Pelanggan --}}
                 <div class="bg-slate-800/40 p-5 rounded-2xl border border-slate-700/50 flex flex-col gap-4">
                     <div class="flex items-start gap-4">
                         <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 shrink-0"><i class="fa-solid fa-user"></i></div>
@@ -289,19 +300,17 @@
                     </a>
                 </div>
 
-                {{-- Grid Info Layanan & Jumlah --}}
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-slate-800/40 p-5 rounded-2xl border border-slate-700/50">
-                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2"><i class="fa-solid fa-jug-detergent mr-1"></i> Layanan</p>
-                        <p id="detLayanan" class="font-black text-white uppercase tracking-tighter text-sm leading-tight">---</p>
+                    <div class="bg-slate-800/40 p-5 rounded-2xl border border-slate-700/50 col-span-2 md:col-span-1">
+                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2"><i class="fa-solid fa-jug-detergent mr-1"></i> Rincian Layanan</p>
+                        <p id="detLayanan" class="font-black text-white uppercase tracking-tighter text-[11px] leading-loose">---</p>
                     </div>
-                    <div class="bg-slate-800/40 p-5 rounded-2xl border border-slate-700/50">
-                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2"><i class="fa-solid fa-shoe-prints mr-1"></i> Quantity</p>
-                        <p id="detJumlah" class="font-black text-white uppercase tracking-widest text-sm leading-tight">--- Pasang</p>
+                    <div class="bg-slate-800/40 p-5 rounded-2xl border border-slate-700/50 col-span-2 md:col-span-1">
+                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2"><i class="fa-solid fa-shoe-prints mr-1"></i> Total Sepatu</p>
+                        <p id="detJumlah" class="font-black text-white uppercase tracking-widest text-[11px] leading-tight">--- Pasang</p>
                     </div>
                 </div>
 
-                {{-- Info Alamat & Pembayaran --}}
                 <div class="bg-slate-800/40 p-5 rounded-2xl border border-slate-700/50 space-y-4">
                     <div>
                         <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1"><i class="fa-solid fa-location-dot mr-1"></i> Titik Lokasi / Alamat</p>
@@ -313,7 +322,6 @@
                         <p id="detMetode" class="font-black text-amber-400 italic uppercase text-sm">---</p>
                     </div>
                 </div>
-
             </div>
             
             <div class="mt-8 pt-6 border-t border-slate-800">
@@ -322,28 +330,21 @@
         </div>
     </div>
 
-    {{-- MODAL BUKTI TRANSFER --}}
-    <div id="imageModal" class="fixed inset-0 z-[110] hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4 md:p-6 opacity-0 transition-opacity duration-300">
-        <button onclick="closeImageModal()" class="absolute top-6 right-6 text-white bg-slate-800 hover:bg-red-500 transition-colors w-12 h-12 flex items-center justify-center rounded-full shadow-lg border border-slate-700">
-            <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-        <img id="modalImage" src="" alt="Bukti Transfer" class="rounded-[2rem] shadow-[0_0_50px_rgba(0,0,0,0.8)] border-4 border-slate-800 max-h-[85vh] w-auto object-contain">
-    </div>
-
     <script>
-        function showDetail(id, nama, layanan, jumlah, alamat, status, metode, noTelp) {
+        function showDetail(id, nama, layananHTML, jumlah, alamat, status, metode, noTelp) {
             document.getElementById('detID').innerText = 'ORD-' + id.padStart(4, '0');
             document.getElementById('detNama').innerText = nama;
-            document.getElementById('detLayanan').innerText = layanan;
-            document.getElementById('detJumlah').innerText = jumlah + ' PASANG';
+            
+            // ✨ FIX: Menggunakan innerHTML karena layananHTML membawa tag <br>
+            document.getElementById('detLayanan').innerHTML = layananHTML;
+            document.getElementById('detJumlah').innerText = jumlah + ' PASANG (TOTAL)';
+            
             document.getElementById('detAlamat').innerText = alamat;
             document.getElementById('detStatus').innerText = status;
             document.getElementById('detMetode').innerText = metode;
             
-            // Format Nomor Telp
             document.getElementById('detNoTelp').innerText = noTelp ? noTelp : 'TIDAK ADA NOMOR HP';
 
-            // Link WA
             let waLink = "#";
             if(noTelp) {
                 let formattedNumber = noTelp.replace(/^0/, '62');
@@ -359,22 +360,6 @@
         function closeDetail() {
             document.getElementById('detailModal').classList.remove('active', 'visible');
             setTimeout(() => { document.getElementById('detailModal').classList.add('invisible'); }, 300);
-            document.body.classList.remove('modal-active');
-        }
-
-        function openImageModal(imgSrc) {
-            const modal = document.getElementById('imageModal');
-            const modalImg = document.getElementById('modalImage');
-            modalImg.src = imgSrc;
-            modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.add('flex', 'opacity-100'); }, 10);
-            document.body.classList.add('modal-active');
-        }
-
-        function closeImageModal() {
-            const modal = document.getElementById('imageModal');
-            modal.classList.remove('opacity-100');
-            setTimeout(() => { modal.classList.add('hidden', 'flex'); }, 300);
             document.body.classList.remove('modal-active');
         }
     </script>
